@@ -1,12 +1,5 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 13, 2025 lúc 03:47 PM
--- Phiên bản máy phục vụ: 10.4.32-MariaDB
--- Phiên bản PHP: 8.2.12
-
+-- Create Database internet_cafe
+use internet_cafe;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -18,7 +11,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Cơ sở dữ liệu: `netgame`
+-- Cơ sở dữ liệu: `internet_cafe`
 --
 
 -- --------------------------------------------------------
@@ -28,16 +21,16 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `account` (
-  `account_id` int(11) NOT NULL,
+  `account_id` int NOT NULL,
   `customer_name` varchar(100) NOT NULL,
   `phone_number` varchar(15) DEFAULT NULL,
   `membership_card` varchar(50) DEFAULT NULL,
   `username` varchar(50) NOT NULL,
   `password` varchar(100) NOT NULL,
   `balance` decimal(12,2) DEFAULT 0.00,
-  `registration_date` date DEFAULT curdate(),
+  `registration_date` datetime DEFAULT CURRENT_TIMESTAMP(),
   `status` enum('Active','Inactive') DEFAULT 'Active'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -46,14 +39,14 @@ CREATE TABLE `account` (
 --
 
 CREATE TABLE `bill` (
-  `bill_id` int(11) NOT NULL,
-  `account_id` int(11) NOT NULL,
+  `bill_id` int NOT NULL,
+  `account_id` int NOT NULL,
   `sale_date` datetime DEFAULT current_timestamp(),
   `discount` decimal(10,2) DEFAULT 0.00,
   `total` decimal(12,2) DEFAULT 0.00,
-  `payment_method` enum('Cash','Bank transfer') DEFAULT 'Available',
+  `payment_method` varchar(50) not null,
   `note` varchar(200) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -62,11 +55,11 @@ CREATE TABLE `bill` (
 --
 
 CREATE TABLE `billdetail` (
-  `bill_detail_id` int(11) NOT NULL,
-  `bill_id` int(11) NOT NULL,
-  `item_id` int(11) NOT NULL,
-  `quantity` int(11) NOT NULL CHECK (`quantity` > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+  `bill_detail_id` int NOT NULL,
+  `bill_id` int NOT NULL,
+  `item_id` int NOT NULL,
+  `quantity` int NOT NULL CHECK (`quantity` > 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -75,13 +68,13 @@ CREATE TABLE `billdetail` (
 --
 
 CREATE TABLE `computer` (
-  `computer_id` int(11) NOT NULL,
+  `computer_id` int NOT NULL,
   `computer_name` varchar(50) NOT NULL,
-  `specifications` varchar(200) DEFAULT NULL,
-  `ip_address` varchar(20) DEFAULT NULL,
+  `specifications` varchar(200) NOT NULL,
+  `ip_address` varchar(20) NOT NULL,
   `price_per_hour` decimal(10,2) NOT NULL,
   `status` enum('Available','In Use','Broken') DEFAULT 'Available'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -90,13 +83,13 @@ CREATE TABLE `computer` (
 --
 
 CREATE TABLE `item` (
-  `item_id` int(11) NOT NULL,
+  `item_id` int NOT NULL,
   `item_name` varchar(100) NOT NULL,
   `item_category` varchar(50) DEFAULT NULL,
   `price` decimal(10,2) NOT NULL,
-  `stock` int(11) DEFAULT 0,
+  `stock` int DEFAULT 0,
   `supplier_name` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -105,12 +98,12 @@ CREATE TABLE `item` (
 --
 
 CREATE TABLE `session` (
-  `session_id` int(11) NOT NULL,
-  `account_id` int(11) NOT NULL,
-  `computer_id` int(11) NOT NULL,
+  `session_id` int NOT NULL,
+  `account_id` int NOT NULL,
+  `computer_id` int NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -166,37 +159,37 @@ ALTER TABLE `session`
 -- AUTO_INCREMENT cho bảng `account`
 --
 ALTER TABLE `account`
-  MODIFY `account_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `account_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `bill`
 --
 ALTER TABLE `bill`
-  MODIFY `bill_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `bill_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `billdetail`
 --
 ALTER TABLE `billdetail`
-  MODIFY `bill_detail_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `bill_detail_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `computer`
 --
 ALTER TABLE `computer`
-  MODIFY `computer_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `computer_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `item`
 --
 ALTER TABLE `item`
-  MODIFY `item_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `item_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `session`
 --
 ALTER TABLE `session`
-  MODIFY `session_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `session_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
