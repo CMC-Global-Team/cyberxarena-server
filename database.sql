@@ -30,7 +30,7 @@ CREATE TABLE `account` (
   `balance` decimal(12,2) DEFAULT 0.00,
   `registration_date` datetime DEFAULT CURRENT_TIMESTAMP(),
   `status` enum('Active','Inactive') DEFAULT 'Active'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -46,7 +46,7 @@ CREATE TABLE `sale` (
   `total` decimal(12,2) DEFAULT 0.00,
   `payment_method` varchar(50) not null,
   `note` varchar(200) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -59,7 +59,7 @@ CREATE TABLE `sale_detail` (
   `sale_id` int NOT NULL,
   `item_id` int NOT NULL,
   `quantity` int NOT NULL CHECK (`quantity` > 0)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -74,7 +74,7 @@ CREATE TABLE `computer` (
   `ip_address` varchar(20) NOT NULL,
   `price_per_hour` decimal(10,2) NOT NULL,
   `status` enum('Available','In Use','Broken') DEFAULT 'Available'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -89,7 +89,7 @@ CREATE TABLE `item` (
   `price` decimal(10,2) NOT NULL,
   `stock` int DEFAULT 0,
   `supplier_name` varchar(100) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -103,7 +103,7 @@ CREATE TABLE `session` (
   `computer_id` int NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -117,7 +117,7 @@ CREATE TABLE `revenue` (
   `computer_usage_revenue` decimal(10,2) NOT NULL,
   `sales_revenue` decimal(10,2) NOT NULL,
   `operating_expense` decimal(10,2) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -190,7 +190,7 @@ ALTER TABLE `sale`
 --
 -- AUTO_INCREMENT cho bảng `sale_detail`
 --
-ALTER TABLE `saledetail`
+ALTER TABLE `sale_detail`
   MODIFY `sale_detail_id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -219,12 +219,6 @@ ALTER TABLE `revenue`
 --
 -- Các ràng buộc cho các bảng đã đổ
 --
-
---
--- Các ràng buộc cho bảng `account`
---
-ALTER TABLE `account`
-  ADD UNIQUE (username);
   
 --  
 -- Các ràng buộc cho bảng `computer`
@@ -248,7 +242,7 @@ ALTER TABLE `sale`
 -- Các ràng buộc cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
-  ADD CONSTRAINT `sale_detail_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`),
+  ADD CONSTRAINT `sale_detail_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`),
   ADD CONSTRAINT `sale_detail_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
 
 --
