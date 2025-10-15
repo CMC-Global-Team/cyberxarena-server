@@ -38,8 +38,8 @@ CREATE TABLE `account` (
 -- Cấu trúc bảng cho bảng `bill`
 --
 
-CREATE TABLE `bill` (
-  `bill_id` int NOT NULL,
+CREATE TABLE `sale` (
+  `sale_id` int NOT NULL,
   `account_id` int NOT NULL,
   `sale_date` datetime DEFAULT current_timestamp(),
   `discount` decimal(10,2) DEFAULT 0.00,
@@ -54,9 +54,9 @@ CREATE TABLE `bill` (
 -- Cấu trúc bảng cho bảng `billdetail`
 --
 
-CREATE TABLE `billdetail` (
-  `bill_detail_id` int NOT NULL,
-  `bill_id` int NOT NULL,
+CREATE TABLE `sale_detail` (
+  `sale_detail_id` int NOT NULL,
+  `sale_id` int NOT NULL,
   `item_id` int NOT NULL,
   `quantity` int NOT NULL CHECK (`quantity` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -119,16 +119,16 @@ ALTER TABLE `account`
 --
 -- Chỉ mục cho bảng `bill`
 --
-ALTER TABLE `bill`
-  ADD PRIMARY KEY (`bill_id`),
+ALTER TABLE `sale`
+  ADD PRIMARY KEY (`sale_id`),
   ADD KEY `account_id` (`account_id`);
 
 --
 -- Chỉ mục cho bảng `billdetail`
 --
-ALTER TABLE `billdetail`
-  ADD PRIMARY KEY (`bill_detail_id`),
-  ADD KEY `bill_id` (`bill_id`),
+ALTER TABLE `sale_detail`
+  ADD PRIMARY KEY (`sale_detail_id`),
+  ADD KEY `bill_id` (`sale_id`),
   ADD KEY `item_id` (`item_id`);
 
 --
@@ -164,14 +164,14 @@ ALTER TABLE `account`
 --
 -- AUTO_INCREMENT cho bảng `bill`
 --
-ALTER TABLE `bill`
-  MODIFY `bill_id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE `sale`
+  MODIFY `sale_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `billdetail`
 --
-ALTER TABLE `billdetail`
-  MODIFY `bill_detail_id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE `saledetail`
+  MODIFY `sale_detail_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `computer`
@@ -198,15 +198,15 @@ ALTER TABLE `session`
 --
 -- Các ràng buộc cho bảng `bill`
 --
-ALTER TABLE `bill`
-  ADD CONSTRAINT `bill_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`);
+ALTER TABLE `sale`
+  ADD CONSTRAINT `sale_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`);
 
 --
 -- Các ràng buộc cho bảng `billdetail`
 --
-ALTER TABLE `billdetail`
-  ADD CONSTRAINT `billdetail_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`),
-  ADD CONSTRAINT `billdetail_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
+ALTER TABLE `sale_detail`
+  ADD CONSTRAINT `sale_detail_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`),
+  ADD CONSTRAINT `sale_detail_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
 
 --
 -- Các ràng buộc cho bảng `session`
