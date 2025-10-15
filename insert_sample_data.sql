@@ -42,18 +42,18 @@ VALUES
     ('PC10', 'Esport Competitive', '192.168.1.110', 18000.00, 'Available');
 
 -- Insert 10 sample records into `sale`
-INSERT INTO `sale` (account_id, sale_date, discount, total, payment_method, note)
+INSERT INTO `sale` (account_id, sale_date,total, discount_type, discount, payment_method, note)
 VALUES
-    (1, '2025-10-14 15:30:00', 5000.00, 45000.00, 'Tiền mặt', ''),
-    (2, '2025-10-14 12:00:00', 0.00, 30000.00, 'Tiền mặt', 'Snack purchase'),
-    (3, '2025-10-13 17:45:00', 2000.00, 58000.00, 'Chuyển khoản', 'Gaming session and energy drink'),
-    (4, '2025-10-12 14:20:00', 10000.00, 90000.00, 'Chuyển khoản', 'Extended gaming session'),
-    (5, '2025-10-11 10:10:00', 0.00, 25000.00, 'Tiền mặt', 'Bought water and snacks'),
-    (8, '2025-10-14 16:00:00', 3000.00, 67000.00, 'Chuyển khoản', 'VIP gaming session'),
-	(7, '2025-10-14 16:45:00', 3000.00, 52000.00, 'Tiền mặt', 'Payment for snacks and gaming'),
-    (8, '2025-10-14 10:15:00', 0.00, 35000.00, 'Chuyển khoản', 'Drink purchase'),
-    (9, '2025-10-13 15:30:00', 1000.00, 60000.00, 'Tiền mặt', 'Gaming session and food'),
-    (10, '2025-10-12 12:00:00', 2000.00, 78000.00, 'Chuyển khoản', 'Extended gaming and drinks');
+    (1, '2025-10-14 15:30:00', 45000.00, 'Flat', 5000.00, 'Tiền mặt', ''),
+    (2, '2025-10-14 12:00:00', 30000.00, 'Flat' , 0.00,'Tiền mặt', 'Snack purchase'),
+    (3, '2025-10-13 17:45:00', 60000.00, 'Percentage','5.00', 'Chuyển khoản', 'Gaming session and energy drink'),
+    (4, '2025-10-12 14:20:00', 100000.00, 'Percentage',50.00, 'Chuyển khoản', 'Extended gaming session'),
+    (5, '2025-10-11 10:10:00', 25000.00, 'Flat', 0.00, 'Tiền mặt', 'Bought water and snacks'),
+    (8, '2025-10-14 16:00:00', 70000.00, 'Flat',3000.00, 'Chuyển khoản', 'VIP gaming session'),
+	(7, '2025-10-14 16:45:00', 55000.00, 'Flat',3000.00, 'Tiền mặt', 'Payment for snacks and gaming'),
+    (8, '2025-10-14 10:15:00', 35000.00,'Flat' ,0.00, 'Chuyển khoản', 'Drink purchase'),
+    (9, '2025-10-13 15:30:00', 60000.00, 'Percentage', 10.00, 'Tiền mặt', 'Gaming session and food'),
+    (10, '2025-10-12 12:00:00', 80000.00,'Percentage' , 10.00, 'Chuyển khoản', 'Extended gaming and drinks');
 
 -- Insert 10 sample records into `billdetail`
 INSERT INTO `sale_detail` (sale_id, item_id, quantity)
