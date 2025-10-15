@@ -105,6 +105,20 @@ CREATE TABLE `session` (
   `end_time` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `revenue`
+--
+
+CREATE TABLE `revenue` (
+  `revenue_id` int NOT NULL,
+  `date` datetime NOT NULL,
+  `computer_usage_revenue` decimal(10,2) NOT NULL,
+  `sales_revenue` decimal(10,2) NOT NULL,
+  `operating_expense` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 --
 -- Chỉ mục cho các bảng đã đổ
 --
@@ -117,14 +131,14 @@ ALTER TABLE `account`
   ADD UNIQUE KEY `username` (`username`);
 
 --
--- Chỉ mục cho bảng `bill`
+-- Chỉ mục cho bảng `sale`
 --
 ALTER TABLE `sale`
   ADD PRIMARY KEY (`sale_id`),
   ADD KEY `account_id` (`account_id`);
 
 --
--- Chỉ mục cho bảng `billdetail`
+-- Chỉ mục cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
   ADD PRIMARY KEY (`sale_detail_id`),
@@ -152,6 +166,12 @@ ALTER TABLE `session`
   ADD KEY `computer_id` (`computer_id`);
 
 --
+-- Chỉ mục cho bảng `revenue`
+--
+ALTER TABLE `revenue`
+  ADD PRIMARY KEY (`revenue_id`);
+
+--
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
 
@@ -162,13 +182,13 @@ ALTER TABLE `account`
   MODIFY `account_id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `bill`
+-- AUTO_INCREMENT cho bảng `sale`
 --
 ALTER TABLE `sale`
   MODIFY `sale_id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT cho bảng `billdetail`
+-- AUTO_INCREMENT cho bảng `sale_detail`
 --
 ALTER TABLE `saledetail`
   MODIFY `sale_detail_id` int NOT NULL AUTO_INCREMENT;
@@ -190,6 +210,11 @@ ALTER TABLE `item`
 --
 ALTER TABLE `session`
   MODIFY `session_id` int NOT NULL AUTO_INCREMENT;
+
+-- AUTO_INCREMENT cho bảng `revenue`
+--
+ALTER TABLE `revenue`
+  MODIFY `revenue_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
