@@ -17,19 +17,16 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `account`
+-- Cấu trúc bảng cho bảng `customer`
 --
 
-CREATE TABLE `account` (
-  `account_id` int NOT NULL,
+CREATE TABLE `customer` (
+  `customer_id` int NOT NULL,
   `customer_name` varchar(100) NOT NULL,
   `phone_number` varchar(15) DEFAULT NULL,
   `membership_card` varchar(50) DEFAULT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(100) NOT NULL,
   `balance` decimal(12,2) DEFAULT 0.00,
   `registration_date` datetime DEFAULT CURRENT_TIMESTAMP(),
-  `status` enum('Active','Inactive') DEFAULT 'Active'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -40,9 +37,8 @@ CREATE TABLE `account` (
 
 CREATE TABLE `sale` (
   `sale_id` int NOT NULL,
-  `account_id` int NOT NULL,
+  `customer_id` int NOT NULL,
   `sale_date` datetime DEFAULT current_timestamp(),
-  `total` decimal(12,2) DEFAULT 0.00,
   `discount_type` enum('Percentage', 'Flat') default 'Flat',
   `discount` decimal(10,2) DEFAULT 0.00,
   `payment_method` varchar(50) not null,
@@ -100,7 +96,7 @@ CREATE TABLE `item` (
 
 CREATE TABLE `session` (
   `session_id` int NOT NULL,
-  `account_id` int NOT NULL,
+  `customer_id` int NOT NULL,
   `computer_id` int NOT NULL,
   `start_time` datetime NOT NULL,
   `end_time` datetime DEFAULT NULL
@@ -125,18 +121,17 @@ CREATE TABLE `revenue` (
 --
 
 --
--- Chỉ mục cho bảng `account`
+-- Chỉ mục cho bảng `customer`
 --
-ALTER TABLE `account`
-  ADD PRIMARY KEY (`account_id`),
-  ADD UNIQUE KEY `username` (`username`);
+ALTER TABLE `customer`
+  ADD PRIMARY KEY (`customer_id`),
 
 --
 -- Chỉ mục cho bảng `sale`
 --
 ALTER TABLE `sale`
   ADD PRIMARY KEY (`sale_id`),
-  ADD KEY `account_id` (`account_id`);
+  ADD KEY `customer_id` (`customer_id`);
 
 --
 -- Chỉ mục cho bảng `sale_detail`
@@ -163,7 +158,7 @@ ALTER TABLE `item`
 --
 ALTER TABLE `session`
   ADD PRIMARY KEY (`session_id`),
-  ADD KEY `account_id` (`account_id`),
+  ADD KEY `customer_id` (`customer_id`),
   ADD KEY `computer_id` (`computer_id`);
 
 --
@@ -177,10 +172,10 @@ ALTER TABLE `revenue`
 --
 
 --
--- AUTO_INCREMENT cho bảng `account`
+-- AUTO_INCREMENT cho bảng `customer`
 --
-ALTER TABLE `account`
-  MODIFY `account_id` int NOT NULL AUTO_INCREMENT;
+ALTER TABLE `customer`
+  MODIFY `customer_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `sale`
@@ -237,7 +232,7 @@ ALTER TABLE `item`
 -- Các ràng buộc cho bảng `sale`
 --
 ALTER TABLE `sale`
-  ADD CONSTRAINT `sale_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`);
+  ADD CONSTRAINT `sale_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`);
 
 --
 -- Các ràng buộc cho bảng `sale_detail`
@@ -250,7 +245,7 @@ ALTER TABLE `sale_detail`
 -- Các ràng buộc cho bảng `session`
 --
 ALTER TABLE `session`
-  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`),
+  ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`),
   ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`computer_id`) REFERENCES `computer` (`computer_id`);
 COMMIT;
 
