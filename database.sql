@@ -42,8 +42,9 @@ CREATE TABLE `sale` (
   `sale_id` int NOT NULL,
   `account_id` int NOT NULL,
   `sale_date` datetime DEFAULT current_timestamp(),
-  `discount` decimal(10,2) DEFAULT 0.00,
   `total` decimal(12,2) DEFAULT 0.00,
+  `discount_type` enum('Percentage', 'Flat') default 'Flat',
+  `discount` decimal(10,2) DEFAULT 0.00,
   `payment_method` varchar(50) not null,
   `note` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
