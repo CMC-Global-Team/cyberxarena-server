@@ -32,16 +32,4 @@ public class Session {
     @Column(name = "end_time")
     private LocalDateTime endTime;
 
-    // ✅ Hàm tiện ích: kiểm tra phiên đang hoạt động
-    @Transient
-    public boolean isActive() {
-        return endTime == null;
-    }
-
-    // ✅ Hàm tiện ích: tính thời lượng sử dụng (nếu có)
-    @Transient
-    public Long getDurationInMinutes() {
-        if (endTime == null || startTime == null) return null;
-        return java.time.Duration.between(startTime, endTime).toMinutes();
-    }
 }
