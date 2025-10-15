@@ -35,7 +35,7 @@ CREATE TABLE `account` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `bill`
+-- Cấu trúc bảng cho bảng `sale`
 --
 
 CREATE TABLE `sale` (
@@ -51,7 +51,7 @@ CREATE TABLE `sale` (
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `billdetail`
+-- Cấu trúc bảng cho bảng `sale_detail`
 --
 
 CREATE TABLE `sale_detail` (
@@ -221,13 +221,31 @@ ALTER TABLE `revenue`
 --
 
 --
--- Các ràng buộc cho bảng `bill`
+-- Các ràng buộc cho bảng `account`
+--
+ALTER TABLE `account`
+  ADD UNIQUE (username);
+  
+--  
+-- Các ràng buộc cho bảng `computer`
+--
+ALTER TABLE `computer`
+  ADD UNIQUE (computer_name);
+  
+--  
+-- Các ràng buộc cho bảng `item`
+--
+ALTER TABLE `item`
+  ADD UNIQUE (item_name);
+
+--
+-- Các ràng buộc cho bảng `sale`
 --
 ALTER TABLE `sale`
   ADD CONSTRAINT `sale_ibfk_1` FOREIGN KEY (`account_id`) REFERENCES `account` (`account_id`);
 
 --
--- Các ràng buộc cho bảng `billdetail`
+-- Các ràng buộc cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
   ADD CONSTRAINT `sale_detail_ibfk_1` FOREIGN KEY (`bill_id`) REFERENCES `bill` (`bill_id`),
