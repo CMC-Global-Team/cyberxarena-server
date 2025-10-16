@@ -35,6 +35,6 @@ public class Computer {
 
     @PrePersist
     protected void onCreate() {
-        if (status == null) status = "Available";
+        if (status == null) status = "Đang trống";
     }
 }
