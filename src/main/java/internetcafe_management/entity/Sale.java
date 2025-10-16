@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "sale")
@@ -14,27 +15,42 @@ public class Sale {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "sale_id")
     private Integer saleId;
 
-    @ManyToOne
+    // Khóa ngoại tới bảng customer
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Column(name = "quantity", nullable = false)
-    private Integer quantity;
-
-    @Column(name = "total_price", precision = 12, scale = 2, nullable = false)
-    private BigDecimal totalPrice;
 
     @Column(name = "sale_date", nullable = false)
     private LocalDateTime saleDate;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "discount_type", length = 20)
+    private DiscountType discountType = DiscountType.Flat;
+
+    @Column(name = "discount", precision = 10, scale = 2)
+    private BigDecimal discount = BigDecimal.ZERO;
+
+    @Column(name = "payment_method", nullable = false, length = 50)
+    private String paymentMethod;
+
+    @Column(name = "note", length = 200)
+    private String note;
+
+    // Quan hệ 1->N tới sale_detail
+    @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SaleDetail> saleDetails;
+
     @PrePersist
     protected void onCreate() {
-        saleDate = LocalDateTime.now();
+        if (saleDate == null) saleDate = LocalDateTime.now();
+        if (discountType == null) discountType = DiscountType.Flat;
+        if (discount == null) discount = BigDecimal.ZERO;
+    }
+
+    public enum DiscountType {
+        Percentage, Flat
     }
 }
