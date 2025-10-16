@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class SaleDTO {
 
+    private Integer saleId;
     @NotNull(message = "customerId không được để trống")
     private Integer customerId;
 
