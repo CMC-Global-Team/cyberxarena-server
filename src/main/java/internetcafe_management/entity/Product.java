@@ -5,7 +5,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "product")
+@Table(name = "item")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,25 +13,26 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer productId;
+    @Column(name = "item_id")
+    private Integer itemId;
 
-    @Column(name = "product_name", nullable = false, length = 100)
-    private String productName;
+    @Column(name = "item_name", nullable = false, length = 100)
+    private String itemName;
 
-    @Column(name = "category", length = 50)
-    private String category;
+    @Column(name = "item_category", length = 50)
+    private String itemCategory;
 
     @Column(name = "price", precision = 10, scale = 2, nullable = false)
     private BigDecimal price;
 
-    @Column(name = "quantity", nullable = false)
-    private Integer quantity;
+    @Column(name = "stock", nullable = false)
+    private Integer stock;
 
-    @Column(name = "status", length = 20)
-    private String status;
+    @Column(name = "supplier_name", length = 100)
+    private String supplierName;
 
     @PrePersist
     protected void onCreate() {
-        if (status == null) status = "Còn hàng";
+        if (stock == null) stock = 0;
     }
 }
