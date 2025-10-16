@@ -26,7 +26,7 @@ CREATE TABLE `customer` (
   `phone_number` varchar(15) DEFAULT NULL,
   `membership_card` varchar(50) DEFAULT NULL,
   `balance` decimal(12,2) DEFAULT 0.00,
-  `registration_date` datetime DEFAULT CURRENT_TIMESTAMP(),
+  `registration_date` datetime DEFAULT CURRENT_TIMESTAMP()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -124,7 +124,7 @@ CREATE TABLE `revenue` (
 -- Chỉ mục cho bảng `customer`
 --
 ALTER TABLE `customer`
-  ADD PRIMARY KEY (`customer_id`),
+  ADD PRIMARY KEY (`customer_id`);
 
 --
 -- Chỉ mục cho bảng `sale`
