@@ -17,14 +17,11 @@ public class SaleDetail {
     private Integer saleDetailId;
 
     @Column(name = "sale_id", nullable = false)
-    @NotNull(message = "Mã hóa đơn không được để trống")
     private Integer saleId;
 
     @Column(name = "item_id", nullable = false)
-    @NotNull(message = "Mã sản phẩm không được để trống")
     private Integer itemId;
 
     @Column(name = "quantity", nullable = false)
-    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
     private Integer quantity;
 }
