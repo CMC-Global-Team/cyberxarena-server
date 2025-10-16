@@ -120,7 +120,6 @@ CREATE TABLE `revenue` (
 -- Cấu trúc bảng cho bảng `session_price`
 --
 create table session_price(
-    session_price_id INT PRIMARY KEY,
     session_id int,
     total_amount DECIMAL(10,2)
 );
@@ -180,7 +179,7 @@ ALTER TABLE `revenue`
 -- Chỉ mục cho bảng `session_price`
 --
 ALTER TABLE `session_price`
-  ADD KEY `session_id` (`session_id`);
+  ADD PRIMARY KEY (`session_id`),
 
 --
 -- AUTO_INCREMENT cho các bảng đã đổ
@@ -226,12 +225,6 @@ ALTER TABLE `session`
 --
 ALTER TABLE `revenue`
   MODIFY `revenue_id` int NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT cho bảng `session_price`
---
-ALTER TABLE `session_price`
-  MODIFY `session_price_id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
