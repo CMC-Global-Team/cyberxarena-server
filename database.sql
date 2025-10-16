@@ -117,6 +117,15 @@ CREATE TABLE `revenue` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
+-- Cấu trúc bảng cho bảng `session_price`
+--
+create table session_price(
+    session_price_id INT PRIMARY KEY,
+    session_id int,
+    total_amount DECIMAL(10,2)
+);
+
+--
 -- Chỉ mục cho các bảng đã đổ
 --
 
@@ -168,6 +177,12 @@ ALTER TABLE `revenue`
   ADD PRIMARY KEY (`revenue_id`);
 
 --
+-- Chỉ mục cho bảng `session_price`
+--
+ALTER TABLE `session_price`
+  ADD KEY `session_id` (`session_id`);
+
+--
 -- AUTO_INCREMENT cho các bảng đã đổ
 --
 
@@ -213,6 +228,12 @@ ALTER TABLE `revenue`
   MODIFY `revenue_id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `session_price`
+--
+ALTER TABLE `session_price`
+  MODIFY `session_price_id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- Các ràng buộc cho các bảng đã đổ
 --
   
@@ -247,6 +268,12 @@ ALTER TABLE `sale_detail`
 ALTER TABLE `session`
   ADD CONSTRAINT `session_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`),
   ADD CONSTRAINT `session_ibfk_2` FOREIGN KEY (`computer_id`) REFERENCES `computer` (`computer_id`);
+
+--
+-- Các ràng buộc cho bảng `session_price`
+--
+ALTER TABLE `session_price`
+  ADD CONSTRAINT `session_price_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
