@@ -31,4 +31,11 @@ public class ComputerController {
         ComputerDTO createdComputer = computerService.createComputer(computerDTO);
         return new ResponseEntity<>(createdComputer, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ComputerDTO> updateComputer(@PathVariable Integer id, @Valid @RequestBody ComputerDTO computerDTO) {
+        ComputerDTO updatedComputer = computerService.updateComputer(id, computerDTO);
+
+        return ResponseEntity.ok(updatedComputer);
+    }
 }
