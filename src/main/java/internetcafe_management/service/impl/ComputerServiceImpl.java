@@ -51,4 +51,23 @@ public class ComputerServiceImpl implements ComputerService {
 
         return computerMapper.toDto(savedComputer);
     }
+    @Override
+    public ComputerDTO updateComputer(Integer id, ComputerDTO computerDTO) {
+        Computer existingComputer = computerRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy máy tính với ID: " + id));
+
+        computerMapper.updateEntityFromDto(computerDTO, existingComputer);
+
+        if (computerDTO.getStatus() != null) {
+            try {
+                existingComputer.setStatus(ComputerStatus.valueOf(computerDTO.getStatus()));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Trạng thái không hợp lệ: " + computerDTO.getStatus());
+            }
+        }
+
+        Computer updatedComputer = computerRepository.save(existingComputer);
+
+        return computerMapper.toDto(updatedComputer);
+    }
 }
