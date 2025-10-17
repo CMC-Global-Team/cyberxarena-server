@@ -32,6 +32,9 @@ public class Customer {
     @Column(name = "registration_date", updatable = false, insertable = false)
     private LocalDateTime registrationDate;
 
+    @OneToOne(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Account account;
+
     //Dùng @PrePersist để đảm bảo balance không bao giờ null khi tạo mới
     @PrePersist
     protected void onCreate() {
