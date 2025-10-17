@@ -21,8 +21,13 @@ public class ComputerController {
 
 
     @GetMapping
-    public ResponseEntity<Page<ComputerDTO>> getAllComputers(Pageable pageable) {
-        Page<ComputerDTO> computers = computerService.getAllComputers(pageable);
+    public ResponseEntity<Page<ComputerDTO>> getAllComputers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String ip,
+            @RequestParam(required = false) String status,
+            Pageable pageable) {
+
+        Page<ComputerDTO> computers = computerService.getAllComputers(name, ip, status, pageable);
         return ResponseEntity.ok(computers);
     }
 
