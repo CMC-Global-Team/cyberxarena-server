@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CustomerDTO {
-
     private Integer customerId;
 
     @NotBlank(message = "Tên khách hàng không được để trống")
