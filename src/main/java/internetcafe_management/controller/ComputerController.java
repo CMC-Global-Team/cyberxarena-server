@@ -19,6 +19,7 @@ public class ComputerController {
         this.computerService = computerService;
     }
 
+
     @GetMapping
     public ResponseEntity<Page<ComputerDTO>> getAllComputers(Pageable pageable) {
         Page<ComputerDTO> computers = computerService.getAllComputers(pageable);
