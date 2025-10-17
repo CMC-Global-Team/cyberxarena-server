@@ -1,4 +1,4 @@
-package internetcafe_management.mapper.session;
+package internetcafe_management.mapper.computer;
 
 import internetcafe_management.dto.ComputerDTO;
 import internetcafe_management.entity.Computer;
