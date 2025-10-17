@@ -16,12 +16,15 @@ public class SaleDetail {
     @Column(name = "sale_detail_id")
     private Integer saleDetailId;
 
-    @Column(name = "sale_id", nullable = false)
-    private Integer saleId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "sale_id", nullable = false)
+    private Sale sale;
 
     @Column(name = "item_id", nullable = false)
+    @Positive(message = "Mã mặt hàng phải là số dương")
     private Integer itemId;
 
     @Column(name = "quantity", nullable = false)
+    @Positive(message = "Số lượng phải lớn hơn 0")
     private Integer quantity;
 }
