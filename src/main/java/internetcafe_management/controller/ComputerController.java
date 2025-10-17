@@ -38,4 +38,11 @@ public class ComputerController {
 
         return ResponseEntity.ok(updatedComputer);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteComputer(@PathVariable Integer id) {
+        computerService.deleteComputer(id);
+
+        return ResponseEntity.noContent().build();
+    }
 }
