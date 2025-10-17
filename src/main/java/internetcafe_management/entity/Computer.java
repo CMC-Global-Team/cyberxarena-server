@@ -30,11 +30,18 @@ public class Computer {
     @Column(name = "price_per_hour", nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerHour;
 
-    @Column(name = "status", nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private ComputerStatus status;
+
+    public enum ComputerStatus {
+        Available,
+        In_Use,
+        Broken
+    }
 
     @PrePersist
     protected void onCreate() {
-        if (status == null) status = "Đang trống";
+        if (status == null) status = ComputerStatus.Available;
     }
 }
