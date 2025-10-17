@@ -33,8 +33,8 @@ public class ComputerDTO {
 
     @NotBlank(message = "Trạng thái không được để trống")
     @Pattern(
-            regexp = "Available|In Use|Broken",
-            message = "Trạng thái chỉ được là: Available, In Use hoặc Broken"
+            regexp = "Available|In_Use|Broken",
+            message = "Trạng thái chỉ được là: Available, In_Use hoặc Broken"
     )
     private String status;
 }
