@@ -6,6 +6,8 @@ import internetcafe_management.entity.Computer.ComputerStatus;
 import internetcafe_management.mapper.computer.ComputerMapper;
 import internetcafe_management.repository.computer.ComputerRepository;
 import internetcafe_management.service.computer.ComputerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,16 @@ public class ComputerServiceImpl implements ComputerService {
     public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper) {
         this.computerRepository = repo;
         this.computerMapper = mapper;
+    }
+
+    @Override
+    @Transactional(readOnly = true) // Tối ưu cho các tác vụ chỉ đọc
+    public Page<ComputerDTO> getAllComputers(Pageable pageable) {
+        // 1. Gọi repository để lấy một "Trang" (Page) các đối tượng Computer
+        Page<Computer> computerPage = computerRepository.findAll(pageable);
+
+        // 2. Dùng hàm map có sẵn của Page để chuyển đổi từng Computer sang ComputerDTO
+        return computerPage.map(computerMapper::toDto);
     }
 
     @Override
