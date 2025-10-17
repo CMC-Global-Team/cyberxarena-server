@@ -70,4 +70,13 @@ public class ComputerServiceImpl implements ComputerService {
 
         return computerMapper.toDto(updatedComputer);
     }
+
+    @Override
+    public void deleteComputer(Integer id) {
+        if (!computerRepository.existsById(id)) {
+            throw new RuntimeException("Không tìm thấy máy tính với ID: " + id);
+        }
+
+        computerRepository.deleteById(id);
+    }
 }
