@@ -8,4 +8,5 @@ public interface ComputerService {
     Page<ComputerDTO> getAllComputers(Pageable pageable);
     ComputerDTO createComputer(ComputerDTO computerDTO);
     ComputerDTO updateComputer(Integer id, ComputerDTO computerDTO);
+    void deleteComputer(Integer id);
 }
