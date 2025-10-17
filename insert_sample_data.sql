@@ -12,7 +12,21 @@ VALUES
     ('Ngô Minh Đức', '09543210987', 'Advanced', 400000.00, '2025-10-13 09:30:00'),
     ('Bùi Văn Nam', '09678901234', 'Normal', 80000.00, '2025-10-12 11:45:00'),
     ('Đặng Thị Thanh', '09321098765', 'Advanced', 250000.00, '2025-10-11 14:20:00');
-    
+
+ 
+INSERT INTO account (customer_id, username, password)
+VALUES
+(1, 'nguyenhung', MD5('123456')),
+(2, 'tranmai', MD5('654321')),
+(3, 'lehoanganh', MD5('password')),
+(4, 'phamtuan', MD5('qwerty')),
+(5, 'hongngoc', MD5('abc123')),
+(6, 'vuquocdat', MD5('123abc')),
+(7, 'hoanglan', MD5('lan789')),
+(8, 'ngominhduc', MD5('duc123')),
+(9, 'buinam', MD5('nam456')),
+(10, 'dangthithanh', MD5('thanh999'));
+
     -- Insert 10 sample records into `item`
 INSERT INTO `item` (item_name, item_category, price, stock, supplier_name)
 VALUES
