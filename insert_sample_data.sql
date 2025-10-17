@@ -1,4 +1,4 @@
-use internet_cafe;
+use railway;
 -- Insert 10 sample records into `account`
 INSERT INTO `customer` (customer_name, phone_number, membership_card, balance, registration_date)
 VALUES
