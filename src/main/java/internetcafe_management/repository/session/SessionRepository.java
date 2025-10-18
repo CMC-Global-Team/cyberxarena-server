@@ -4,7 +4,23 @@ import internetcafe_management.entity.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 public interface SessionRepository extends JpaRepository<Session, Integer> {
     Page<Session> findAll(Pageable pageable);
+    @Query("SELECT s, sp.totalAmount FROM Session s LEFT JOIN SessionPrice sp ON s.sessionId = sp.sessionId")
+    List<Object[]> findAllWithTotalAmount();
+    @Query( """
+            SELECT s FROM Session s
+            WHERE (:customerId IS NULL OR s.customerId = :customerId)
+            AND (:computerId IS NULL OR s.computerId = :computerId)
+            AND (:startTime IS NULL OR s.startTime >= :startTime)
+            AND (:endTime IS NULL OR s.endTime <= :endTime)
+            """)
+    List<Session> searchSessions(Integer customerId, Integer computerId,
+                                 LocalDateTime startTime, LocalDateTime endTime);
+
 }

@@ -8,6 +8,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class SessionServiceImpl implements SessionService {
@@ -36,5 +43,21 @@ public class SessionServiceImpl implements SessionService {
             throw new RuntimeException("Session not found");
         sessionRepository.deleteById(id);
     }
-
-}
+    @Override
+    public List<Map<String, Object>> getSessionsWithTotalAmount() {
+        List<Object[]> result = sessionRepository.findAllWithTotalAmount();
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (Object[] row : result) {
+            Session s = (Session) row[0];
+            BigDecimal total = (BigDecimal) row[1];
+            Map<String, Object> map = new HashMap<>();
+            map.put("session", s);
+            map.put("totalAmount", total);
+            list.add(map);
+        }
+        return list;
+    }
+    @Override
+    public List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime) {
+        return sessionRepository.searchSessions(customerId, computerId, startTime, endTime);
+    }}
