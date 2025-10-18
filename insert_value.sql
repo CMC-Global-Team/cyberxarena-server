@@ -13,7 +13,7 @@ VALUES
     ('Bùi Văn Nam', '09678901234', 'Normal', 80000.00, '2025-10-12 11:45:00'),
     ('Đặng Thị Thanh', '09321098765', 'Advanced', 250000.00, '2025-10-11 14:20:00');
 
- 
+select * from customer;
 INSERT INTO account (customer_id, username, password)
 VALUES
 (1, 'nguyenhung', MD5('123456')),
@@ -40,7 +40,6 @@ VALUES
     ('Bánh mì pate', 'Food', 20000.00, 15, 'Công ty Thực Phẩm Việt'),
     ('Sting dâu', 'Energy Drink', 15000.00, 30, 'Công ty Năng Lượng Quốc Tế'),
     ('Kem ốc quế', 'Dessert', 10000.00, 25, 'Công ty Kem');
-
 -- Insert 10 sample records into `computer`
 INSERT INTO `computer` (computer_name, specifications, ip_address, price_per_hour, status)
 VALUES
@@ -54,7 +53,7 @@ VALUES
     ('PC08', 'Stream', '192.168.1.108', 25000.00, 'Available'),
     ('PC09', 'Esport Competitive', '192.168.1.109', 18000.00, 'Broken'),
     ('PC10', 'Esport Competitive', '192.168.1.110', 18000.00, 'Available');
-
+select * from computer;
 -- Insert 10 sample records into `sale`
 INSERT INTO `sale` (customer_id, sale_date, discount_type, discount, payment_method, note)
 VALUES
@@ -68,6 +67,7 @@ VALUES
     (8, '2025-10-14 10:15:00', 'Flat' ,0.00, 'Chuyển khoản', 'Drink purchase'),
     (9, '2025-10-13 15:30:00', 'Percentage', 10.00, 'Tiền mặt', 'Gaming session and food'),
     (10, '2025-10-12 12:00:00', 'Percentage' , 10.00, 'Chuyển khoản', 'Extended gaming and drinks');
+SHOW TRIGGERS LIKE 'sale%';
 
 -- Insert 10 sample records into `billdetail`
 INSERT INTO `sale_detail` (sale_id, item_id, quantity)
@@ -84,15 +84,38 @@ VALUES
     (10, 4, 2);
 
 -- Insert 10 sample records into `session`
-INSERT INTO `session` (customer_id, computer_id, start_time, end_time)
+INSERT INTO session (customer_id, computer_id, start_time, end_time)
 VALUES
-    (1, 1, '2025-10-14 14:00:00', '2025-10-14 16:00:00'),
-    (2, 2, '2025-10-14 11:30:00', NULL),
-    (3, 3, '2025-10-13 16:00:00', '2025-10-13 19:00:00'),
-    (4, 5, '2025-10-12 13:00:00', NULL),
-    (5, 1, '2025-10-11 09:00:00', '2025-10-11 10:30:00'),
-    (6, 4, '2025-10-14 15:00:00', NULL),
-    (7, 7, '2025-10-14 15:30:00', NULL),
-    (8, 8, '2025-10-14 09:00:00', '2025-10-14 11:00:00'),
-    (9, 5, '2025-10-13 14:00:00', '2025-10-13 16:30:00'),
-    (10, 1, '2025-10-12 10:00:00', '2025-10-12 13:00:00');
+(1, 1, '2025-10-14 14:00:00', '2025-10-14 16:00:00'),
+(2, 2, '2025-10-14 11:30:00', '2025-10-14 12:45:00'),
+(3, 3, '2025-10-13 16:00:00', '2025-10-13 19:00:00'),
+(4, 5, '2025-10-12 13:00:00', '2025-10-12 15:00:00'),
+(5, 1, '2025-10-11 09:00:00', '2025-10-11 10:30:00'),
+(6, 4, '2025-10-14 15:00:00', '2025-10-14 16:30:00'),
+(7, 7, '2025-10-14 15:30:00', '2025-10-14 17:00:00'),
+(8, 8, '2025-10-14 09:00:00', '2025-10-14 11:00:00'),
+(9, 5, '2025-10-13 14:00:00', '2025-10-13 16:30:00'),
+(10, 1, '2025-10-12 10:00:00', '2025-10-12 13:00:00');
+
+select * from session_price;
+
+UPDATE session
+SET end_time = '2025-10-14 16:00:00'
+WHERE session_id = 1;
+
+UPDATE session
+SET end_time = '2025-10-14 12:45:00'
+WHERE session_id = 2;
+
+UPDATE session
+SET end_time = '2025-10-13 19:00:00'
+WHERE session_id = 3;
+
+UPDATE session
+SET end_time = '2025-10-12 15:00:00'
+WHERE session_id = 4;
+
+UPDATE session
+SET end_time = '2025-10-11 10:30:00'
+WHERE session_id = 5;
+ 
