@@ -1,0 +1,47 @@
+services:
+  # Web Service for Spring Boot Application
+  - type: web
+    name: cyberxarena-server
+    env: docker
+    plan: starter
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/*.jar
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: PORT
+        value: 8080
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 86400000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cyberxarena-db
+          property: connectionString
+      - key: DATABASE_USERNAME
+        fromDatabase:
+          name: cyberxarena-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: cyberxarena-db
+          property: password
+
+  # Database Service
+  - type: pserv
+    name: cyberxarena-db
+    plan: starter
+    disk:
+      name: cyberxarena-disk
+      mountPath: /var/lib/mysql
+    env: docker
+    dockerfilePath: |
+      FROM mysql:8.0
+      ENV MYSQL_ROOT_PASSWORD=rootpassword
+      ENV MYSQL_DATABASE=cyberxarena
+      ENV MYSQL_USER=appuser
+      ENV MYSQL_PASSWORD=apppassword
+      EXPOSE 3306

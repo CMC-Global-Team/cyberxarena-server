@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
   servlet:
     context-path: /api/v1
 
@@ -8,9 +8,9 @@ spring:
     name: internet-cafe-management
 
   datasource:
-    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
+    url: ${DATABASE_URL:jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DATABASE_USERNAME:root}
+    password: ${DATABASE_PASSWORD:KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -36,7 +36,7 @@ spring:
   security:
     jwt:
       secret: ${JWT_SECRET:mySecretKey}
-      expiration: 86400000 # 24 hours
+      expiration: ${JWT_EXPIRATION:86400000} # 24 hours
 
 logging:
   level:
