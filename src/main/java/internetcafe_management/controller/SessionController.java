@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,6 +33,12 @@ public class SessionController {
     @PutMapping("/{id}")
     public Session updateSession(@PathVariable Integer id, @RequestBody Session session) {
         return sessionService.updateSession(id, session);
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteComputer(@PathVariable Integer id) {
+        sessionService.deleteSession(id);
+
+        return ResponseEntity.noContent().build();
     }
 
 }

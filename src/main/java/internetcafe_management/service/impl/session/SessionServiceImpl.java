@@ -30,5 +30,11 @@ public class SessionServiceImpl implements SessionService {
         existing.setEndTime(session.getEndTime());
         return sessionRepository.save(existing);
     }
+    @Override
+    public void deleteSession(Integer id) {
+        if (!sessionRepository.existsById(id))
+            throw new RuntimeException("Session not found");
+        sessionRepository.deleteById(id);
+    }
 
 }
