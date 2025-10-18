@@ -18,4 +18,9 @@ public class SessionServiceImpl implements SessionService {
     public Page<Session> getAllSessions(Pageable pageable) {
         return sessionRepository.findAll(pageable);
     }
+    @Override
+    public Session createSession(Session session) {
+        session.setEndTime(null);
+        return sessionRepository.save(session);
+    }
 }
