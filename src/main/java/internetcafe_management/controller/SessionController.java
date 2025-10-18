@@ -25,4 +25,9 @@ public class SessionController {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
         return sessionService.getAllSessions(pageable);
     }
+    @PostMapping
+    public Session createSession(@RequestBody Session session) {
+        return sessionService.createSession(session);
+    }
+
 }

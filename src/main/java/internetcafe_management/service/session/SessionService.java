@@ -6,4 +6,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface SessionService {
     Page<Session> getAllSessions(Pageable pageable);
+    Session createSession(Session session);
 }
