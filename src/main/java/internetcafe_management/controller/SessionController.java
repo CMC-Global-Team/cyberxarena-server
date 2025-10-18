@@ -29,5 +29,9 @@ public class SessionController {
     public Session createSession(@RequestBody Session session) {
         return sessionService.createSession(session);
     }
+    @PutMapping("/{id}")
+    public Session updateSession(@PathVariable Integer id, @RequestBody Session session) {
+        return sessionService.updateSession(id, session);
+    }
 
 }
