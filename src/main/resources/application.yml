@@ -8,10 +8,16 @@ spring:
     name: internet-cafe-management
 
   datasource:
-    url: jdbc:mysql://localhost:3306/internet_cafe
+    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password: 123456
+    password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
     driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
     
   jpa:
     hibernate:
