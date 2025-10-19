@@ -3,9 +3,7 @@ package internetcafe_management.service.impl.Customer;
 import internetcafe_management.dto.CustomerDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.mapper.Customer.CustomerMapper;
-import internetcafe_management.repository.Customer.CustomerRepository;
-import internetcafe_management.repository.Customer.CustomerSortedAscRepository;
-import internetcafe_management.repository.Customer.CustomerSortedDescRepository;
+import internetcafe_management.repository.Customer.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import internetcafe_management.service.Customer.CustomerService;
@@ -27,6 +25,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private CustomerSortedDescRepository customerSortedDescRepository;
+
+    @Autowired
+    private CustomerSortDASCRepo customerSortDASCRepo;
+
+    @Autowired
+    private CustomerSortDDescRepo customerSortDDescRepo;
 
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
@@ -76,6 +80,18 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerDTO> getAllCustomersSortedDesc() {
         return customerSortedDescRepository.findAll().stream()
+                .map(customerMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<CustomerDTO> getAllCustomersSortDateDesc() {
+        return customerSortDDescRepo.findAll().stream()
+                .map(customerMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+    @Override
+    public List<CustomerDTO> getAllCustomersSoreDateAsc() {
+        return customerSortDASCRepo.findAll().stream()
                 .map(customerMapper::toDTO)
                 .collect(Collectors.toList());
     }
