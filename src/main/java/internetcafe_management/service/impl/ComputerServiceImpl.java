@@ -7,6 +7,8 @@ import internetcafe_management.mapper.computer.ComputerMapper;
 import internetcafe_management.repository.computer.ComputerRepository;
 import internetcafe_management.service.computer.ComputerService;
 import internetcafe_management.specification.ComputerSpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ComputerServiceImpl implements ComputerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(ComputerServiceImpl.class);
 
     private final ComputerRepository computerRepository;
     private final ComputerMapper computerMapper;
@@ -28,8 +32,20 @@ public class ComputerServiceImpl implements ComputerService {
     @Override
     @Transactional(readOnly = true)
     public Page<ComputerDTO> getAllComputers(String name, String ip, String status, Pageable pageable) {
+        logger.info("Getting all computers with filters - name: {}, ip: {}, status: {}, page: {}, size: {}", 
+                   name, ip, status, pageable.getPageNumber(), pageable.getPageSize());
+        
+        // First, let's check total count without filters
+        long totalCount = computerRepository.count();
+        logger.info("Total computers in database: {}", totalCount);
+        
         Specification<Computer> spec = ComputerSpecification.search(name, ip, status);
         Page<Computer> computerPage = computerRepository.findAll(spec, pageable);
+        
+        logger.info("Found {} computers with current filters", computerPage.getTotalElements());
+        logger.info("Returning page {} of {} with {} items", 
+                   computerPage.getNumber(), computerPage.getTotalPages(), computerPage.getNumberOfElements());
+        
         return computerPage.map(computerMapper::toDto);
     }
 
