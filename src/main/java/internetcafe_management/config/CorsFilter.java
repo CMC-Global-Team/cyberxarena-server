@@ -3,6 +3,8 @@ package internetcafe_management.config;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -13,12 +15,17 @@ import java.io.IOException;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorsFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(CorsFilter.class);
+
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
         
         HttpServletResponse response = (HttpServletResponse) res;
         HttpServletRequest request = (HttpServletRequest) req;
+        
+        logger.debug("CORS Filter - Request: {} {}", request.getMethod(), request.getRequestURI());
+        logger.debug("CORS Filter - Origin: {}", request.getHeader("Origin"));
         
         // Set CORS headers
         String origin = request.getHeader("Origin");
