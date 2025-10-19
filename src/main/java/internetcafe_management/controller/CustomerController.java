@@ -30,4 +30,8 @@ public class CustomerController {
     public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Integer customerId) {
         return ResponseEntity.ok(customerService.getCustomerById(customerId));
     }
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Integer customerId, @Valid @RequestBody CustomerDTO dto) { // Thêm @Valid
+        return ResponseEntity.ok(customerService.updateCustomer(customerId, dto));
+    }
 }
