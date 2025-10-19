@@ -12,4 +12,6 @@ public interface CustomerService {
     List<CustomerDTO> getAllCustomers();
     List<CustomerDTO> getAllCustomersSortedAsc();
     List<CustomerDTO> getAllCustomersSortedDesc();
+    List<CustomerDTO> getAllCustomersSoreDateAsc();
+    List<CustomerDTO> getAllCustomersSortDateDesc();
 }
