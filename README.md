@@ -116,7 +116,7 @@ docker-compose down -v
 - **Swagger UI**: http://localhost:8080/api/v1/swagger-ui.html
 - **Health Check**: http://localhost:8080/api/v1/actuator/health
 - **phpMyAdmin**: http://localhost:8081 (optional)
-- **MySQL**: localhost:3306
+- **MySQL**: localhost:3307
 
 ### Development Guidelines
 
