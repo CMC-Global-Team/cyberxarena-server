@@ -1,45 +1,55 @@
 use internet_cafe;
 
  /*--tạo triger cho việc sắp xếp sản phẩm theo tên mỗi khi xóa thêm hay cập nhật--*/
--- Tạo bảng sắp xếp sản phẩm
-CREATE TABLE IF NOT EXISTS item_sorted AS
+CREATE TABLE IF NOT EXISTS item_sorted_name_asc AS
 SELECT * FROM item ORDER BY item_name ASC;
 
--- Xóa trigger cũ nếu tồn tại
-DROP TRIGGER IF EXISTS trg_item_after_insert;
-DROP TRIGGER IF EXISTS trg_item_after_update;
-DROP TRIGGER IF EXISTS trg_item_after_delete;
+CREATE TABLE IF NOT EXISTS item_sorted_name_desc AS
+SELECT * FROM item ORDER BY item_name DESC;
+
+DROP TRIGGER IF EXISTS trg_item_after_insert_sort;
+DROP TRIGGER IF EXISTS trg_item_after_update_sort;
+DROP TRIGGER IF EXISTS trg_item_after_delete_sort;
 
 DELIMITER $$
 
--- Trigger: sau khi thêm sản phẩm
-CREATE TRIGGER trg_item_after_insert
+CREATE TRIGGER trg_item_after_insert_sort
 AFTER INSERT ON item
 FOR EACH ROW
 BEGIN
-  DELETE FROM item_sorted;
-  INSERT INTO item_sorted
+  DELETE FROM item_sorted_name_asc;
+  INSERT INTO item_sorted_name_asc
   SELECT * FROM item ORDER BY item_name ASC;
+
+  DELETE FROM item_sorted_name_desc;
+  INSERT INTO item_sorted_name_desc
+  SELECT * FROM item ORDER BY item_name DESC;
 END$$
 
--- Trigger: sau khi cập nhật sản phẩm
-CREATE TRIGGER trg_item_after_update
+CREATE TRIGGER trg_item_after_update_sort
 AFTER UPDATE ON item
 FOR EACH ROW
 BEGIN
-  DELETE FROM item_sorted;
-  INSERT INTO item_sorted
+  DELETE FROM item_sorted_name_asc;
+  INSERT INTO item_sorted_name_asc
   SELECT * FROM item ORDER BY item_name ASC;
+
+  DELETE FROM item_sorted_name_desc;
+  INSERT INTO item_sorted_name_desc
+  SELECT * FROM item ORDER BY item_name DESC;
 END$$
 
---  Trigger: sau khi xóa sản phẩm
-CREATE TRIGGER trg_item_after_delete
+CREATE TRIGGER trg_item_after_delete_sort
 AFTER DELETE ON item
 FOR EACH ROW
 BEGIN
-  DELETE FROM item_sorted;
-  INSERT INTO item_sorted
+  DELETE FROM item_sorted_name_asc;
+  INSERT INTO item_sorted_name_asc
   SELECT * FROM item ORDER BY item_name ASC;
+
+  DELETE FROM item_sorted_name_desc;
+  INSERT INTO item_sorted_name_desc
+  SELECT * FROM item ORDER BY item_name DESC;
 END$$
 
 DELIMITER ;
@@ -113,10 +123,10 @@ DELIMITER ;
 
 /*trigger cho việc sắp xếp danh sách bán hàng theo ngày bán tăng dần và giảm dần */
 -- TẠO BẢNG PHỤ LƯU DANH SÁCH ĐÃ SẮP XẾP 
-CREATE TABLE IF NOT EXISTS sale_sorted_asc AS
+CREATE TABLE IF NOT EXISTS sale_sorted_date_asc AS
 SELECT * FROM sale ORDER BY sale_date ASC;
 
-CREATE TABLE IF NOT EXISTS sale_sorted_desc AS
+CREATE TABLE IF NOT EXISTS sale_sorted_date_desc AS
 SELECT * FROM sale ORDER BY sale_date DESC;
 
 -- XOÁ TRIGGER CŨ (VALIDATION) 
@@ -132,13 +142,13 @@ AFTER INSERT ON sale
 FOR EACH ROW
 BEGIN
   -- Cập nhật bảng tăng dần (cũ → mới)
-  DELETE FROM sale_sorted_asc;
-  INSERT INTO sale_sorted_asc
+  DELETE FROM sale_sorted_date_asc;
+  INSERT INTO sale_sorted_date_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
 
   -- Cập nhật bảng giảm dần (mới → cũ)
-  DELETE FROM sale_sorted_desc;
-  INSERT INTO sale_sorted_desc
+  DELETE FROM sale_sorted_date_desc;
+  INSERT INTO sale_sorted_date_desc
   SELECT * FROM sale ORDER BY sale_date DESC;
 END$$
  
@@ -147,12 +157,12 @@ CREATE TRIGGER trg_sale_after_update_sort
 AFTER UPDATE ON sale
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_sorted_asc;
-  INSERT INTO sale_sorted_asc
+  DELETE FROM sale_sorted_date_asc;
+  INSERT INTO sale_sorted_date_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
 
-  DELETE FROM sale_sorted_desc;
-  INSERT INTO sale_sorted_desc
+  DELETE FROM sale_sorted_date_desc;
+  INSERT INTO sale_sorted_date_desc
   SELECT * FROM sale ORDER BY sale_date DESC;
 END$$
  
@@ -161,12 +171,12 @@ CREATE TRIGGER trg_sale_after_delete_sort
 AFTER DELETE ON sale
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_sorted_asc;
-  INSERT INTO sale_sorted_asc
+  DELETE FROM sale_sorted_date_asc;
+  INSERT INTO sale_sorted_date_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
 
-  DELETE FROM sale_sorted_desc;
-  INSERT INTO sale_sorted_desc
+  DELETE FROM sale_sorted_date_desc;
+  INSERT INTO sale_sorted_date_desc
   SELECT * FROM sale ORDER BY sale_date DESC;
 END$$
 
@@ -288,10 +298,10 @@ END$$
 DELIMITER ;
 /*tạo trigger cho Sắp xếp chi tiết bán hàng theo Số lượng(Chi tiết bán hàng)*/
 -- TẠO BẢNG PHỤ SẮP XẾP THEO SỐ LƯỢNG
-CREATE TABLE IF NOT EXISTS sale_detail_sorted_asc AS
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_qua_asc AS
 SELECT * FROM sale_detail ORDER BY quantity ASC;
 
-CREATE TABLE IF NOT EXISTS sale_detail_sorted_desc AS
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_qua_desc AS
 SELECT * FROM sale_detail ORDER BY quantity DESC;
 
 -- XOÁ TRIGGER CŨ (VALIDATION)
@@ -307,13 +317,13 @@ AFTER INSERT ON sale_detail
 FOR EACH ROW
 BEGIN
   -- Cập nhật bảng tăng dần (ít → nhiều)
-  DELETE FROM sale_detail_sorted_asc;
-  INSERT INTO sale_detail_sorted_asc
+  DELETE FROM sale_detail_sorted_qua_asc;
+  INSERT INTO sale_detail_sorted_qua_asc
   SELECT * FROM sale_detail ORDER BY quantity ASC;
 
   -- Cập nhật bảng giảm dần (nhiều → ít)
-  DELETE FROM sale_detail_sorted_desc;
-  INSERT INTO sale_detail_sorted_desc
+  DELETE FROM sale_detail_sorted_qua_desc;
+  INSERT INTO sale_detail_sorted_qua_desc
   SELECT * FROM sale_detail ORDER BY quantity DESC;
 END$$
 
@@ -322,12 +332,12 @@ CREATE TRIGGER trg_sale_detail_after_update_sort
 AFTER UPDATE ON sale_detail
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_detail_sorted_asc;
-  INSERT INTO sale_detail_sorted_asc
+  DELETE FROM sale_detail_sorted_qua_asc;
+  INSERT INTO sale_detail_sorted_qua_asc
   SELECT * FROM sale_detail ORDER BY quantity ASC;
 
-  DELETE FROM sale_detail_sorted_desc;
-  INSERT INTO sale_detail_sorted_desc
+  DELETE FROM sale_detail_sorted_qua_desc;
+  INSERT INTO sale_detail_sorted_qua_desc
   SELECT * FROM sale_detail ORDER BY quantity DESC;
 END$$
 
@@ -336,12 +346,12 @@ CREATE TRIGGER trg_sale_detail_after_delete_sort
 AFTER DELETE ON sale_detail
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_detail_sorted_asc;
-  INSERT INTO sale_detail_sorted_asc
+  DELETE FROM sale_detail_sorted_qua_asc;
+  INSERT INTO sale_detail_sorted_qua_asc
   SELECT * FROM sale_detail ORDER BY quantity ASC;
 
-  DELETE FROM sale_detail_sorted_desc;
-  INSERT INTO sale_detail_sorted_desc
+  DELETE FROM sale_detail_sorted_qua_desc;
+  INSERT INTO sale_detail_sorted_qua_desc
   SELECT * FROM sale_detail ORDER BY quantity DESC;
 END$$
 
