@@ -50,4 +50,13 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDTO>> getAllSortedDesc() {
         return ResponseEntity.ok(customerService.getAllCustomersSortedDesc());
     }
+
+    @GetMapping("/sortedD/asc")
+    public ResponseEntity<List<CustomerDTO>> getAllCustomersSoreDateAsc() {
+        return ResponseEntity.ok(customerService.getAllCustomersSoreDateAsc());
+    }
+    @GetMapping("/sortedD/desc")
+    public ResponseEntity<List<CustomerDTO>> getAllCustomersSortDateDesc() {
+        return ResponseEntity.ok(customerService.getAllCustomersSortDateDesc());
+    }
 }
