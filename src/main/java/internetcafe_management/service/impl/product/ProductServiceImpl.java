@@ -2,6 +2,7 @@ package internetcafe_management.service.impl.product;
 
 import internetcafe_management.dto.ProductDTO;
 import internetcafe_management.dto.UpdateProductRequestDTO;
+import internetcafe_management.dto.PartialUpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.repository.product.ProductRepository;
 import internetcafe_management.service.product.ProductService;
@@ -85,6 +86,43 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
+    public Product partialUpdateProduct(Integer id, PartialUpdateProductRequestDTO partialUpdateProductRequestDTO) {
+        log.info("Partially updating product with ID: {}", id);
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
+        if (partialUpdateProductRequestDTO.getItemName() != null 
+            && !existingProduct.getItemName().equals(partialUpdateProductRequestDTO.getItemName()) 
+            && productRepository.existsByItemName(partialUpdateProductRequestDTO.getItemName())) {
+            throw new RuntimeException("Sản phẩm với tên '" + partialUpdateProductRequestDTO.getItemName() + "' đã tồn tại");
+        }
+        
+        // Chỉ cập nhật các field không null
+        if (partialUpdateProductRequestDTO.getItemName() != null) {
+            existingProduct.setItemName(partialUpdateProductRequestDTO.getItemName());
+        }
+        if (partialUpdateProductRequestDTO.getItemCategory() != null) {
+            existingProduct.setItemCategory(partialUpdateProductRequestDTO.getItemCategory());
+        }
+        if (partialUpdateProductRequestDTO.getPrice() != null) {
+            existingProduct.setPrice(partialUpdateProductRequestDTO.getPrice());
+        }
+        if (partialUpdateProductRequestDTO.getStock() != null) {
+            existingProduct.setStock(partialUpdateProductRequestDTO.getStock());
+        }
+        if (partialUpdateProductRequestDTO.getSupplierName() != null) {
+            existingProduct.setSupplierName(partialUpdateProductRequestDTO.getSupplierName());
+        }
+        
+        Product updatedProduct = productRepository.save(existingProduct);
+        log.info("Successfully partially updated product with ID: {}", updatedProduct.getItemId());
+        
+        return updatedProduct;
+    }
+    
+    @Override
     public void deleteProduct(Integer id) {
         log.info("Deleting product with ID: {}", id);
         
@@ -136,5 +174,23 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public boolean existsByItemName(String itemName) {
         return productRepository.existsByItemName(itemName);
+    }
+    
+    @Override
+    public Product updateProductStock(Integer id, Integer newStock) {
+        log.info("Updating stock for product with ID: {} to {}", id, newStock);
+        
+        if (newStock < 0) {
+            throw new RuntimeException("Số lượng tồn kho không được âm");
+        }
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        existingProduct.setStock(newStock);
+        Product updatedProduct = productRepository.save(existingProduct);
+        
+        log.info("Successfully updated stock for product with ID: {} to {}", updatedProduct.getItemId(), newStock);
+        return updatedProduct;
     }
 }
