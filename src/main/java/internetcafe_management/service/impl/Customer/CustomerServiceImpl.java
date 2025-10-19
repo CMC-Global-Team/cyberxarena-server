@@ -50,4 +50,10 @@ public class CustomerServiceImpl implements CustomerService {
         Customer updated = customerRepository.save(existing);
         return customerMapper.toDTO(updated);
     }
+    @Override
+    public List<CustomerDTO> getAllCustomers() {
+        return customerRepository.findAll().stream()
+                .map(customerMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 }
