@@ -3,9 +3,11 @@ package internetcafe_management.controller;
 import internetcafe_management.dto.AccountDTO;
 import internetcafe_management.dto.CreateAccountRequestDTO;
 import internetcafe_management.dto.UpdateAccountRequestDTO;
+import internetcafe_management.dto.AccountSearchRequestDTO;
 import internetcafe_management.service.account.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,6 +74,43 @@ public class AccountController {
     public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
         boolean exists = accountService.existsByUsername(username);
         return ResponseEntity.ok(exists);
+    }
+    
+    /**
+     * Tìm kiếm tài khoản với các bộ lọc và phân trang
+     * @param username tên đăng nhập (optional)
+     * @param customerName tên khách hàng (optional)
+     * @param phoneNumber số điện thoại (optional)
+     * @param membershipCard thẻ thành viên (optional)
+     * @param page số trang (default: 0)
+     * @param size kích thước trang (default: 10)
+     * @param sortBy trường sắp xếp (default: accountId)
+     * @param sortDirection hướng sắp xếp (default: asc)
+     * @return ResponseEntity<Page<AccountDTO>>
+     */
+    @GetMapping("/search")
+    public ResponseEntity<Page<AccountDTO>> searchAccounts(
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String customerName,
+            @RequestParam(required = false) String phoneNumber,
+            @RequestParam(required = false) String membershipCard,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "accountId") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDirection) {
+        
+        AccountSearchRequestDTO searchRequest = new AccountSearchRequestDTO();
+        searchRequest.setUsername(username);
+        searchRequest.setCustomerName(customerName);
+        searchRequest.setPhoneNumber(phoneNumber);
+        searchRequest.setMembershipCard(membershipCard);
+        searchRequest.setPage(page);
+        searchRequest.setSize(size);
+        searchRequest.setSortBy(sortBy);
+        searchRequest.setSortDirection(sortDirection);
+        
+        Page<AccountDTO> result = accountService.searchAccounts(searchRequest);
+        return ResponseEntity.ok(result);
     }
     
     /**

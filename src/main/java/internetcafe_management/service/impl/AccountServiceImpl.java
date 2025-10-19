@@ -3,12 +3,19 @@ package internetcafe_management.service.impl;
 import internetcafe_management.dto.AccountDTO;
 import internetcafe_management.dto.CreateAccountRequestDTO;
 import internetcafe_management.dto.UpdateAccountRequestDTO;
+import internetcafe_management.dto.AccountSearchRequestDTO;
 import internetcafe_management.entity.Account;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.account.AccountRepository;
 import internetcafe_management.service.account.AccountService;
+import internetcafe_management.specification.AccountSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,6 +114,35 @@ public class AccountServiceImpl implements AccountService {
         
         // Hard delete - xóa hoàn toàn khỏi database
         accountRepository.delete(account);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AccountDTO> searchAccounts(AccountSearchRequestDTO searchRequest) {
+        // Tạo Specification từ các filter
+        Specification<Account> spec = AccountSpecification.search(
+            searchRequest.getUsername(),
+            searchRequest.getCustomerName(),
+            searchRequest.getPhoneNumber(),
+            searchRequest.getMembershipCard()
+        );
+        
+        // Tạo Sort object
+        Sort sort = Sort.by(
+            "asc".equalsIgnoreCase(searchRequest.getSortDirection()) 
+                ? Sort.Direction.ASC 
+                : Sort.Direction.DESC,
+            searchRequest.getSortBy()
+        );
+        
+        // Tạo Pageable object
+        Pageable pageable = PageRequest.of(searchRequest.getPage(), searchRequest.getSize(), sort);
+        
+        // Thực hiện tìm kiếm với phân trang
+        Page<Account> accountPage = accountRepository.findAll(spec, pageable);
+        
+        // Chuyển đổi Page<Account> thành Page<AccountDTO>
+        return accountPage.map(this::convertToDTO);
     }
     
     private AccountDTO convertToDTO(Account account) {
