@@ -21,7 +21,17 @@ public class CorsFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         
         // Set CORS headers
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        String origin = request.getHeader("Origin");
+        if (origin != null && (
+            origin.contains("cyberxarena-server.onrender.com") ||
+            origin.contains("cyberxarena-server.herokuapp.com") ||
+            origin.contains("localhost") ||
+            origin.contains("127.0.0.1")
+        )) {
+            response.setHeader("Access-Control-Allow-Origin", origin);
+        } else {
+            response.setHeader("Access-Control-Allow-Origin", "*");
+        }
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD");
         response.setHeader("Access-Control-Allow-Headers", "*");
         response.setHeader("Access-Control-Allow-Credentials", "true");
