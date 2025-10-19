@@ -1,6 +1,7 @@
 package internetcafe_management.controller;
 
 import internetcafe_management.dto.ProductDTO;
+import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -157,5 +158,88 @@ public class ProductController {
         log.info("Retrieving products by price range: {} - {}", minPrice, maxPrice);
         List<Product> products = productService.getProductsByPriceRange(minPrice, maxPrice);
         return ResponseEntity.ok(products);
+    }
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "Update product completely", description = "Update all fields of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product with same name already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "Updated product information", required = true)
+            @Valid @RequestBody UpdateProductRequestDTO updateRequest) {
+        
+        log.info("Received request to update product with ID: {}", id);
+        
+        try {
+            Product updatedProduct = productService.updateProductWithRequest(id, updateRequest);
+            log.info("Successfully updated product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PatchMapping("/{id}")
+    @Operation(summary = "Partially update product", description = "Update only specified fields of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product with same name already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> partialUpdateProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "Partial product update information", required = true)
+            @Valid @RequestBody UpdateProductRequestDTO updateRequest) {
+        
+        log.info("Received request to partially update product with ID: {}", id);
+        
+        try {
+            Product updatedProduct = productService.partialUpdateProduct(id, updateRequest);
+            log.info("Successfully partially updated product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error partially updating product: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete product", description = "Delete a product by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> deleteProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id) {
+        
+        log.info("Received request to delete product with ID: {}", id);
+        
+        try {
+            productService.deleteProduct(id);
+            log.info("Successfully deleted product with ID: {}", id);
+            
+            return ResponseEntity.noContent().build();
+            
+        } catch (RuntimeException e) {
+            log.error("Error deleting product: {}", e.getMessage());
+            throw e;
+        }
     }
 }
