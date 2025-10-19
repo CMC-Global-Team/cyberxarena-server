@@ -242,4 +242,114 @@ public class ProductController {
             throw e;
         }
     }
+    
+    @PutMapping("/{id}/price")
+    @Operation(summary = "Update product price", description = "Update only the price of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product price updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid price value"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProductPrice(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "New price", required = true)
+            @RequestParam java.math.BigDecimal newPrice) {
+        
+        log.info("Received request to update price for product with ID: {} to {}", id, newPrice);
+        
+        try {
+            Product updatedProduct = productService.updateProductPrice(id, newPrice);
+            log.info("Successfully updated price for product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product price: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PutMapping("/{id}/stock")
+    @Operation(summary = "Update product stock", description = "Update only the stock quantity of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product stock updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid stock value"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProductStock(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "New stock quantity", required = true)
+            @RequestParam Integer newStock) {
+        
+        log.info("Received request to update stock for product with ID: {} to {}", id, newStock);
+        
+        try {
+            Product updatedProduct = productService.updateProductStock(id, newStock);
+            log.info("Successfully updated stock for product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product stock: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PutMapping("/{id}/supplier")
+    @Operation(summary = "Update product supplier", description = "Update only the supplier of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product supplier updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProductSupplier(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "New supplier name", required = true)
+            @RequestParam String supplierName) {
+        
+        log.info("Received request to update supplier for product with ID: {} to {}", id, supplierName);
+        
+        try {
+            Product updatedProduct = productService.updateProductSupplier(id, supplierName);
+            log.info("Successfully updated supplier for product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product supplier: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PutMapping("/{id}/category")
+    @Operation(summary = "Update product category", description = "Update only the category of a product")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product category updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProductCategory(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "New category", required = true)
+            @RequestParam String category) {
+        
+        log.info("Received request to update category for product with ID: {} to {}", id, category);
+        
+        try {
+            Product updatedProduct = productService.updateProductCategory(id, category);
+            log.info("Successfully updated category for product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product category: {}", e.getMessage());
+            throw e;
+        }
+    }
 }
