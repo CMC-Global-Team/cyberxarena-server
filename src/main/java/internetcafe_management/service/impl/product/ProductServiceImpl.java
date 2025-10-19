@@ -202,4 +202,74 @@ public class ProductServiceImpl implements ProductService {
     public boolean existsByItemName(String itemName) {
         return productRepository.existsByItemName(itemName);
     }
+    
+    @Override
+    public Product updateProductPrice(Integer id, java.math.BigDecimal newPrice) {
+        log.info("Updating price for product with ID: {} to {}", id, newPrice);
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        if (newPrice == null || newPrice.compareTo(java.math.BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Giá sản phẩm phải lớn hơn 0");
+        }
+        
+        existingProduct.setPrice(newPrice);
+        Product updatedProduct = productRepository.save(existingProduct);
+        log.info("Successfully updated price for product with ID: {}", updatedProduct.getItemId());
+        
+        return updatedProduct;
+    }
+    
+    @Override
+    public Product updateProductStock(Integer id, Integer newStock) {
+        log.info("Updating stock for product with ID: {} to {}", id, newStock);
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        if (newStock == null || newStock < 0) {
+            throw new RuntimeException("Số lượng tồn kho không được âm");
+        }
+        
+        existingProduct.setStock(newStock);
+        Product updatedProduct = productRepository.save(existingProduct);
+        log.info("Successfully updated stock for product with ID: {}", updatedProduct.getItemId());
+        
+        return updatedProduct;
+    }
+    
+    @Override
+    public Product updateProductSupplier(Integer id, String supplierName) {
+        log.info("Updating supplier for product with ID: {} to {}", id, supplierName);
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        existingProduct.setSupplierName(supplierName);
+        Product updatedProduct = productRepository.save(existingProduct);
+        log.info("Successfully updated supplier for product with ID: {}", updatedProduct.getItemId());
+        
+        return updatedProduct;
+    }
+    
+    @Override
+    public Product updateProductCategory(Integer id, String category) {
+        log.info("Updating category for product with ID: {} to {}", id, category);
+        
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+        
+        existingProduct.setItemCategory(category);
+        Product updatedProduct = productRepository.save(existingProduct);
+        log.info("Successfully updated category for product with ID: {}", updatedProduct.getItemId());
+        
+        return updatedProduct;
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsById(Integer id) {
+        return productRepository.existsById(id);
+    }
 }
