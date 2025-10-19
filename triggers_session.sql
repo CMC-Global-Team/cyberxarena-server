@@ -346,3 +346,102 @@ BEGIN
 END$$
 
 DELIMITER ;
+/*tạo trigger cho Sắp xếp chi tiết bán hàng theo Thành tiền(Chi tiết bán hàng)*/
+-- TẠO BẢNG PHỤ SẮP XẾP THEO THÀNH TIỀN
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_total_asc AS
+SELECT 
+    sd.*,
+    (sd.quantity * i.price) AS total_amount
+FROM sale_detail sd
+LEFT JOIN item i ON sd.item_id = i.item_id
+ORDER BY total_amount ASC;
+
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_total_desc AS
+SELECT 
+    sd.*,
+    (sd.quantity * i.price) AS total_amount
+FROM sale_detail sd
+LEFT JOIN item i ON sd.item_id = i.item_id
+ORDER BY total_amount DESC;
+
+-- XOÁ TRIGGER CŨ (VALIDATION)-
+DROP TRIGGER IF EXISTS trg_sale_detail_total_after_insert;
+DROP TRIGGER IF EXISTS trg_sale_detail_total_after_update;
+DROP TRIGGER IF EXISTS trg_sale_detail_total_after_delete;
+
+DELIMITER $$
+
+-- TRIGGER: SAU KHI THÊM CHI TIẾT BÁN-
+CREATE TRIGGER trg_sale_detail_total_after_insert
+AFTER INSERT ON sale_detail
+FOR EACH ROW
+BEGIN
+  -- Cập nhật bảng tăng dần (thành tiền thấp → cao)
+  DELETE FROM sale_detail_sorted_total_asc;
+  INSERT INTO sale_detail_sorted_total_asc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount ASC;
+
+  -- Cập nhật bảng giảm dần (thành tiền cao → thấp)
+  DELETE FROM sale_detail_sorted_total_desc;
+  INSERT INTO sale_detail_sorted_total_desc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount DESC;
+END$$
+-- TRIGGER: SAU KHI CẬP NHẬT CHI TIẾT BÁN-
+CREATE TRIGGER trg_sale_detail_total_after_update
+AFTER UPDATE ON sale_detail
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_detail_sorted_total_asc;
+  INSERT INTO sale_detail_sorted_total_asc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount ASC;
+
+  DELETE FROM sale_detail_sorted_total_desc;
+  INSERT INTO sale_detail_sorted_total_desc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount DESC;
+END$$
+
+-- TRIGGER: SAU KHI XOÁ CHI TIẾT BÁN-
+CREATE TRIGGER trg_sale_detail_total_after_delete
+AFTER DELETE ON sale_detail
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_detail_sorted_total_asc;
+  INSERT INTO sale_detail_sorted_total_asc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount ASC;
+
+  DELETE FROM sale_detail_sorted_total_desc;
+  INSERT INTO sale_detail_sorted_total_desc
+  SELECT 
+      sd.*,
+      (sd.quantity * i.price) AS total_amount
+  FROM sale_detail sd
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  ORDER BY total_amount DESC;
+END$$
+
+DELIMITER ;
