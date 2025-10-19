@@ -21,11 +21,11 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
+        System.out.println("Creating customer with DTO: " + dto); // Log DTO
         Customer entity = customerMapper.toEntity(dto);
         Customer saved = customerRepository.save(entity);
         return customerMapper.toDTO(saved);
     }
-
     @Override
     public CustomerDTO getCustomerById(Integer customerId) {
         Customer entity = customerRepository.findById(customerId)

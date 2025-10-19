@@ -6,21 +6,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/customers")
+@RequestMapping("/customers")
 public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> createCustomer(@RequestBody CustomerDTO dto) {
+    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO dto) { // Thêm @Valid để kích hoạt validation
         return ResponseEntity.ok(customerService.createCustomer(dto));
     }
 
-    @GetMapping("get/{customerId}")
+    @GetMapping("/{customerId}")
     public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Integer customerId) {
         return ResponseEntity.ok(customerService.getCustomerById(customerId));
     }
@@ -30,13 +32,13 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
 
-    @PutMapping("put/{customerId}")
-    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Integer customerId, @RequestBody CustomerDTO dto) {
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Integer customerId, @Valid @RequestBody CustomerDTO dto) { // Thêm @Valid
         return ResponseEntity.ok(customerService.updateCustomer(customerId, dto));
     }
-
-    @DeleteMapping("delete/{customerId}")
+    @DeleteMapping("/{customerId}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Integer customerId) {
+        System.out.println("Deleting customer with ID: " + customerId);
         customerService.deleteCustomer(customerId);
         return ResponseEntity.noContent().build();
     }
