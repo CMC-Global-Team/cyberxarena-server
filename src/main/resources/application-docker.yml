@@ -8,9 +8,9 @@ spring:
     name: internet-cafe-management
 
   datasource:
-    url: jdbc:mysql://mysql:3306/cyberxarena?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${SPRING_DATASOURCE_USERNAME:cyberxarena_user}
-    password: ${SPRING_DATASOURCE_PASSWORD:cyberxarena_password}
+    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
@@ -42,7 +42,11 @@ logging:
   level:
     com.internetcafe.management: DEBUG
     org.springframework.security: DEBUG
+    org.springframework.web.cors: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: logs/application.log
