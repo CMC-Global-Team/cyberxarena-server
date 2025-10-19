@@ -78,12 +78,12 @@ public class ComputerMapperImpl implements ComputerMapper {
     }
 
     // Custom mapping methods for enum handling
-    private Computer.ComputerStatus mapStringToComputerStatus(String status) {
+    public Computer.ComputerStatus mapStringToComputerStatus(String status) {
         if (status == null) return null;
         return Computer.ComputerStatus.fromString(status);
     }
 
-    private String mapComputerStatusToString(Computer.ComputerStatus status) {
+    public String mapComputerStatusToString(Computer.ComputerStatus status) {
         if (status == null) return null;
         return status.toJsonValue();
     }
