@@ -62,10 +62,10 @@ DELIMITER ;
 /*  SẮP XẾP THEO NGÀY ĐĂNG KÝ  */
 
 CREATE TABLE IF NOT EXISTS customer_sorted_date_asc AS
-SELECT * FROM customer ORDER BY register_date ASC;
+SELECT * FROM customer ORDER BY registration_date ASC;
 
 CREATE TABLE IF NOT EXISTS customer_sorted_date_desc AS
-SELECT * FROM customer ORDER BY register_date DESC;
+SELECT * FROM customer ORDER BY registration_date DESC;
 
 DROP TRIGGER IF EXISTS trg_customer_after_insert_sort;
 DROP TRIGGER IF EXISTS trg_customer_after_update_sort;
@@ -81,12 +81,12 @@ BEGIN
   -- Bảng tăng dần (cũ → mới)
   DELETE FROM customer_sorted_asc;
   INSERT INTO customer_sorted_asc
-  SELECT * FROM customer ORDER BY register_date ASC;
+  SELECT * FROM customer ORDER BY registration_date ASC;
 
   -- Bảng giảm dần (mới → cũ)
   DELETE FROM customer_sorted_desc;
   INSERT INTO customer_sorted_desc
-  SELECT * FROM customer ORDER BY register_date DESC;
+  SELECT * FROM customer ORDER BY registration_date DESC;
 END$$
 
 -- TRIGGER: SAU KHI CẬP NHẬT KHÁCH HÀNG--
@@ -96,11 +96,11 @@ FOR EACH ROW
 BEGIN
   DELETE FROM customer_sorted_asc;
   INSERT INTO customer_sorted_asc
-  SELECT * FROM customer ORDER BY register_date ASC;
+  SELECT * FROM customer ORDER BY registration_date ASC;
 
   DELETE FROM customer_sorted_desc;
   INSERT INTO customer_sorted_desc
-  SELECT * FROM customer ORDER BY register_date DESC;
+  SELECT * FROM customer ORDER BY registration_date DESC;
 END$$
 
 -- TRIGGER: SAU KHI XOÁ KHÁCH HÀNG-
@@ -110,11 +110,11 @@ FOR EACH ROW
 BEGIN
   DELETE FROM customer_sorted_asc;
   INSERT INTO customer_sorted_asc
-  SELECT * FROM customer ORDER BY register_date ASC;
+  SELECT * FROM customer ORDER BY registration_date ASC;
 
   DELETE FROM customer_sorted_desc;
   INSERT INTO customer_sorted_desc
-  SELECT * FROM customer ORDER BY register_date DESC;
+  SELECT * FROM customer ORDER BY registration_date DESC;
 END$$
 
 DELIMITER ;
