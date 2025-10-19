@@ -90,4 +90,49 @@ public class AccountController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+    /**
+     * Xóa tài khoản của khách hàng (soft delete)
+     * @param customerId ID của khách hàng
+     * @return ResponseEntity<String>
+     */
+    @DeleteMapping("/customer/{customerId}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Integer customerId) {
+        try {
+            accountService.deleteAccount(customerId);
+            return ResponseEntity.ok("Account deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    /**
+     * Vô hiệu hóa tài khoản của khách hàng
+     * @param customerId ID của khách hàng
+     * @return ResponseEntity<AccountDTO>
+     */
+    @PatchMapping("/customer/{customerId}/deactivate")
+    public ResponseEntity<?> deactivateAccount(@PathVariable Integer customerId) {
+        try {
+            AccountDTO deactivatedAccount = accountService.deactivateAccount(customerId);
+            return ResponseEntity.ok(deactivatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    
+    /**
+     * Kích hoạt lại tài khoản của khách hàng
+     * @param customerId ID của khách hàng
+     * @return ResponseEntity<AccountDTO>
+     */
+    @PatchMapping("/customer/{customerId}/reactivate")
+    public ResponseEntity<?> reactivateAccount(@PathVariable Integer customerId) {
+        try {
+            AccountDTO reactivatedAccount = accountService.reactivateAccount(customerId);
+            return ResponseEntity.ok(reactivatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
