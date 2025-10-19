@@ -25,4 +25,13 @@ public class HealthController {
     public ResponseEntity<String> ping() {
         return ResponseEntity.ok("pong");
     }
+    
+    @GetMapping("/cors-test")
+    public ResponseEntity<Map<String, Object>> corsTest() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "CORS is working!");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("status", "success");
+        return ResponseEntity.ok(response);
+    }
 }
