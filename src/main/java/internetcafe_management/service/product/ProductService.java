@@ -73,4 +73,29 @@ public interface ProductService {
      * Kiểm tra sản phẩm có tồn tại không
      */
     boolean existsByItemName(String itemName);
+    
+    /**
+     * Cập nhật giá sản phẩm
+     */
+    Product updateProductPrice(Integer id, java.math.BigDecimal newPrice);
+    
+    /**
+     * Cập nhật số lượng tồn kho sản phẩm
+     */
+    Product updateProductStock(Integer id, Integer newStock);
+    
+    /**
+     * Cập nhật thông tin nhà cung cấp
+     */
+    Product updateProductSupplier(Integer id, String supplierName);
+    
+    /**
+     * Cập nhật danh mục sản phẩm
+     */
+    Product updateProductCategory(Integer id, String category);
+    
+    /**
+     * Kiểm tra sản phẩm có tồn tại theo ID không
+     */
+    boolean existsById(Integer id);
 }
