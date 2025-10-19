@@ -51,7 +51,7 @@ logs/                              # Application logs
 
 - **Framework**: Spring Boot 3.2.0
 - **Java Version**: 17
-- **Database**: PostgreSQL (Production), H2 (Testing)
+- **Database**: MySQL (Production), H2 (Testing)
 - **Security**: Spring Security + JWT
 - **ORM**: Spring Data JPA + Hibernate
 - **Migration**: Flyway
