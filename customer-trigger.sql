@@ -61,10 +61,10 @@ DELIMITER ;
 
 /*  SẮP XẾP THEO NGÀY ĐĂNG KÝ  */
 
-CREATE TABLE IF NOT EXISTS customer_sorted_asc AS
+CREATE TABLE IF NOT EXISTS customer_sorted_date_asc AS
 SELECT * FROM customer ORDER BY register_date ASC;
 
-CREATE TABLE IF NOT EXISTS customer_sorted_desc AS
+CREATE TABLE IF NOT EXISTS customer_sorted_date_desc AS
 SELECT * FROM customer ORDER BY register_date DESC;
 
 DROP TRIGGER IF EXISTS trg_customer_after_insert_sort;
@@ -73,7 +73,7 @@ DROP TRIGGER IF EXISTS trg_customer_after_delete_sort;
 
 DELIMITER $$
 
-  --TRIGGER: SAU KHI THÊM KHÁCH HÀNG--
+  -- TRIGGER: SAU KHI THÊM KHÁCH HÀNG--
 CREATE TRIGGER trg_customer_after_insert_sort
 AFTER INSERT ON customer
 FOR EACH ROW
