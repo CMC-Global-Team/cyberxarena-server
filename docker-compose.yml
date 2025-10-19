@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: cyberxarena-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cyberxarena
+      MYSQL_USER: cyberxarena_user
+      MYSQL_PASSWORD: cyberxarena_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - cyberxarena-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Spring Boot Application
+  app:
+    build: .
+    container_name: cyberxarena-app
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/cyberxarena?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: cyberxarena_user
+      SPRING_DATASOURCE_PASSWORD: cyberxarena_password
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - cyberxarena-network
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/v1/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # phpMyAdmin for database management (optional)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: cyberxarena-phpmyadmin
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: cyberxarena_user
+      PMA_PASSWORD: cyberxarena_password
+    depends_on:
+      - mysql
+    networks:
+      - cyberxarena-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  cyberxarena-network:
+    driver: bridge
