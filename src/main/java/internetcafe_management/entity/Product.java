@@ -31,8 +31,12 @@ public class Product {
     @Column(name = "supplier_name", length = 100)
     private String supplierName;
 
+    @Column(name = "is_featured", nullable = false)
+    private Boolean isFeatured = false;
+
     @PrePersist
     protected void onCreate() {
         if (stock == null) stock = 0;
+        if (isFeatured == null) isFeatured = false;
     }
 }
