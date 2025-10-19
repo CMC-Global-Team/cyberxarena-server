@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/computers")
+@RequestMapping("/computers")
 @Tag(name = "Computer Management", description = "APIs for managing computers in the internet cafe")
 public class ComputerController {
 
