@@ -55,4 +55,14 @@ public class HealthController {
         response.put("timestamp", System.currentTimeMillis());
         return ResponseEntity.ok(response);
     }
+    
+    @GetMapping("/swagger-test")
+    public ResponseEntity<Map<String, Object>> swaggerTest() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Swagger UI test endpoint working!");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("status", "success");
+        response.put("swaggerUrl", "/api/v1/swagger-ui.html");
+        return ResponseEntity.ok(response);
+    }
 }
