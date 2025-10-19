@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,10 +42,35 @@ public class ComputerController {
             @Parameter(description = "Filter by computer name") @RequestParam(required = false) String name,
             @Parameter(description = "Filter by IP address") @RequestParam(required = false) String ip,
             @Parameter(description = "Filter by computer status") @RequestParam(required = false) String status,
-            @Parameter(description = "Pagination parameters") Pageable pageable) {
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field (computerId, computerName, ipAddress, pricePerHour, status)") @RequestParam(defaultValue = "computerId") String sortBy,
+            @Parameter(description = "Sort direction (asc, desc)") @RequestParam(defaultValue = "asc") String sortDir) {
 
-        Page<ComputerDTO> computers = computerService.getAllComputers(name, ip, status, pageable);
-        return ResponseEntity.ok(computers);
+        try {
+            // Validate sort field
+            String[] allowedSortFields = {"computerId", "computerName", "ipAddress", "pricePerHour", "status"};
+            boolean isValidSortField = java.util.Arrays.asList(allowedSortFields).contains(sortBy);
+            if (!isValidSortField) {
+                sortBy = "computerId"; // Default to computerId if invalid
+            }
+
+            // Validate sort direction
+            if (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")) {
+                sortDir = "asc"; // Default to asc if invalid
+            }
+
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<ComputerDTO> computers = computerService.getAllComputers(name, ip, status, pageable);
+            return ResponseEntity.ok(computers);
+        } catch (Exception e) {
+            // Fallback to default pagination if any error occurs
+            Pageable defaultPageable = PageRequest.of(page, size);
+            Page<ComputerDTO> computers = computerService.getAllComputers(name, ip, status, defaultPageable);
+            return ResponseEntity.ok(computers);
+        }
     }
 
     @PostMapping
