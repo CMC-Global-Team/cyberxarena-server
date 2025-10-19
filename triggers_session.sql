@@ -286,3 +286,63 @@ BEGIN
 END$$
 
 DELIMITER ;
+/*tạo trigger cho Sắp xếp chi tiết bán hàng theo Số lượng(Chi tiết bán hàng)*/
+-- TẠO BẢNG PHỤ SẮP XẾP THEO SỐ LƯỢNG
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_asc AS
+SELECT * FROM sale_detail ORDER BY quantity ASC;
+
+CREATE TABLE IF NOT EXISTS sale_detail_sorted_desc AS
+SELECT * FROM sale_detail ORDER BY quantity DESC;
+
+-- XOÁ TRIGGER CŨ (VALIDATION)
+DROP TRIGGER IF EXISTS trg_sale_detail_after_insert_sort;
+DROP TRIGGER IF EXISTS trg_sale_detail_after_update_sort;
+DROP TRIGGER IF EXISTS trg_sale_detail_after_delete_sort;
+
+DELIMITER $$
+
+-- TRIGGER: SAU KHI THÊM CHI TIẾT BÁN
+CREATE TRIGGER trg_sale_detail_after_insert_sort
+AFTER INSERT ON sale_detail
+FOR EACH ROW
+BEGIN
+  -- Cập nhật bảng tăng dần (ít → nhiều)
+  DELETE FROM sale_detail_sorted_asc;
+  INSERT INTO sale_detail_sorted_asc
+  SELECT * FROM sale_detail ORDER BY quantity ASC;
+
+  -- Cập nhật bảng giảm dần (nhiều → ít)
+  DELETE FROM sale_detail_sorted_desc;
+  INSERT INTO sale_detail_sorted_desc
+  SELECT * FROM sale_detail ORDER BY quantity DESC;
+END$$
+
+-- TRIGGER: SAU KHI CẬP NHẬT CHI TIẾT BÁN
+CREATE TRIGGER trg_sale_detail_after_update_sort
+AFTER UPDATE ON sale_detail
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_detail_sorted_asc;
+  INSERT INTO sale_detail_sorted_asc
+  SELECT * FROM sale_detail ORDER BY quantity ASC;
+
+  DELETE FROM sale_detail_sorted_desc;
+  INSERT INTO sale_detail_sorted_desc
+  SELECT * FROM sale_detail ORDER BY quantity DESC;
+END$$
+
+-- TRIGGER: SAU KHI XOÁ CHI TIẾT BÁN
+CREATE TRIGGER trg_sale_detail_after_delete_sort
+AFTER DELETE ON sale_detail
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_detail_sorted_asc;
+  INSERT INTO sale_detail_sorted_asc
+  SELECT * FROM sale_detail ORDER BY quantity ASC;
+
+  DELETE FROM sale_detail_sorted_desc;
+  INSERT INTO sale_detail_sorted_desc
+  SELECT * FROM sale_detail ORDER BY quantity DESC;
+END$$
+
+DELIMITER ;
