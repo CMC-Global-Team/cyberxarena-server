@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 @Entity
 @Table(name = "computer")
@@ -35,9 +37,46 @@ public class Computer {
     private ComputerStatus status;
 
     public enum ComputerStatus {
-        Available,
-        In_Use,
-        Broken
+        Available("Available"),
+        In_Use("In Use"),
+        Broken("Broken");
+
+        private final String displayName;
+
+        ComputerStatus(String displayName) {
+            this.displayName = displayName;
+        }
+
+        public String getDisplayName() {
+            return displayName;
+        }
+
+        @JsonCreator
+        public static ComputerStatus fromString(String value) {
+            if (value == null) return null;
+            
+            // Handle database values with spaces
+            switch (value.trim()) {
+                case "Available":
+                    return Available;
+                case "In Use":
+                    return In_Use;
+                case "Broken":
+                    return Broken;
+                default:
+                    // Try to match by enum name
+                    try {
+                        return ComputerStatus.valueOf(value.replace(" ", "_"));
+                    } catch (IllegalArgumentException e) {
+                        return Available; // Default fallback
+                    }
+            }
+        }
+
+        @JsonValue
+        public String toJsonValue() {
+            return displayName;
+        }
     }
 
     @PrePersist
