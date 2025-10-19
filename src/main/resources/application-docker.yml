@@ -8,9 +8,9 @@ spring:
     name: internet-cafe-management
 
   datasource:
-    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: root
-    password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
+    url: jdbc:mysql://mysql:3306/cyberxarena?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: ${SPRING_DATASOURCE_USERNAME:cyberxarena_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:cyberxarena_password}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10

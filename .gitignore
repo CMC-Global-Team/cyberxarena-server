@@ -99,3 +99,6 @@ application-prod.yml
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Embedded git repositories
+cyberxarena-server/
