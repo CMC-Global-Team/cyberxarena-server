@@ -1,0 +1,35 @@
+package internetcafe_management.service.account;
+
+import internetcafe_management.dto.AccountDTO;
+import internetcafe_management.dto.CreateAccountRequestDTO;
+
+public interface AccountService {
+    
+    /**
+     * Tạo tài khoản mới cho khách hàng
+     * @param request thông tin tạo tài khoản
+     * @return AccountDTO thông tin tài khoản đã tạo
+     */
+    AccountDTO createAccount(CreateAccountRequestDTO request);
+    
+    /**
+     * Tìm tài khoản theo username
+     * @param username tên đăng nhập
+     * @return AccountDTO thông tin tài khoản
+     */
+    AccountDTO findByUsername(String username);
+    
+    /**
+     * Tìm tài khoản theo customer ID
+     * @param customerId ID của khách hàng
+     * @return AccountDTO thông tin tài khoản
+     */
+    AccountDTO findByCustomerId(Integer customerId);
+    
+    /**
+     * Kiểm tra username đã tồn tại chưa
+     * @param username tên đăng nhập
+     * @return true nếu đã tồn tại, false nếu chưa
+     */
+    boolean existsByUsername(String username);
+}
