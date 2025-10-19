@@ -20,5 +20,10 @@ public class CustomerController {
     public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO dto) { // Thêm @Valid để kích hoạt validation
         return ResponseEntity.ok(customerService.createCustomer(dto));
     }
-
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Integer customerId) {
+        System.out.println("Deleting customer with ID: " + customerId);
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.noContent().build();
+    }
 }
