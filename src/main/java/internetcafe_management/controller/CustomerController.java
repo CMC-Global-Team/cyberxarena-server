@@ -26,4 +26,8 @@ public class CustomerController {
         customerService.deleteCustomer(customerId);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{customerId}")
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Integer customerId) {
+        return ResponseEntity.ok(customerService.getCustomerById(customerId));
+    }
 }
