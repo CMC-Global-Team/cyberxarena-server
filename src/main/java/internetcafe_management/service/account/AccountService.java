@@ -2,6 +2,7 @@ package internetcafe_management.service.account;
 
 import internetcafe_management.dto.AccountDTO;
 import internetcafe_management.dto.CreateAccountRequestDTO;
+import internetcafe_management.dto.UpdateAccountRequestDTO;
 
 public interface AccountService {
     
@@ -32,4 +33,12 @@ public interface AccountService {
      * @return true nếu đã tồn tại, false nếu chưa
      */
     boolean existsByUsername(String username);
+    
+    /**
+     * Cập nhật thông tin tài khoản
+     * @param customerId ID của khách hàng
+     * @param request thông tin cập nhật
+     * @return AccountDTO thông tin tài khoản đã cập nhật
+     */
+    AccountDTO updateAccount(Integer customerId, UpdateAccountRequestDTO request);
 }

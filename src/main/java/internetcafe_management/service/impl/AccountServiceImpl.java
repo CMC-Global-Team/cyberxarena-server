@@ -2,6 +2,7 @@ package internetcafe_management.service.impl;
 
 import internetcafe_management.dto.AccountDTO;
 import internetcafe_management.dto.CreateAccountRequestDTO;
+import internetcafe_management.dto.UpdateAccountRequestDTO;
 import internetcafe_management.entity.Account;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.repository.Customer.CustomerRepository;
@@ -72,6 +73,30 @@ public class AccountServiceImpl implements AccountService {
     @Transactional(readOnly = true)
     public boolean existsByUsername(String username) {
         return accountRepository.existsByUsername(username);
+    }
+    
+    @Override
+    public AccountDTO updateAccount(Integer customerId, UpdateAccountRequestDTO request) {
+        // Tìm account theo customer ID
+        Account account = accountRepository.findByCustomerCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
+        
+        // Kiểm tra username mới có trùng với account khác không (nếu có thay đổi username)
+        if (!account.getUsername().equals(request.getUsername())) {
+            if (accountRepository.existsByUsername(request.getUsername())) {
+                throw new RuntimeException("Username already exists");
+            }
+            account.setUsername(request.getUsername());
+        }
+        
+        // Cập nhật password nếu có (chỉ khi password không null và không rỗng)
+        if (request.getPassword() != null && !request.getPassword().trim().isEmpty()) {
+            account.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        
+        Account updatedAccount = accountRepository.save(account);
+        
+        return convertToDTO(updatedAccount);
     }
     
     private AccountDTO convertToDTO(Account account) {

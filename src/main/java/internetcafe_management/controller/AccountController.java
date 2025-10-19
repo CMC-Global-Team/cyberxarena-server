@@ -2,6 +2,7 @@ package internetcafe_management.controller;
 
 import internetcafe_management.dto.AccountDTO;
 import internetcafe_management.dto.CreateAccountRequestDTO;
+import internetcafe_management.dto.UpdateAccountRequestDTO;
 import internetcafe_management.service.account.AccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -71,5 +72,22 @@ public class AccountController {
     public ResponseEntity<Boolean> checkUsernameExists(@PathVariable String username) {
         boolean exists = accountService.existsByUsername(username);
         return ResponseEntity.ok(exists);
+    }
+    
+    /**
+     * Cập nhật thông tin tài khoản của khách hàng
+     * @param customerId ID của khách hàng
+     * @param request thông tin cập nhật
+     * @return ResponseEntity<AccountDTO>
+     */
+    @PutMapping("/customer/{customerId}")
+    public ResponseEntity<?> updateAccount(@PathVariable Integer customerId, 
+                                         @Valid @RequestBody UpdateAccountRequestDTO request) {
+        try {
+            AccountDTO updatedAccount = accountService.updateAccount(customerId, request);
+            return ResponseEntity.ok(updatedAccount);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
