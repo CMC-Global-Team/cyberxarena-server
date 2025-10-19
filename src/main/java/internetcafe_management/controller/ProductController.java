@@ -2,6 +2,7 @@ package internetcafe_management.controller;
 
 import internetcafe_management.dto.ProductDTO;
 import internetcafe_management.dto.UpdateProductRequestDTO;
+import internetcafe_management.dto.PartialUpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -210,6 +211,63 @@ public class ProductController {
             
         } catch (RuntimeException e) {
             log.error("Error deleting product: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PatchMapping("/{id}")
+    @Operation(summary = "Partially update product", description = "Update specific fields of an existing product by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product with same name already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> partialUpdateProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "Partial product update information", required = true)
+            @Valid @RequestBody PartialUpdateProductRequestDTO partialUpdateProductRequestDTO) {
+        
+        log.info("Received request to partially update product with ID: {}", id);
+        
+        try {
+            Product updatedProduct = productService.partialUpdateProduct(id, partialUpdateProductRequestDTO);
+            log.info("Successfully partially updated product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error partially updating product: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @PutMapping("/{id}/stock")
+    @Operation(summary = "Update product stock", description = "Update the stock quantity of a product by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product stock updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid stock value"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProductStock(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "New stock quantity", required = true)
+            @RequestParam Integer stock) {
+        
+        log.info("Received request to update stock for product with ID: {} to {}", id, stock);
+        
+        try {
+            Product updatedProduct = productService.updateProductStock(id, stock);
+            log.info("Successfully updated stock for product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product stock: {}", e.getMessage());
             throw e;
         }
     }
