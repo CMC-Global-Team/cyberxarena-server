@@ -109,3 +109,48 @@ BEGIN
 END$$
 
 DELIMITER ;
+
+
+/*trigger cho việc sắp xếp danh sách bán hàng theo ngày bán*/
+-- Tạo bảng sắp xếp theo ngày bán
+CREATE TABLE IF NOT EXISTS sale_sorted AS
+SELECT * FROM sale ORDER BY sale_date ASC;
+
+-- Xóa trigger cũ nếu có (validation)
+DROP TRIGGER IF EXISTS trg_sale_after_insert;
+DROP TRIGGER IF EXISTS trg_sale_after_update;
+DROP TRIGGER IF EXISTS trg_sale_after_delete;
+
+DELIMITER $$
+
+-- Trigger: khi thêm đơn bán mới
+CREATE TRIGGER trg_sale_after_insert
+AFTER INSERT ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted;
+  INSERT INTO sale_sorted
+  SELECT * FROM sale ORDER BY sale_date ASC;
+END$$
+
+-- Trigger: khi cập nhật đơn bán
+CREATE TRIGGER trg_sale_after_update
+AFTER UPDATE ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted;
+  INSERT INTO sale_sorted
+  SELECT * FROM sale ORDER BY sale_date ASC;
+END$$
+
+-- Trigger: khi xóa đơn bán
+CREATE TRIGGER trg_sale_after_delete
+AFTER DELETE ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted;
+  INSERT INTO sale_sorted
+  SELECT * FROM sale ORDER BY sale_date ASC;
+END$$
+
+DELIMITER ;
