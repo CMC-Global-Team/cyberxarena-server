@@ -44,4 +44,19 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     @Query("SELECT p FROM Product p WHERE p.price BETWEEN :minPrice AND :maxPrice")
     List<Product> findByPriceRange(@Param("minPrice") java.math.BigDecimal minPrice, 
                                    @Param("maxPrice") java.math.BigDecimal maxPrice);
+    
+    /**
+     * Tìm tất cả sản phẩm nổi bật
+     */
+    List<Product> findByIsFeaturedTrue();
+    
+    /**
+     * Tìm sản phẩm nổi bật theo danh mục
+     */
+    List<Product> findByIsFeaturedTrueAndItemCategory(String itemCategory);
+    
+    /**
+     * Đếm số lượng sản phẩm nổi bật
+     */
+    long countByIsFeaturedTrue();
 }
