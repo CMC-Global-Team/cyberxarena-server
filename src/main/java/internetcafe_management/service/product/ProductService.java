@@ -62,4 +62,24 @@ public interface ProductService {
      * Kiểm tra sản phẩm có tồn tại không
      */
     boolean existsByItemName(String itemName);
+    
+    /**
+     * Lấy tất cả sản phẩm nổi bật
+     */
+    List<Product> getFeaturedProducts();
+    
+    /**
+     * Lấy sản phẩm nổi bật theo danh mục
+     */
+    List<Product> getFeaturedProductsByCategory(String itemCategory);
+    
+    /**
+     * Cập nhật trạng thái nổi bật của sản phẩm
+     */
+    Product updateFeaturedStatus(Integer id, Boolean isFeatured);
+    
+    /**
+     * Đếm số lượng sản phẩm nổi bật
+     */
+    long countFeaturedProducts();
 }
