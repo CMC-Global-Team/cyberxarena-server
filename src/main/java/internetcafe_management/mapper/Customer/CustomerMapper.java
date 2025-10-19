@@ -2,6 +2,8 @@ package internetcafe_management.mapper.Customer;
 
 import internetcafe_management.dto.CustomerDTO;
 import internetcafe_management.entity.Customer;
+import internetcafe_management.entity.CustomerSortedAsc;
+import internetcafe_management.entity.CustomerSortedDesc;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -28,4 +30,27 @@ public class CustomerMapper {
         entity.setBalance(dto.getBalance());
         return entity;
     }
+    public CustomerDTO toDTO(CustomerSortedAsc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+    public CustomerDTO toDTO(CustomerSortedDesc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+
 }
