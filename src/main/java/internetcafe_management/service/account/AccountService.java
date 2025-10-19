@@ -41,4 +41,24 @@ public interface AccountService {
      * @return AccountDTO thông tin tài khoản đã cập nhật
      */
     AccountDTO updateAccount(Integer customerId, UpdateAccountRequestDTO request);
+    
+    /**
+     * Xóa tài khoản (soft delete - đặt isActive = false)
+     * @param customerId ID của khách hàng
+     */
+    void deleteAccount(Integer customerId);
+    
+    /**
+     * Vô hiệu hóa tài khoản
+     * @param customerId ID của khách hàng
+     * @return AccountDTO thông tin tài khoản đã vô hiệu hóa
+     */
+    AccountDTO deactivateAccount(Integer customerId);
+    
+    /**
+     * Kích hoạt lại tài khoản
+     * @param customerId ID của khách hàng
+     * @return AccountDTO thông tin tài khoản đã kích hoạt
+     */
+    AccountDTO reactivateAccount(Integer customerId);
 }
