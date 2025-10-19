@@ -27,9 +27,4 @@ public class CustomerServiceImpl implements CustomerService {
         Customer saved = customerRepository.save(entity);
         return customerMapper.toDTO(saved);
     }
-
-    @Override
-    public void deleteCustomer(Integer customerId) {
-        customerRepository.deleteById(customerId);
-    }
 }

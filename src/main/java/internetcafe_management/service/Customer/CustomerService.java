@@ -5,6 +5,4 @@ import internetcafe_management.dto.CustomerDTO;
 
 public interface CustomerService {
     CustomerDTO createCustomer(CustomerDTO dto);
-    void deleteCustomer(Integer customerId);
-
 }
