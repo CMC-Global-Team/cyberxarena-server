@@ -1,7 +1,6 @@
 package internetcafe_management.service.impl.product;
 
 import internetcafe_management.dto.ProductDTO;
-import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.repository.product.ProductRepository;
 import internetcafe_management.service.product.ProductService;
@@ -133,143 +132,8 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    public Product updateProductWithRequest(Integer id, UpdateProductRequestDTO updateRequest) {
-        log.info("Updating product with ID: {} using UpdateProductRequestDTO", id);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
-        if (!existingProduct.getItemName().equals(updateRequest.getItemName()) 
-            && productRepository.existsByItemName(updateRequest.getItemName())) {
-            throw new RuntimeException("Sản phẩm với tên '" + updateRequest.getItemName() + "' đã tồn tại");
-        }
-        
-        // Cập nhật tất cả các trường
-        existingProduct.setItemName(updateRequest.getItemName());
-        existingProduct.setItemCategory(updateRequest.getItemCategory());
-        existingProduct.setPrice(updateRequest.getPrice());
-        existingProduct.setStock(updateRequest.getStock());
-        existingProduct.setSupplierName(updateRequest.getSupplierName());
-        
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully updated product with ID: {} using UpdateProductRequestDTO", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
-    public Product partialUpdateProduct(Integer id, UpdateProductRequestDTO updateRequest) {
-        log.info("Partially updating product with ID: {}", id);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        // Chỉ cập nhật các trường không null
-        if (updateRequest.getItemName() != null && !updateRequest.getItemName().trim().isEmpty()) {
-            // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
-            if (!existingProduct.getItemName().equals(updateRequest.getItemName()) 
-                && productRepository.existsByItemName(updateRequest.getItemName())) {
-                throw new RuntimeException("Sản phẩm với tên '" + updateRequest.getItemName() + "' đã tồn tại");
-            }
-            existingProduct.setItemName(updateRequest.getItemName());
-        }
-        
-        if (updateRequest.getItemCategory() != null) {
-            existingProduct.setItemCategory(updateRequest.getItemCategory());
-        }
-        
-        if (updateRequest.getPrice() != null) {
-            existingProduct.setPrice(updateRequest.getPrice());
-        }
-        
-        if (updateRequest.getStock() != null) {
-            existingProduct.setStock(updateRequest.getStock());
-        }
-        
-        if (updateRequest.getSupplierName() != null) {
-            existingProduct.setSupplierName(updateRequest.getSupplierName());
-        }
-        
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully partially updated product with ID: {}", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
     @Transactional(readOnly = true)
     public boolean existsByItemName(String itemName) {
         return productRepository.existsByItemName(itemName);
-    }
-    
-    @Override
-    public Product updateProductPrice(Integer id, java.math.BigDecimal newPrice) {
-        log.info("Updating price for product with ID: {} to {}", id, newPrice);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        if (newPrice == null || newPrice.compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            throw new RuntimeException("Giá sản phẩm phải lớn hơn 0");
-        }
-        
-        existingProduct.setPrice(newPrice);
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully updated price for product with ID: {}", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
-    public Product updateProductStock(Integer id, Integer newStock) {
-        log.info("Updating stock for product with ID: {} to {}", id, newStock);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        if (newStock == null || newStock < 0) {
-            throw new RuntimeException("Số lượng tồn kho không được âm");
-        }
-        
-        existingProduct.setStock(newStock);
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully updated stock for product with ID: {}", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
-    public Product updateProductSupplier(Integer id, String supplierName) {
-        log.info("Updating supplier for product with ID: {} to {}", id, supplierName);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        existingProduct.setSupplierName(supplierName);
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully updated supplier for product with ID: {}", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
-    public Product updateProductCategory(Integer id, String category) {
-        log.info("Updating category for product with ID: {} to {}", id, category);
-        
-        Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
-        
-        existingProduct.setItemCategory(category);
-        Product updatedProduct = productRepository.save(existingProduct);
-        log.info("Successfully updated category for product with ID: {}", updatedProduct.getItemId());
-        
-        return updatedProduct;
-    }
-    
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsById(Integer id) {
-        return productRepository.existsById(id);
     }
 }
