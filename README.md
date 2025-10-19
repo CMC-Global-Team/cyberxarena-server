@@ -51,13 +51,14 @@ logs/                              # Application logs
 
 - **Framework**: Spring Boot 3.2.0
 - **Java Version**: 17
-- **Database**: PostgreSQL (Production), H2 (Testing)
+- **Database**: MySQL (Production), H2 (Testing)
 - **Security**: Spring Security + JWT
 - **ORM**: Spring Data JPA + Hibernate
 - **Migration**: Flyway
 - **Mapping**: MapStruct
 - **Build Tool**: Maven
 - **Testing**: JUnit 5 + Mockito
+- **Containerization**: Docker + Docker Compose
 
 ### Key Features
 
@@ -72,10 +73,50 @@ logs/                              # Application logs
 
 ### Getting Started
 
+#### Option 1: Using Docker (Recommended)
+
+1. Ensure Docker and Docker Compose are installed
+2. Clone the repository
+3. Run the application with Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+4. Access the application at `http://localhost:8080/api/v1`
+5. Access phpMyAdmin at `http://localhost:8081` (optional)
+
+#### Option 2: Local Development
+
 1. Ensure Java 17+ is installed
-2. Install PostgreSQL (for production)
+2. Install MySQL (for production)
 3. Configure database connection in `application.yml`
 4. Run the application: `mvn spring-boot:run`
+
+### Docker Commands
+
+```bash
+# Build and start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop all services
+docker-compose down
+
+# Rebuild and start
+docker-compose up --build -d
+
+# Stop and remove volumes (WARNING: This will delete all data)
+docker-compose down -v
+```
+
+### Services
+
+- **Application**: http://localhost:8080/api/v1
+- **Swagger UI**: http://localhost:8080/api/v1/swagger-ui.html
+- **Health Check**: http://localhost:8080/api/v1/actuator/health
+- **phpMyAdmin**: http://localhost:8081 (optional)
+- **MySQL**: localhost:3306
 
 ### Development Guidelines
 
