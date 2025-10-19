@@ -172,3 +172,117 @@ END$$
 
 DELIMITER ;
 
+/*trigger Sắp xếp danh sách bán hàng theo Tổng tiền*/
+-- TẠO BẢNG PHỤ THEO TỔNG TIỀN 
+CREATE TABLE IF NOT EXISTS sale_sorted_total_asc AS
+SELECT 
+    s.*,
+    COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+FROM sale s
+LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+LEFT JOIN item i ON sd.item_id = i.item_id
+GROUP BY s.sale_id
+ORDER BY total_amount ASC;
+
+CREATE TABLE IF NOT EXISTS sale_sorted_total_desc AS
+SELECT 
+    s.*,
+    COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+FROM sale s
+LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+LEFT JOIN item i ON sd.item_id = i.item_id
+GROUP BY s.sale_id
+ORDER BY total_amount DESC;
+
+-- XOÁ TRIGGER CŨ (VALIDATION) 
+DROP TRIGGER IF EXISTS trg_sale_total_after_insert;
+DROP TRIGGER IF EXISTS trg_sale_total_after_update;
+DROP TRIGGER IF EXISTS trg_sale_total_after_delete;
+
+DELIMITER $$
+
+-- TRIGGER: SAU KHI THÊM HÓA ĐƠN 
+CREATE TRIGGER trg_sale_total_after_insert
+AFTER INSERT ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted_total_asc;
+  INSERT INTO sale_sorted_total_asc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount ASC;
+
+  DELETE FROM sale_sorted_total_desc;
+  INSERT INTO sale_sorted_total_desc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount DESC;
+END$$
+
+-- TRIGGER: SAU KHI CẬP NHẬT HÓA ĐƠN 
+CREATE TRIGGER trg_sale_total_after_update
+AFTER UPDATE ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted_total_asc;
+  INSERT INTO sale_sorted_total_asc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount ASC;
+
+  DELETE FROM sale_sorted_total_desc;
+  INSERT INTO sale_sorted_total_desc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount DESC;
+END$$
+
+-- TRIGGER: SAU KHI XOÁ HÓA ĐƠN 
+CREATE TRIGGER trg_sale_total_after_delete
+AFTER DELETE ON sale
+FOR EACH ROW
+BEGIN
+  DELETE FROM sale_sorted_total_asc;
+  INSERT INTO sale_sorted_total_asc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount ASC;
+
+  DELETE FROM sale_sorted_total_desc;
+  INSERT INTO sale_sorted_total_desc
+  SELECT 
+      s.*,
+      COALESCE(SUM(i.price * sd.quantity) - s.discount, 0) AS total_amount
+  FROM sale s
+  LEFT JOIN sale_detail sd ON s.sale_id = sd.sale_id
+  LEFT JOIN item i ON sd.item_id = i.item_id
+  GROUP BY s.sale_id
+  ORDER BY total_amount DESC;
+END$$
+
+DELIMITER ;
