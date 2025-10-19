@@ -31,7 +31,7 @@ public class ComputerController {
 
 
     @GetMapping
-    @Operation(summary = "Get all computers", description = "Retrieve a paginated list of computers with optional filtering")
+    @Operation(summary = "Get all computers", description = "Retrieve a paginated list of all computers")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved computers",
                     content = @Content(mediaType = "application/json",
@@ -39,6 +39,46 @@ public class ComputerController {
             @ApiResponse(responseCode = "400", description = "Invalid request parameters")
     })
     public ResponseEntity<Page<ComputerDTO>> getAllComputers(
+            @Parameter(description = "Page number (0-based)") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort by field (computerId, computerName, ipAddress, pricePerHour, status)") @RequestParam(defaultValue = "computerId") String sortBy,
+            @Parameter(description = "Sort direction (asc, desc)") @RequestParam(defaultValue = "asc") String sortDir) {
+
+        try {
+            // Validate sort field
+            String[] allowedSortFields = {"computerId", "computerName", "ipAddress", "pricePerHour", "status"};
+            boolean isValidSortField = java.util.Arrays.asList(allowedSortFields).contains(sortBy);
+            if (!isValidSortField) {
+                sortBy = "computerId"; // Default to computerId if invalid
+            }
+
+            // Validate sort direction
+            if (!sortDir.equalsIgnoreCase("asc") && !sortDir.equalsIgnoreCase("desc")) {
+                sortDir = "asc"; // Default to asc if invalid
+            }
+
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDir), sortBy);
+            Pageable pageable = PageRequest.of(page, size, sort);
+
+            Page<ComputerDTO> computers = computerService.getAllComputers(null, null, null, pageable);
+            return ResponseEntity.ok(computers);
+        } catch (Exception e) {
+            // Fallback to default pagination if any error occurs
+            Pageable defaultPageable = PageRequest.of(page, size);
+            Page<ComputerDTO> computers = computerService.getAllComputers(null, null, null, defaultPageable);
+            return ResponseEntity.ok(computers);
+        }
+    }
+
+    @GetMapping("/search")
+    @Operation(summary = "Search computers with filters", description = "Search computers with optional filtering by name, IP, and status")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved filtered computers",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request parameters")
+    })
+    public ResponseEntity<Page<ComputerDTO>> searchComputers(
             @Parameter(description = "Filter by computer name") @RequestParam(required = false) String name,
             @Parameter(description = "Filter by IP address") @RequestParam(required = false) String ip,
             @Parameter(description = "Filter by computer status") @RequestParam(required = false) String status,
