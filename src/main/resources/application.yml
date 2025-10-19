@@ -65,6 +65,4 @@ springdoc:
     operationsSorter: method
     tagsSorter: alpha
     tryItOutEnabled: true
-    configUrl: /api-docs/swagger-config
-    url: /api-docs
   show-actuator: true
