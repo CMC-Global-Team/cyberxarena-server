@@ -10,8 +10,5 @@ public interface CustomerService {
     CustomerDTO getCustomerById(Integer customerId);
     CustomerDTO updateCustomer(Integer customerId, CustomerDTO dto);
     List<CustomerDTO> getAllCustomers();
-    List<CustomerDTO> getAllCustomersSortedAsc();
-    List<CustomerDTO> getAllCustomersSortedDesc();
-    List<CustomerDTO> getAllCustomersSoreDateAsc();
-    List<CustomerDTO> getAllCustomersSortDateDesc();
+    List<CustomerDTO> searchCustomers(String sortBy, String sortOrder, String name, String phone, String email);
 }

@@ -41,22 +41,13 @@ public class CustomerController {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
 
-    @GetMapping("/sorted/asc")
-    public ResponseEntity<List<CustomerDTO>> getAllSortedAsc() {
-        return ResponseEntity.ok(customerService.getAllCustomersSortedAsc());
-    }
-
-    @GetMapping("/sorted/desc")
-    public ResponseEntity<List<CustomerDTO>> getAllSortedDesc() {
-        return ResponseEntity.ok(customerService.getAllCustomersSortedDesc());
-    }
-
-    @GetMapping("/sortedD/asc")
-    public ResponseEntity<List<CustomerDTO>> getAllCustomersSoreDateAsc() {
-        return ResponseEntity.ok(customerService.getAllCustomersSoreDateAsc());
-    }
-    @GetMapping("/sortedD/desc")
-    public ResponseEntity<List<CustomerDTO>> getAllCustomersSortDateDesc() {
-        return ResponseEntity.ok(customerService.getAllCustomersSortDateDesc());
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDTO>> searchCustomers(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String email) {
+        return ResponseEntity.ok(customerService.searchCustomers(sortBy, sortOrder, name, phone, email));
     }
 }
