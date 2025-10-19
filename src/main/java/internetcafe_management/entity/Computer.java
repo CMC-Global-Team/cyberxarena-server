@@ -32,7 +32,7 @@ public class Computer {
     @Column(name = "price_per_hour", nullable = false, precision = 10, scale = 2)
     private BigDecimal pricePerHour;
 
-    @Enumerated(EnumType.STRING)
+    @Convert(converter = ComputerStatusConverter.class)
     @Column(name = "status", nullable = false)
     private ComputerStatus status;
 
