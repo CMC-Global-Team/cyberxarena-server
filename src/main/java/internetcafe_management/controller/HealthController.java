@@ -63,6 +63,22 @@ public class HealthController {
         response.put("timestamp", System.currentTimeMillis());
         response.put("status", "success");
         response.put("swaggerUrl", "/api/v1/swagger-ui.html");
+        response.put("apiDocsUrl", "/api/v1/api-docs");
+        return ResponseEntity.ok(response);
+    }
+    
+    @GetMapping("/api-docs-test")
+    public ResponseEntity<Map<String, Object>> apiDocsTest() {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "API docs endpoint is accessible!");
+        response.put("timestamp", System.currentTimeMillis());
+        response.put("status", "success");
+        response.put("openApiVersion", "3.0.1");
+        response.put("endpoints", new String[]{
+            "/api/v1/health",
+            "/api/v1/computers",
+            "/api/v1/sessions"
+        });
         return ResponseEntity.ok(response);
     }
 }
