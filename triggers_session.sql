@@ -45,7 +45,7 @@ END$$
 DELIMITER ;
 
 
-/*tạo trigger cho việc sắp xếp danh sách sản phẩm theo giá--*/
+/*tạo trigger cho việc sắp xếp danh sách sản phẩm theo giá tăng dần và giảm dần--*/
 /* --- Tạo 2 bảng phụ --- */
 CREATE TABLE IF NOT EXISTS item_sorted_price_desc LIKE item;
 CREATE TABLE IF NOT EXISTS item_sorted_price_asc  LIKE item;
@@ -111,46 +111,64 @@ END$$
 DELIMITER ;
 
 
-/*trigger cho việc sắp xếp danh sách bán hàng theo ngày bán*/
--- Tạo bảng sắp xếp theo ngày bán
-CREATE TABLE IF NOT EXISTS sale_sorted AS
+/*trigger cho việc sắp xếp danh sách bán hàng theo ngày bán tăng dần và giảm dần */
+-- TẠO BẢNG PHỤ LƯU DANH SÁCH ĐÃ SẮP XẾP 
+CREATE TABLE IF NOT EXISTS sale_sorted_asc AS
 SELECT * FROM sale ORDER BY sale_date ASC;
 
--- Xóa trigger cũ nếu có (validation)
-DROP TRIGGER IF EXISTS trg_sale_after_insert;
-DROP TRIGGER IF EXISTS trg_sale_after_update;
-DROP TRIGGER IF EXISTS trg_sale_after_delete;
+CREATE TABLE IF NOT EXISTS sale_sorted_desc AS
+SELECT * FROM sale ORDER BY sale_date DESC;
+
+-- XOÁ TRIGGER CŨ (VALIDATION) 
+DROP TRIGGER IF EXISTS trg_sale_after_insert_sort;
+DROP TRIGGER IF EXISTS trg_sale_after_update_sort;
+DROP TRIGGER IF EXISTS trg_sale_after_delete_sort;
 
 DELIMITER $$
 
--- Trigger: khi thêm đơn bán mới
-CREATE TRIGGER trg_sale_after_insert
+-- TRIGGER: KHI THÊM HÓA ĐƠN 
+CREATE TRIGGER trg_sale_after_insert_sort
 AFTER INSERT ON sale
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_sorted;
-  INSERT INTO sale_sorted
+  -- Cập nhật bảng tăng dần (cũ → mới)
+  DELETE FROM sale_sorted_asc;
+  INSERT INTO sale_sorted_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
-END$$
 
--- Trigger: khi cập nhật đơn bán
-CREATE TRIGGER trg_sale_after_update
+  -- Cập nhật bảng giảm dần (mới → cũ)
+  DELETE FROM sale_sorted_desc;
+  INSERT INTO sale_sorted_desc
+  SELECT * FROM sale ORDER BY sale_date DESC;
+END$$
+ 
+  -- TRIGGER: KHI CẬP NHẬT HÓA ĐƠN 
+CREATE TRIGGER trg_sale_after_update_sort
 AFTER UPDATE ON sale
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_sorted;
-  INSERT INTO sale_sorted
+  DELETE FROM sale_sorted_asc;
+  INSERT INTO sale_sorted_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
-END$$
 
--- Trigger: khi xóa đơn bán
-CREATE TRIGGER trg_sale_after_delete
+  DELETE FROM sale_sorted_desc;
+  INSERT INTO sale_sorted_desc
+  SELECT * FROM sale ORDER BY sale_date DESC;
+END$$
+ 
+ -- TRIGGER: KHI XOÁ HÓA ĐƠN 
+CREATE TRIGGER trg_sale_after_delete_sort
 AFTER DELETE ON sale
 FOR EACH ROW
 BEGIN
-  DELETE FROM sale_sorted;
-  INSERT INTO sale_sorted
+  DELETE FROM sale_sorted_asc;
+  INSERT INTO sale_sorted_asc
   SELECT * FROM sale ORDER BY sale_date ASC;
+
+  DELETE FROM sale_sorted_desc;
+  INSERT INTO sale_sorted_desc
+  SELECT * FROM sale ORDER BY sale_date DESC;
 END$$
 
 DELIMITER ;
+
