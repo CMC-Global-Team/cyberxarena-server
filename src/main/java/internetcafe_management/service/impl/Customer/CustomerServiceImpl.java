@@ -32,10 +32,22 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(Integer customerId) {
         customerRepository.deleteById(customerId);
     }
+
     @Override
     public CustomerDTO getCustomerById(Integer customerId) {
         Customer entity = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
         return customerMapper.toDTO(entity);
+    }
+    @Override
+    public CustomerDTO updateCustomer(Integer customerId, CustomerDTO dto) {
+        Customer existing = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
+        existing.setCustomerName(dto.getCustomerName());
+        existing.setPhoneNumber(dto.getPhoneNumber());
+        existing.setMembershipCard(dto.getMembershipCard());
+        existing.setBalance(dto.getBalance());
+        Customer updated = customerRepository.save(existing);
+        return customerMapper.toDTO(updated);
     }
 }
