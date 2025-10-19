@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/sessions")
+@RequestMapping("/api/v1/sessions")
 @RequiredArgsConstructor
 public class SessionController {
 
