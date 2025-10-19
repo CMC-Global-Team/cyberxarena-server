@@ -1,16 +1,19 @@
 package internetcafe_management.service.session;
 
-import internetcafe_management.dto.SessionDTO;
 import internetcafe_management.entity.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 public interface SessionService {
-    Page<Session> getAllSessions(Pageable pageable, Optional<Integer> customerId, Optional<Integer> computerId);
-    Session getSessionById(Integer id);
-    Session createSession(SessionDTO sessionDTO);
-    Session updateSession(Integer id, SessionDTO sessionDTO);
+    Page<Session> getAllSessions(Pageable pageable);
+    Session createSession(Session session);
+    Session updateSession(Integer id, Session session);
     void deleteSession(Integer id);
+    List<Map<String, Object>> getSessionsWithTotalAmount();
+    List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime);
 }
