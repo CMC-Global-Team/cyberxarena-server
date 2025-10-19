@@ -10,5 +10,6 @@ public interface CustomerService {
     CustomerDTO getCustomerById(Integer customerId);
     CustomerDTO updateCustomer(Integer customerId, CustomerDTO dto);
     List<CustomerDTO> getAllCustomers();
-
+    List<CustomerDTO> getAllCustomersSortedAsc();
+    List<CustomerDTO> getAllCustomersSortedDesc();
 }
