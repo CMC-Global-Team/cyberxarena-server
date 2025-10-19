@@ -32,7 +32,8 @@ public class DatabaseConfig implements CommandLineRunner {
             
         } catch (Exception e) {
             logger.error("❌ Database connection failed: {}", e.getMessage());
-            throw e;
+            logger.error("Application will continue to start but database operations may fail");
+            // Don't throw exception to prevent application startup failure
         }
     }
 }
