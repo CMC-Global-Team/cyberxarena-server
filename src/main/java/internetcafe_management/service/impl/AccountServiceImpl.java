@@ -99,6 +99,16 @@ public class AccountServiceImpl implements AccountService {
         return convertToDTO(updatedAccount);
     }
     
+    @Override
+    public void deleteAccount(Integer customerId) {
+        // Tìm account theo customer ID
+        Account account = accountRepository.findByCustomerCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
+        
+        // Hard delete - xóa hoàn toàn khỏi database
+        accountRepository.delete(account);
+    }
+    
     private AccountDTO convertToDTO(Account account) {
         AccountDTO dto = new AccountDTO();
         dto.setAccountId(account.getAccountId());

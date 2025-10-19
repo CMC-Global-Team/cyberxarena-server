@@ -90,4 +90,19 @@ public class AccountController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    
+    /**
+     * Xóa tài khoản của khách hàng (hard delete)
+     * @param customerId ID của khách hàng
+     * @return ResponseEntity<String>
+     */
+    @DeleteMapping("/customer/{customerId}")
+    public ResponseEntity<?> deleteAccount(@PathVariable Integer customerId) {
+        try {
+            accountService.deleteAccount(customerId);
+            return ResponseEntity.ok("Account deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

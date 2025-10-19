@@ -41,4 +41,10 @@ public interface AccountService {
      * @return AccountDTO thông tin tài khoản đã cập nhật
      */
     AccountDTO updateAccount(Integer customerId, UpdateAccountRequestDTO request);
+    
+    /**
+     * Xóa tài khoản (hard delete)
+     * @param customerId ID của khách hàng
+     */
+    void deleteAccount(Integer customerId);
 }
