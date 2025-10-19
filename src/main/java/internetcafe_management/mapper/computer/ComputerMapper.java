@@ -16,4 +16,15 @@ public interface ComputerMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(ComputerDTO dto, @MappingTarget Computer entity);
+
+    // Custom mapping methods for enum handling
+    default Computer.ComputerStatus mapStringToComputerStatus(String status) {
+        if (status == null) return null;
+        return Computer.ComputerStatus.fromString(status);
+    }
+
+    default String mapComputerStatusToString(Computer.ComputerStatus status) {
+        if (status == null) return null;
+        return status.toJsonValue();
+    }
 }
