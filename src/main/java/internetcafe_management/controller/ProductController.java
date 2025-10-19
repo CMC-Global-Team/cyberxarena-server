@@ -158,4 +158,58 @@ public class ProductController {
         List<Product> products = productService.getProductsByPriceRange(minPrice, maxPrice);
         return ResponseEntity.ok(products);
     }
+    
+    @PutMapping("/{id}")
+    @Operation(summary = "Update product", description = "Update an existing product by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Product updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "409", description = "Product with same name already exists"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Product> updateProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id,
+            @Parameter(description = "Updated product information", required = true)
+            @Valid @RequestBody ProductDTO productDTO) {
+        
+        log.info("Received request to update product with ID: {}", id);
+        
+        try {
+            Product updatedProduct = productService.updateProduct(id, productDTO);
+            log.info("Successfully updated product with ID: {}", updatedProduct.getItemId());
+            
+            return ResponseEntity.ok(updatedProduct);
+            
+        } catch (RuntimeException e) {
+            log.error("Error updating product: {}", e.getMessage());
+            throw e;
+        }
+    }
+    
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete product", description = "Delete a product by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Product deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Product not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> deleteProduct(
+            @Parameter(description = "Product ID", required = true)
+            @PathVariable Integer id) {
+        
+        log.info("Received request to delete product with ID: {}", id);
+        
+        try {
+            productService.deleteProduct(id);
+            log.info("Successfully deleted product with ID: {}", id);
+            
+            return ResponseEntity.noContent().build();
+            
+        } catch (RuntimeException e) {
+            log.error("Error deleting product: {}", e.getMessage());
+            throw e;
+        }
+    }
 }
