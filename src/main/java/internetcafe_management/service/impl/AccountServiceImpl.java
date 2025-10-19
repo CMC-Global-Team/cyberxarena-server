@@ -99,6 +99,53 @@ public class AccountServiceImpl implements AccountService {
         return convertToDTO(updatedAccount);
     }
     
+    @Override
+    public void deleteAccount(Integer customerId) {
+        // Tìm account theo customer ID
+        Account account = accountRepository.findByCustomerCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
+        
+        // Soft delete - đặt isActive = false
+        account.setIsActive(false);
+        accountRepository.save(account);
+    }
+    
+    @Override
+    public AccountDTO deactivateAccount(Integer customerId) {
+        // Tìm account theo customer ID
+        Account account = accountRepository.findByCustomerCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
+        
+        // Kiểm tra account đã bị vô hiệu hóa chưa
+        if (!account.getIsActive()) {
+            throw new RuntimeException("Account is already deactivated");
+        }
+        
+        // Vô hiệu hóa account
+        account.setIsActive(false);
+        Account deactivatedAccount = accountRepository.save(account);
+        
+        return convertToDTO(deactivatedAccount);
+    }
+    
+    @Override
+    public AccountDTO reactivateAccount(Integer customerId) {
+        // Tìm account theo customer ID
+        Account account = accountRepository.findByCustomerCustomerId(customerId)
+                .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
+        
+        // Kiểm tra account đã được kích hoạt chưa
+        if (account.getIsActive()) {
+            throw new RuntimeException("Account is already active");
+        }
+        
+        // Kích hoạt lại account
+        account.setIsActive(true);
+        Account reactivatedAccount = accountRepository.save(account);
+        
+        return convertToDTO(reactivatedAccount);
+    }
+    
     private AccountDTO convertToDTO(Account account) {
         AccountDTO dto = new AccountDTO();
         dto.setAccountId(account.getAccountId());
