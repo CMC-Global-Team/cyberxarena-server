@@ -1,6 +1,7 @@
 package internetcafe_management.service.product;
 
 import internetcafe_management.dto.ProductDTO;
+import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ public interface ProductService {
     /**
      * Cập nhật sản phẩm
      */
-    Product updateProduct(Integer id, ProductDTO productDTO);
+    Product updateProduct(Integer id, UpdateProductRequestDTO updateProductDTO);
     
     /**
      * Xóa sản phẩm
