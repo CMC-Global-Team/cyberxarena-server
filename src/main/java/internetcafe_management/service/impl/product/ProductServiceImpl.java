@@ -4,6 +4,8 @@ import internetcafe_management.dto.ProductDTO;
 import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.dto.PartialUpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
+import internetcafe_management.exception.ProductNotFoundException;
+import internetcafe_management.exception.DuplicateProductNameException;
 import internetcafe_management.repository.product.ProductRepository;
 import internetcafe_management.service.product.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +30,7 @@ public class ProductServiceImpl implements ProductService {
         
         // Kiểm tra sản phẩm đã tồn tại chưa
         if (productRepository.existsByItemName(productDTO.getItemName())) {
-            throw new RuntimeException("Sản phẩm với tên '" + productDTO.getItemName() + "' đã tồn tại");
+            throw new DuplicateProductNameException("Sản phẩm với tên '" + productDTO.getItemName() + "' đã tồn tại");
         }
         
         // Tạo entity từ DTO
@@ -57,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductById(Integer id) {
         log.info("Retrieving product with ID: {}", id);
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
     }
     
     @Override
@@ -65,12 +67,12 @@ public class ProductServiceImpl implements ProductService {
         log.info("Updating product with ID: {}", id);
         
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
         
         // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
         if (!existingProduct.getItemName().equals(updateProductRequestDTO.getItemName()) 
             && productRepository.existsByItemName(updateProductRequestDTO.getItemName())) {
-            throw new RuntimeException("Sản phẩm với tên '" + updateProductRequestDTO.getItemName() + "' đã tồn tại");
+            throw new DuplicateProductNameException("Sản phẩm với tên '" + updateProductRequestDTO.getItemName() + "' đã tồn tại");
         }
         
         existingProduct.setItemName(updateProductRequestDTO.getItemName());
@@ -90,13 +92,13 @@ public class ProductServiceImpl implements ProductService {
         log.info("Partially updating product with ID: {}", id);
         
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
         
         // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
         if (partialUpdateProductRequestDTO.getItemName() != null 
             && !existingProduct.getItemName().equals(partialUpdateProductRequestDTO.getItemName()) 
             && productRepository.existsByItemName(partialUpdateProductRequestDTO.getItemName())) {
-            throw new RuntimeException("Sản phẩm với tên '" + partialUpdateProductRequestDTO.getItemName() + "' đã tồn tại");
+            throw new DuplicateProductNameException("Sản phẩm với tên '" + partialUpdateProductRequestDTO.getItemName() + "' đã tồn tại");
         }
         
         // Chỉ cập nhật các field không null
@@ -127,7 +129,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("Deleting product with ID: {}", id);
         
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("Không tìm thấy sản phẩm với ID: " + id);
+            throw new ProductNotFoundException("Không tìm thấy sản phẩm với ID: " + id);
         }
         
         productRepository.deleteById(id);
@@ -139,7 +141,7 @@ public class ProductServiceImpl implements ProductService {
     public Product getProductByName(String itemName) {
         log.info("Retrieving product by name: {}", itemName);
         return productRepository.findByItemName(itemName)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với tên: " + itemName));
+                .orElseThrow(() -> new ProductNotFoundException("Không tìm thấy sản phẩm với tên: " + itemName));
     }
     
     @Override
@@ -185,7 +187,7 @@ public class ProductServiceImpl implements ProductService {
         }
         
         Product existingProduct = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
+                .orElseThrow(() -> new ProductNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
         
         existingProduct.setStock(newStock);
         Product updatedProduct = productRepository.save(existingProduct);
