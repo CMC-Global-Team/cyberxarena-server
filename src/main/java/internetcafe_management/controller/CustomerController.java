@@ -40,4 +40,14 @@ public class CustomerController {
     public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
         return ResponseEntity.ok(customerService.getAllCustomers());
     }
+
+    @GetMapping("/sorted/asc")
+    public ResponseEntity<List<CustomerDTO>> getAllSortedAsc() {
+        return ResponseEntity.ok(customerService.getAllCustomersSortedAsc());
+    }
+
+    @GetMapping("/sorted/desc")
+    public ResponseEntity<List<CustomerDTO>> getAllSortedDesc() {
+        return ResponseEntity.ok(customerService.getAllCustomersSortedDesc());
+    }
 }
