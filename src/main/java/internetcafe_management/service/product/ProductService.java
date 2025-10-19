@@ -1,6 +1,7 @@
 package internetcafe_management.service.product;
 
 import internetcafe_management.dto.ProductDTO;
+import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 
 import java.math.BigDecimal;
@@ -26,7 +27,7 @@ public interface ProductService {
     /**
      * Cập nhật sản phẩm
      */
-    Product updateProduct(Integer id, ProductDTO productDTO);
+    Product updateProduct(Integer id, UpdateProductRequestDTO updateProductRequestDTO);
     
     /**
      * Xóa sản phẩm
@@ -62,24 +63,4 @@ public interface ProductService {
      * Kiểm tra sản phẩm có tồn tại không
      */
     boolean existsByItemName(String itemName);
-    
-    /**
-     * Lấy tất cả sản phẩm nổi bật
-     */
-    List<Product> getFeaturedProducts();
-    
-    /**
-     * Lấy sản phẩm nổi bật theo danh mục
-     */
-    List<Product> getFeaturedProductsByCategory(String itemCategory);
-    
-    /**
-     * Cập nhật trạng thái nổi bật của sản phẩm
-     */
-    Product updateFeaturedStatus(Integer id, Boolean isFeatured);
-    
-    /**
-     * Đếm số lượng sản phẩm nổi bật
-     */
-    long countFeaturedProducts();
 }

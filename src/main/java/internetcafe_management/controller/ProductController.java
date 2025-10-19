@@ -1,6 +1,7 @@
 package internetcafe_management.controller;
 
 import internetcafe_management.dto.ProductDTO;
+import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -172,12 +173,12 @@ public class ProductController {
             @Parameter(description = "Product ID", required = true)
             @PathVariable Integer id,
             @Parameter(description = "Updated product information", required = true)
-            @Valid @RequestBody ProductDTO productDTO) {
+            @Valid @RequestBody UpdateProductRequestDTO updateProductRequestDTO) {
         
         log.info("Received request to update product with ID: {}", id);
         
         try {
-            Product updatedProduct = productService.updateProduct(id, productDTO);
+            Product updatedProduct = productService.updateProduct(id, updateProductRequestDTO);
             log.info("Successfully updated product with ID: {}", updatedProduct.getItemId());
             
             return ResponseEntity.ok(updatedProduct);
