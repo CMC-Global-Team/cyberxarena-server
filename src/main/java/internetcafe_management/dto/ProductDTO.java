@@ -26,4 +26,6 @@ public class ProductDTO {
 
     @Size(max = 100, message = "Tên nhà cung cấp không vượt quá 100 ký tự")
     private String supplierName;
+
+    private Boolean isFeatured = false;
 }
