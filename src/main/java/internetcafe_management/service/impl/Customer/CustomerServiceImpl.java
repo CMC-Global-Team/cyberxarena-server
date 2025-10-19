@@ -32,4 +32,10 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteCustomer(Integer customerId) {
         customerRepository.deleteById(customerId);
     }
+    @Override
+    public CustomerDTO getCustomerById(Integer customerId) {
+        Customer entity = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
+        return customerMapper.toDTO(entity);
+    }
 }
