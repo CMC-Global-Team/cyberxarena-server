@@ -105,9 +105,8 @@ public class AccountServiceImpl implements AccountService {
         Account account = accountRepository.findByCustomerCustomerId(customerId)
                 .orElseThrow(() -> new RuntimeException("Account not found for customer ID: " + customerId));
         
-        // Soft delete - đặt isActive = false
-        account.setIsActive(false);
-        accountRepository.save(account);
+        // Hard delete - xóa hoàn toàn khỏi database
+        accountRepository.delete(account);
     }
     
     @Override
