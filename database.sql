@@ -90,7 +90,7 @@ CREATE TABLE `sale_total` (
 
 CREATE TABLE `discount` (
   `discount_id` int NOT NULL,
-  `discount_type` varchar(40) not null,
+  `discount_type` enum('Flat', 'Percentage') not null default 'Flat',
   `discount_value` decimal(10,2)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
