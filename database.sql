@@ -376,6 +376,12 @@ ALTER TABLE `sale`
   ADD CONSTRAINT `sale_ibfk_2` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`discount_id`);
 
 --
+-- Các ràng buộc cho bảng `sale_total`
+--
+ALTER TABLE `sale_total`
+  ADD CONSTRAINT `sale_total_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`);
+
+--
 -- Các ràng buộc cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
