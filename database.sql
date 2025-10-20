@@ -172,8 +172,7 @@ CREATE TABLE `revenue` (
   `revenue_id` int NOT NULL,
   `date` datetime NOT NULL,
   `computer_usage_revenue` decimal(10,2) NOT NULL,
-  `sales_revenue` decimal(10,2) NOT NULL,
-  `operating_expense` decimal(10,2) NOT NULL
+  `sales_revenue` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
