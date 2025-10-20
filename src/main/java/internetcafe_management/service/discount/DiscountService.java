@@ -13,6 +13,7 @@ public interface DiscountService {
     List<Discount> getAllDiscounts();
     Optional<Discount> getDiscountById(Integer id);
     List<Discount> getDiscountsByType(DiscountType type);
+    void deleteDiscount(Integer id);
 }
 
 

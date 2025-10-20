@@ -73,6 +73,18 @@ public class DiscountServiceImpl implements DiscountService {
         log.info("Fetching discounts by type={}", type);
         return discountRepository.findByDiscountType(type);
     }
+
+    @Override
+    public void deleteDiscount(Integer id) {
+        log.info("Deleting discount with id={}", id);
+        
+        if (!discountRepository.existsById(id)) {
+            throw new IllegalArgumentException("Discount not found with id=" + id);
+        }
+        
+        discountRepository.deleteById(id);
+        log.info("Successfully deleted discount with id={}", id);
+    }
 }
 
 
