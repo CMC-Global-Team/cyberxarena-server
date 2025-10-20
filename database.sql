@@ -26,7 +26,7 @@ CREATE TABLE `customer` (
   `customer_id` int NOT NULL,
   `customer_name` varchar(100) NOT NULL,
   `phone_number` varchar(15) DEFAULT NULL,
-  `membership_card` varchar(50) DEFAULT NULL,
+  `membership_card_id` int,
   `balance` decimal(12,2) DEFAULT 0.00,
   `registration_date` datetime DEFAULT CURRENT_TIMESTAMP()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
