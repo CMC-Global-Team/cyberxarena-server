@@ -47,6 +47,18 @@ CREATE TABLE `account` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `membership_card`
+--
+
+CREATE TABLE `membership_card` (
+  `membership_card_id` int NOT NULL,
+  `membership_card_name` varchar(100) NOT NULL,
+  `discount_id` int
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `sale`
 --
 
