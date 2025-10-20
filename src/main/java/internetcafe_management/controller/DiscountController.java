@@ -94,6 +94,19 @@ public class DiscountController {
         List<Discount> discounts = discountService.getDiscountsByType(type);
         return ResponseEntity.ok(discounts);
     }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete discount", description = "Delete a discount by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Discount deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Discount not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Void> deleteDiscount(@PathVariable Integer id) {
+        log.info("Received request to delete discount with id={}", id);
+        discountService.deleteDiscount(id);
+        return ResponseEntity.noContent().build();
+    }
 }
 
 
