@@ -233,6 +233,12 @@ ALTER TABLE `sale_detail`
   ADD KEY `item_id` (`item_id`);
 
 --
+-- Chỉ mục cho bảng `sale_detail_total`
+--
+ALTER TABLE `sale_detail_total`
+  ADD PRIMARY KEY (`sale_detail_id`);
+
+--
 -- Chỉ mục cho bảng `computer`
 --
 ALTER TABLE `computer`
