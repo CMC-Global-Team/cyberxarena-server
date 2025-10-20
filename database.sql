@@ -192,6 +192,12 @@ create table session_price(
 --
 ALTER TABLE `customer`
   ADD PRIMARY KEY (`customer_id`);
+
+--
+-- Chỉ mục cho bảng `membership_card_id`
+--
+ALTER TABLE `membership_card`
+  ADD PRIMARY KEY (`membership_card_id`);
   
 --
 -- Chỉ mục cho bảng `account`
