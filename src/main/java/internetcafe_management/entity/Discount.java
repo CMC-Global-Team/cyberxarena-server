@@ -1,14 +1,10 @@
 package internetcafe_management.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "discount")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Discount {
 
     public enum DiscountType {
@@ -27,6 +23,39 @@ public class Discount {
 
     @Column(name = "discount_value", precision = 10, scale = 2)
     private BigDecimal discountValue;
+    
+    // Constructors
+    public Discount() {}
+    
+    public Discount(DiscountType discountType, BigDecimal discountValue) {
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+    }
+    
+    // Getters and Setters
+    public Integer getDiscountId() {
+        return discountId;
+    }
+    
+    public void setDiscountId(Integer discountId) {
+        this.discountId = discountId;
+    }
+    
+    public DiscountType getDiscountType() {
+        return discountType;
+    }
+    
+    public void setDiscountType(DiscountType discountType) {
+        this.discountType = discountType;
+    }
+    
+    public BigDecimal getDiscountValue() {
+        return discountValue;
+    }
+    
+    public void setDiscountValue(BigDecimal discountValue) {
+        this.discountValue = discountValue;
+    }
 }
 
 
