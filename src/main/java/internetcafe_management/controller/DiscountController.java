@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import internetcafe_management.entity.Discount.DiscountType;
 
 @RestController
 @RequestMapping("/discounts")
@@ -79,6 +80,19 @@ public class DiscountController {
         Optional<Discount> discountOpt = discountService.getDiscountById(id);
         return discountOpt.map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @GetMapping("/type/{type}")
+    @Operation(summary = "Get discounts by type", description = "Retrieve discounts by type (Flat or Percentage)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Discounts retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid type value"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<Discount>> getDiscountsByType(@PathVariable DiscountType type) {
+        log.info("Received request to get discounts by type={}", type);
+        List<Discount> discounts = discountService.getDiscountsByType(type);
+        return ResponseEntity.ok(discounts);
     }
 }
 
