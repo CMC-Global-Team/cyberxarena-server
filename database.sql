@@ -279,7 +279,13 @@ ALTER TABLE `session_price`
 --
 ALTER TABLE `customer`
   MODIFY `customer_id` int NOT NULL AUTO_INCREMENT;
-  
+
+--
+-- AUTO_INCREMENT cho bảng `membership_card`
+--
+ALTER TABLE `membership_card`
+  MODIFY `membership_card_id` int NOT NULL AUTO_INCREMENT;
+
 --
 -- AUTO_INCREMENT cho bảng `account`
 --
