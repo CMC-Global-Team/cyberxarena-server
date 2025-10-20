@@ -368,11 +368,6 @@ ALTER TABLE `sale_detail`
   ADD CONSTRAINT `sale_detail_ibfk_1` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`),
   ADD CONSTRAINT `sale_detail_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`);
 
---
--- Các ràng buộc cho bảng `sale_detail_total`
---
-ALTER TABLE `sale_detail_total`
-  ADD CONSTRAINT `sale_detail_total_ibfk_1` FOREIGN KEY (`sale_detail_id`) REFERENCES `sale_detail` (`sale_detail_id`);
 
 --
 -- Các ràng buộc cho bảng `session`
