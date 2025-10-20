@@ -2,7 +2,7 @@ Create Database internet_cafe;
 use internet_cafe;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
+set global time_zone = '+07:00'; -- Đặt múi giờ Việt Nam
 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -10,8 +10,6 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
-
-set global time_zone = '+07:00'; -- Đặt múi giờ Việt Nam
 --
 -- Cơ sở dữ liệu: `internet_cafe`
 --
