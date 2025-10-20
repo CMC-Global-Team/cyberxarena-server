@@ -10,6 +10,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class UpdateDiscountRequestDTO {
 
+    @Size(max = 100, message = "Discount name must not exceed 100 characters")
+    private String discount_name;
+
     private DiscountType discount_type;
 
     @DecimalMin(value = "0.00", inclusive = false, message = "Discount value must be greater than 0")

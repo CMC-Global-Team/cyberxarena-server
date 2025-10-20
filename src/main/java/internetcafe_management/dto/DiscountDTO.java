@@ -10,6 +10,10 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 public class DiscountDTO {
 
+    @NotBlank(message = "Discount name is required")
+    @Size(max = 100, message = "Discount name must not exceed 100 characters")
+    private String discount_name;
+
     @NotNull(message = "Discount type is required")
     private DiscountType discount_type;
 

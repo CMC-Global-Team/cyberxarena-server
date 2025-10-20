@@ -22,9 +22,10 @@ public class DiscountServiceImpl implements DiscountService {
 
     @Override
     public Discount createDiscount(DiscountDTO discountDTO) {
-        log.info("Creating new discount: type={}, value={}", discountDTO.getDiscount_type(), discountDTO.getDiscount_value());
+        log.info("Creating new discount: name={}, type={}, value={}", discountDTO.getDiscount_name(), discountDTO.getDiscount_type(), discountDTO.getDiscount_value());
 
         Discount discount = new Discount();
+        discount.setDiscountName(discountDTO.getDiscount_name());
         discount.setDiscountType(discountDTO.getDiscount_type());
         discount.setDiscountValue(discountDTO.getDiscount_value());
 
@@ -44,6 +45,9 @@ public class DiscountServiceImpl implements DiscountService {
 
         Discount existing = existingOpt.get();
 
+        if (updateRequestDTO.getDiscount_name() != null) {
+            existing.setDiscountName(updateRequestDTO.getDiscount_name());
+        }
         if (updateRequestDTO.getDiscount_type() != null) {
             existing.setDiscountType(updateRequestDTO.getDiscount_type());
         }
