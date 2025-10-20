@@ -118,21 +118,10 @@ public class MembershipCardService {
         dto.setMembershipCardName(membershipCard.getMembershipCardName());
         dto.setDiscountId(membershipCard.getDiscountId());
         
-        // Debug logging
-        System.out.println("DEBUG: MembershipCard ID: " + membershipCard.getMembershipCardId());
-        System.out.println("DEBUG: Discount ID: " + membershipCard.getDiscountId());
-        System.out.println("DEBUG: Discount object: " + membershipCard.getDiscount());
-        
         if (membershipCard.getDiscount() != null) {
-            System.out.println("DEBUG: Discount name: " + membershipCard.getDiscount().getDiscountName());
-            System.out.println("DEBUG: Discount type: " + membershipCard.getDiscount().getDiscountType());
-            System.out.println("DEBUG: Discount value: " + membershipCard.getDiscount().getDiscountValue());
-            
             dto.setDiscountName(membershipCard.getDiscount().getDiscountName());
             dto.setDiscountType(membershipCard.getDiscount().getDiscountType().toString());
             dto.setDiscountValue(membershipCard.getDiscount().getDiscountValue().doubleValue());
-        } else {
-            System.out.println("DEBUG: Discount is null!");
         }
         
         return dto;
