@@ -26,4 +26,26 @@ public class SaleMapper {
                 .collect(Collectors.toList()) : null);
         return dto;
     }
+
+
+    public Sale toEntity(SaleDTO dto) {
+        if (dto == null) return null;
+        Sale entity = new Sale();
+        entity.setSaleId(dto.getSaleId());
+        entity.setCustomer(entity.getCustomer());
+        entity.setSaleDate(dto.getSaleDate());
+        entity.setDiscountId(dto.getDiscountId());
+        entity.setPaymentMethod(dto.getPaymentMethod());
+        entity.setNote(dto.getNote());
+        entity.setSaleDetails(dto.getItems() != null ? dto.getItems().stream()
+                .map(item -> {
+                    SaleDetail detail = new SaleDetail();
+                    detail.setItemId(item.getItemId());
+                    detail.setQuantity(item.getQuantity());
+                    detail.setSale(entity);
+                    return detail;
+                })
+                .collect(Collectors.toList()) : null);
+        return entity;
+    }
 }
