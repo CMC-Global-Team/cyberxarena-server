@@ -18,7 +18,7 @@ public class SaleDTO {
      * Danh sách mặt hàng trong hóa đơn — mỗi phần tử chỉ cần itemId và quantity.
      */
     @NotEmpty(message = "Danh sách mặt hàng không được rỗng")
-    private List<SaleItemDTO> items;
+    private List<SaleDetailDTO> items;
 
     @NotBlank(message = "Phương thức thanh toán không được để trống")
     @Size(max = 50)
