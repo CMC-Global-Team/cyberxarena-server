@@ -48,10 +48,11 @@ CREATE TABLE `account` (
 -- Cấu trúc bảng cho bảng `membership_card`
 --
 
-CREATE TABLE `membership_card` (
-  `membership_card_id` int NOT NULL,
-  `membership_card_name` varchar(100) NOT NULL,
-  `discount_id` int
+CREATE TABLE membership_card (
+  membership_card_id INT NOT NULL AUTO_INCREMENT,
+  membership_card_name VARCHAR(100) NOT NULL,
+  discount_id INT,
+  PRIMARY KEY (membership_card_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
