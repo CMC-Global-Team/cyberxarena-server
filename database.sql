@@ -342,7 +342,13 @@ ALTER TABLE `revenue`
 --
 ALTER TABLE `computer`
   ADD UNIQUE (computer_name);
-  
+
+--  
+-- Các ràng buộc cho bảng `customer`
+--
+ALTER TABLE `customer`
+  ADD CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`membership_card_id`) REFERENCES `membership_card` (`membership_card_id`);
+
 --  
 -- Các ràng buộc cho bảng `account`
 --
