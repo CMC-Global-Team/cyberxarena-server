@@ -67,6 +67,12 @@ public class DiscountServiceImpl implements DiscountService {
         log.info("Fetching discount by id={}", id);
         return discountRepository.findById(id);
     }
+
+    @Override
+    public List<Discount> getDiscountsByType(Discount.DiscountType type) {
+        log.info("Fetching discounts by type={}", type);
+        return discountRepository.findByDiscountType(type);
+    }
 }
 
 
