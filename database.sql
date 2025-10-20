@@ -74,6 +74,17 @@ CREATE TABLE `sale` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `sale_total`
+--
+
+CREATE TABLE `sale_total` (
+  `sale_id` int NOT NULL,
+  `total_amount` decimal(10,2)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ----------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `sale_detail`
 --
 
