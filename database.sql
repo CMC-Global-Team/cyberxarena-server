@@ -350,6 +350,12 @@ ALTER TABLE `customer`
   ADD CONSTRAINT `customer_ibfk_1` FOREIGN KEY (`membership_card_id`) REFERENCES `membership_card` (`membership_card_id`);
 
 --  
+-- Các ràng buộc cho bảng `membership_card`
+--
+ALTER TABLE `membership_card`
+  ADD CONSTRAINT `membership_card_ibfk_1` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`discount_id`);
+
+--  
 -- Các ràng buộc cho bảng `account`
 --
 ALTER TABLE `account`
