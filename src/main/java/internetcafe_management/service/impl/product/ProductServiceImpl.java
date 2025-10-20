@@ -1,6 +1,7 @@
 package internetcafe_management.service.impl.product;
 
 import internetcafe_management.dto.ProductDTO;
+import internetcafe_management.dto.UpdateProductRequestDTO;
 import internetcafe_management.entity.Product;
 import internetcafe_management.repository.product.ProductRepository;
 import internetcafe_management.service.product.ProductService;
@@ -59,23 +60,35 @@ public class ProductServiceImpl implements ProductService {
     }
     
     @Override
-    public Product updateProduct(Integer id, ProductDTO productDTO) {
+    public Product updateProduct(Integer id, UpdateProductRequestDTO updateProductDTO) {
         log.info("Updating product with ID: {}", id);
         
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + id));
         
         // Kiểm tra tên sản phẩm có bị trùng không (nếu thay đổi tên)
-        if (!existingProduct.getItemName().equals(productDTO.getItemName()) 
-            && productRepository.existsByItemName(productDTO.getItemName())) {
-            throw new RuntimeException("Sản phẩm với tên '" + productDTO.getItemName() + "' đã tồn tại");
+        if (updateProductDTO.getItemName() != null 
+            && !existingProduct.getItemName().equals(updateProductDTO.getItemName()) 
+            && productRepository.existsByItemName(updateProductDTO.getItemName())) {
+            throw new RuntimeException("Sản phẩm với tên '" + updateProductDTO.getItemName() + "' đã tồn tại");
         }
         
-        existingProduct.setItemName(productDTO.getItemName());
-        existingProduct.setItemCategory(productDTO.getItemCategory());
-        existingProduct.setPrice(productDTO.getPrice());
-        existingProduct.setStock(productDTO.getStock());
-        existingProduct.setSupplierName(productDTO.getSupplierName());
+        // Cập nhật chỉ các trường được cung cấp
+        if (updateProductDTO.getItemName() != null) {
+            existingProduct.setItemName(updateProductDTO.getItemName());
+        }
+        if (updateProductDTO.getItemCategory() != null) {
+            existingProduct.setItemCategory(updateProductDTO.getItemCategory());
+        }
+        if (updateProductDTO.getPrice() != null) {
+            existingProduct.setPrice(updateProductDTO.getPrice());
+        }
+        if (updateProductDTO.getStock() != null) {
+            existingProduct.setStock(updateProductDTO.getStock());
+        }
+        if (updateProductDTO.getSupplierName() != null) {
+            existingProduct.setSupplierName(updateProductDTO.getSupplierName());
+        }
         
         Product updatedProduct = productRepository.save(existingProduct);
         log.info("Successfully updated product with ID: {}", updatedProduct.getItemId());
