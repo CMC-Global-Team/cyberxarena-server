@@ -17,6 +17,9 @@ public class Discount {
     @Column(name = "discount_id")
     private Integer discountId;
 
+    @Column(name = "discount_name", nullable = false, length = 100)
+    private String discountName;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false)
     private DiscountType discountType = DiscountType.Flat;
@@ -27,7 +30,8 @@ public class Discount {
     // Constructors
     public Discount() {}
     
-    public Discount(DiscountType discountType, BigDecimal discountValue) {
+    public Discount(String discountName, DiscountType discountType, BigDecimal discountValue) {
+        this.discountName = discountName;
         this.discountType = discountType;
         this.discountValue = discountValue;
     }
@@ -39,6 +43,14 @@ public class Discount {
     
     public void setDiscountId(Integer discountId) {
         this.discountId = discountId;
+    }
+    
+    public String getDiscountName() {
+        return discountName;
+    }
+    
+    public void setDiscountName(String discountName) {
+        this.discountName = discountName;
     }
     
     public DiscountType getDiscountType() {
