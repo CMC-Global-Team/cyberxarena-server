@@ -87,9 +87,10 @@ CREATE TABLE `sale_total` (
 --
 
 CREATE TABLE `discount` (
-  `discount_id` int NOT NULL,
-  `discount_type` enum('Flat', 'Percentage') not null default 'Flat',
-  `discount_value` decimal(10,2)
+  `discount_id` int NOT NULL AUTO_INCREMENT,
+  `discount_type` enum('Flat', 'Percentage') NOT NULL DEFAULT 'Flat',
+  `discount_value` decimal(10,2),
+  PRIMARY KEY (`discount_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
