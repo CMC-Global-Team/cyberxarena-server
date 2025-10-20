@@ -87,11 +87,12 @@ CREATE TABLE `sale_total` (
 -- Cấu trúc bảng cho bảng `discount`
 --
 
-CREATE TABLE `discount` (
-  `discount_id` int NOT NULL AUTO_INCREMENT,
-  `discount_type` enum('Flat', 'Percentage') NOT NULL DEFAULT 'Flat',
-  `discount_value` decimal(10,2),
-  PRIMARY KEY (`discount_id`)
+CREATE TABLE discount (
+  discount_id INT NOT NULL AUTO_INCREMENT,
+  discount_name VARCHAR(100) NOT NULL,
+  discount_type ENUM('Flat', 'Percentage') NOT NULL,
+  discount_value DECIMAL(10,2) NOT NULL,
+  PRIMARY KEY (discount_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
