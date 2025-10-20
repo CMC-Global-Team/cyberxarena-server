@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/membership-cards")
+@RequestMapping("/membership-cards") // Fixed: removed duplicate /api prefix
 @Tag(name = "Membership Card Management", description = "APIs for managing membership cards")
 public class MembershipCardController {
     
