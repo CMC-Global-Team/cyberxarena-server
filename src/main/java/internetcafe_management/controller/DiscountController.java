@@ -1,6 +1,7 @@
 package internetcafe_management.controller;
 
 import internetcafe_management.dto.DiscountDTO;
+import internetcafe_management.dto.UpdateDiscountRequestDTO;
 import internetcafe_management.entity.Discount;
 import internetcafe_management.service.discount.DiscountService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,6 +35,22 @@ public class DiscountController {
         log.info("Received request to create discount");
         Discount created = discountService.createDiscount(discountDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update discount", description = "Update an existing discount by ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Discount updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Discount not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Discount> updateDiscount(
+            @PathVariable Integer id,
+            @Valid @RequestBody UpdateDiscountRequestDTO updateRequestDTO) {
+        log.info("Received request to update discount with id={}", id);
+        Discount updated = discountService.updateDiscount(id, updateRequestDTO);
+        return ResponseEntity.ok(updated);
     }
 }
 
