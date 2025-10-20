@@ -66,8 +66,7 @@ CREATE TABLE `sale` (
   `sale_id` int NOT NULL,
   `customer_id` int NOT NULL,
   `sale_date` datetime DEFAULT current_timestamp(),	
-  `discount_type` enum('Percentage', 'Flat') not null default 'Flat',
-  `discount` decimal(10,2) not null DEFAULT 0.00,
+  `discount_id` int,
   `payment_method` varchar(50) not null default 'Cash',
   `note` varchar(200) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
