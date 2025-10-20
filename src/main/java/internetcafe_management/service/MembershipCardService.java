@@ -43,7 +43,10 @@ public class MembershipCardService {
         membershipCard.setDiscountId(request.getDiscountId());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
-        return convertToDTO(savedMembershipCard);
+        // Fetch the created membership card with discount data
+        MembershipCard membershipCardWithDiscount = membershipCardRepository.findByIdWithDiscount(savedMembershipCard.getMembershipCardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Membership card with ID " + savedMembershipCard.getMembershipCardId() + " not found"));
+        return convertToDTO(membershipCardWithDiscount);
     }
     
     public MembershipCardDTO getMembershipCardById(Integer id) {
@@ -60,7 +63,7 @@ public class MembershipCardService {
     }
     
     public MembershipCardDTO updateMembershipCard(Integer id, UpdateMembershipCardRequestDTO request) {
-        MembershipCard membershipCard = membershipCardRepository.findById(id)
+        MembershipCard membershipCard = membershipCardRepository.findByIdWithDiscount(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Membership card with ID " + id + " not found"));
         
         // Check if new name already exists (excluding current record)
@@ -79,7 +82,10 @@ public class MembershipCardService {
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
         
-        MembershipCard updatedMembershipCard = membershipCardRepository.save(membershipCard);
+        MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
+        // Fetch the updated membership card with discount data
+        MembershipCard updatedMembershipCard = membershipCardRepository.findByIdWithDiscount(savedMembershipCard.getMembershipCardId())
+                .orElseThrow(() -> new ResourceNotFoundException("Membership card with ID " + savedMembershipCard.getMembershipCardId() + " not found"));
         return convertToDTO(updatedMembershipCard);
     }
     
@@ -97,7 +103,7 @@ public class MembershipCardService {
         dto.setDiscountId(membershipCard.getDiscountId());
         
         if (membershipCard.getDiscount() != null) {
-            dto.setDiscountName("Discount " + membershipCard.getDiscount().getDiscountId());
+            dto.setDiscountName(membershipCard.getDiscount().getDiscountName());
             dto.setDiscountType(membershipCard.getDiscount().getDiscountType().toString());
             dto.setDiscountValue(membershipCard.getDiscount().getDiscountValue().doubleValue());
         }
