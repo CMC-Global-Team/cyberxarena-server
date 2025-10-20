@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/discounts")
@@ -35,6 +36,18 @@ public class DiscountController {
         log.info("Received request to create discount");
         Discount created = discountService.createDiscount(discountDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @GetMapping
+    @Operation(summary = "Get all discounts", description = "Retrieve all discounts")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<Discount>> getAllDiscounts() {
+        log.info("Received request to get all discounts");
+        List<Discount> discounts = discountService.getAllDiscounts();
+        return ResponseEntity.ok(discounts);
     }
 
     @PutMapping("/{id}")
