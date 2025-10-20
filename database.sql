@@ -299,6 +299,12 @@ ALTER TABLE `sale`
   MODIFY `sale_id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `discount`
+--
+ALTER TABLE `discount`
+  MODIFY `discount_id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
