@@ -43,10 +43,19 @@ public class MembershipCardService {
         membershipCard.setDiscountId(request.getDiscountId());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
-        // Fetch the created membership card with discount data
-        MembershipCard membershipCardWithDiscount = membershipCardRepository.findByIdWithDiscount(savedMembershipCard.getMembershipCardId())
-                .orElseThrow(() -> new ResourceNotFoundException("Membership card with ID " + savedMembershipCard.getMembershipCardId() + " not found"));
-        return convertToDTO(membershipCardWithDiscount);
+        
+        // Force flush to ensure the data is persisted before fetching
+        membershipCardRepository.flush();
+        
+        // Clear the persistence context to force fresh data fetch
+        // This ensures we get the latest data from database
+        if (request.getDiscountId() != null) {
+            // Manually load the discount and set it
+            var discount = discountRepository.findById(request.getDiscountId()).orElse(null);
+            savedMembershipCard.setDiscount(discount);
+        }
+        
+        return convertToDTO(savedMembershipCard);
     }
     
     public MembershipCardDTO getMembershipCardById(Integer id) {
@@ -83,10 +92,17 @@ public class MembershipCardService {
         membershipCard.setDiscountId(request.getDiscountId());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
-        // Fetch the updated membership card with discount data
-        MembershipCard updatedMembershipCard = membershipCardRepository.findByIdWithDiscount(savedMembershipCard.getMembershipCardId())
-                .orElseThrow(() -> new ResourceNotFoundException("Membership card with ID " + savedMembershipCard.getMembershipCardId() + " not found"));
-        return convertToDTO(updatedMembershipCard);
+        
+        // Force flush to ensure the data is persisted before fetching
+        membershipCardRepository.flush();
+        
+        // Manually load the discount and set it
+        if (request.getDiscountId() != null) {
+            var discount = discountRepository.findById(request.getDiscountId()).orElse(null);
+            savedMembershipCard.setDiscount(discount);
+        }
+        
+        return convertToDTO(savedMembershipCard);
     }
     
     public void deleteMembershipCard(Integer id) {
@@ -102,10 +118,21 @@ public class MembershipCardService {
         dto.setMembershipCardName(membershipCard.getMembershipCardName());
         dto.setDiscountId(membershipCard.getDiscountId());
         
+        // Debug logging
+        System.out.println("DEBUG: MembershipCard ID: " + membershipCard.getMembershipCardId());
+        System.out.println("DEBUG: Discount ID: " + membershipCard.getDiscountId());
+        System.out.println("DEBUG: Discount object: " + membershipCard.getDiscount());
+        
         if (membershipCard.getDiscount() != null) {
+            System.out.println("DEBUG: Discount name: " + membershipCard.getDiscount().getDiscountName());
+            System.out.println("DEBUG: Discount type: " + membershipCard.getDiscount().getDiscountType());
+            System.out.println("DEBUG: Discount value: " + membershipCard.getDiscount().getDiscountValue());
+            
             dto.setDiscountName(membershipCard.getDiscount().getDiscountName());
             dto.setDiscountType(membershipCard.getDiscount().getDiscountType().toString());
             dto.setDiscountValue(membershipCard.getDiscount().getDiscountValue().doubleValue());
+        } else {
+            System.out.println("DEBUG: Discount is null!");
         }
         
         return dto;
