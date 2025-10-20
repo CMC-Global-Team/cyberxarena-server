@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -53,6 +54,12 @@ public class DiscountServiceImpl implements DiscountService {
         Discount saved = discountRepository.save(existing);
         log.info("Updated discount id={} successfully", id);
         return saved;
+    }
+
+    @Override
+    public List<Discount> getAllDiscounts() {
+        log.info("Fetching all discounts");
+        return discountRepository.findAll();
     }
 }
 
