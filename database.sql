@@ -107,16 +107,6 @@ CREATE TABLE `sale_detail` (
   `quantity` int NOT NULL CHECK (`quantity` > 0)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- --------------------------------------------------------
-
---
--- Cấu trúc bảng cho bảng `sale_detail_total`
---
-
-CREATE TABLE `sale_detail_total` (
-  `sale_detail_id` int NOT NULL,
-  `total_amount` decimal(10,2) default 0.0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
  
