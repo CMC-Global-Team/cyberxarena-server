@@ -219,6 +219,12 @@ ALTER TABLE `discount`
   ADD PRIMARY KEY (`discount_id`);
 
 --
+-- Chỉ mục cho bảng `sale_total`
+--
+ALTER TABLE `sale_total`
+  ADD PRIMARY KEY (`sale_id`);
+
+--
 -- Chỉ mục cho bảng `sale_detail`
 --
 ALTER TABLE `sale_detail`
