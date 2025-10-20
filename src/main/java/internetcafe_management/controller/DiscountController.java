@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/discounts")
@@ -64,6 +65,20 @@ public class DiscountController {
         log.info("Received request to update discount with id={}", id);
         Discount updated = discountService.updateDiscount(id, updateRequestDTO);
         return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get discount by ID", description = "Retrieve a discount by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Discount retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Discount not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Discount> getDiscountById(@PathVariable Integer id) {
+        log.info("Received request to get discount by id={}", id);
+        Optional<Discount> discountOpt = discountService.getDiscountById(id);
+        return discountOpt.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 }
 
