@@ -1,5 +1,6 @@
 package internetcafe_management.controller;
 
+import internetcafe_management.dto.SessionDetailsDTO;
 import internetcafe_management.entity.Session;
 import internetcafe_management.service.session.SessionService;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/sessions")
@@ -30,20 +32,24 @@ public class SessionController {
         PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sort[0]));
         return sessionService.getAllSessions(pageable);
     }
+
     @PostMapping
     public Session createSession(@RequestBody Session session) {
         return sessionService.createSession(session);
     }
+
     @PutMapping("/{id}")
     public Session updateSession(@PathVariable Integer id, @RequestBody Session session) {
         return sessionService.updateSession(id, session);
     }
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComputer(@PathVariable Integer id) {
-        sessionService.deleteSession(id);
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSession(@PathVariable Integer id) {
+        sessionService.deleteSession(id);
         return ResponseEntity.noContent().build();
     }
+
+    // Tìm kiếm session theo điều kiện
     @GetMapping("/search")
     public List<Session> searchSessions(
             @RequestParam(required = false) Integer customerId,
@@ -53,4 +59,9 @@ public class SessionController {
         return sessionService.searchSessions(customerId, computerId, startTime, endTime);
     }
 
+    // Lấy session kèm tổng tiền và thời lượng sử dụng
+    @GetMapping("/with-details")
+    public List<SessionDetailsDTO> getAllWithTotalAndUsage() {
+        return sessionService.getSessionsWithTotalAmount();
+    }
 }

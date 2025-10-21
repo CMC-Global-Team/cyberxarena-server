@@ -27,4 +27,15 @@ public class Session {
 
     @Column(name = "end_time")
     private LocalDateTime endTime;
+    @Transient
+    private Double durationHours;
+
+    @OneToOne
+    @JoinColumn(name = "session_id", referencedColumnName = "session_id", insertable = false, updatable = false)
+    private SessionPrice sessionPrice;
+
+    @OneToOne
+    @JoinColumn(name = "session_id", referencedColumnName = "session_id", insertable = false, updatable = false)
+    private SessionUsage sessionUsage;
+
 }
