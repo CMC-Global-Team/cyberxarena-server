@@ -59,4 +59,9 @@ public class SaleServiceImpl implements SaleService {
         }
         return null;
     }
+
+    @Override
+    public void delete(Integer saleId) {
+        saleRepository.deleteById(saleId);
+    }
 }
