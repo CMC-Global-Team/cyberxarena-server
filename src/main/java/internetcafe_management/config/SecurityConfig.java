@@ -42,6 +42,7 @@ public class SecurityConfig {
         
         // Allow specific origins
         configuration.setAllowedOriginPatterns(Arrays.asList(
+            "https://cyberxarena-client.vercel.app",
             "https://cyberxarena-server.onrender.com",
             "https://cyberxarena-server.herokuapp.com",
             "http://localhost:3000",
