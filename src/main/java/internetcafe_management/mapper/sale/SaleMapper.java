@@ -2,7 +2,7 @@ package internetcafe_management.mapper.sale;
 
 import internetcafe_management.dto.CustomerDTO;
 import internetcafe_management.dto.SaleDTO;
-import internetcafe_management.dto.SaleItemDTO;
+import internetcafe_management.dto.SaleDetailDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
 import internetcafe_management.entity.SaleDetail;
@@ -22,7 +22,7 @@ public class SaleMapper {
         dto.setPaymentMethod(entity.getPaymentMethod());
         dto.setNote(entity.getNote());
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
-                .map(detail -> new SaleItemDTO(detail.getItemId(), detail.getQuantity()))
+                .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);
         return dto;
     }
