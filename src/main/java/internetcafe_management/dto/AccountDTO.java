@@ -14,5 +14,5 @@ public class AccountDTO {
     private String password;
     private String customerName;
     private String phoneNumber;
-    private String membershipCard;
+    private Integer membershipCardId;
 }

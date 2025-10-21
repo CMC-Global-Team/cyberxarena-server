@@ -12,7 +12,7 @@ public class CustomerMapper {
         dto.setCustomerId(entity.getCustomerId());
         dto.setCustomerName(entity.getCustomerName());
         dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setMembershipCardId(entity.getMembershipCardId());
         dto.setBalance(entity.getBalance());
         dto.setRegistrationDate(entity.getRegistrationDate());
         return dto;
@@ -24,7 +24,7 @@ public class CustomerMapper {
         entity.setCustomerId(dto.getCustomerId());
         entity.setCustomerName(dto.getCustomerName());
         entity.setPhoneNumber(dto.getPhoneNumber());
-        entity.setMembershipCard(dto.getMembershipCard());
+        entity.setMembershipCardId(dto.getMembershipCardId());
         entity.setBalance(dto.getBalance());
         return entity;
     }
@@ -34,7 +34,7 @@ public class CustomerMapper {
         dto.setCustomerId(entity.getCustomerId());
         dto.setCustomerName(entity.getCustomerName());
         dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setMembershipCardId(entity.getMembershipCardId());
         dto.setBalance(entity.getBalance());
         dto.setRegistrationDate(entity.getRegistrationDate());
         return dto;
@@ -45,7 +45,7 @@ public class CustomerMapper {
         dto.setCustomerId(entity.getCustomerId());
         dto.setCustomerName(entity.getCustomerName());
         dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setMembershipCardId(entity.getMembershipCardId());
         dto.setBalance(entity.getBalance());
         dto.setRegistrationDate(entity.getRegistrationDate());
         return dto;
@@ -56,7 +56,7 @@ public class CustomerMapper {
         dto.setCustomerId(entity.getCustomerId());
         dto.setCustomerName(entity.getCustomerName());
         dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setMembershipCardId(entity.getMembershipCardId());
         dto.setBalance(entity.getBalance());
         dto.setRegistrationDate(entity.getRegistrationDate());
         return dto;
@@ -67,7 +67,7 @@ public class CustomerMapper {
         dto.setCustomerId(entity.getCustomerId());
         dto.setCustomerName(entity.getCustomerName());
         dto.setPhoneNumber(entity.getPhoneNumber());
-        dto.setMembershipCard(entity.getMembershipCard());
+        dto.setMembershipCardId(entity.getMembershipCardId());
         dto.setBalance(entity.getBalance());
         dto.setRegistrationDate(entity.getRegistrationDate());
         return dto;
