@@ -38,9 +38,15 @@ public class MembershipCardService {
             }
         }
         
+        // If setting as default, unset all other default cards first
+        if (request.getIsDefault() != null && request.getIsDefault()) {
+            membershipCardRepository.unsetAllDefaultCards();
+        }
+        
         MembershipCard membershipCard = new MembershipCard();
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : false);
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
         
@@ -88,8 +94,14 @@ public class MembershipCardService {
             }
         }
         
+        // If setting as default, unset all other default cards first
+        if (request.getIsDefault() != null && request.getIsDefault()) {
+            membershipCardRepository.unsetAllDefaultCards();
+        }
+        
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : membershipCard.getIsDefault());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
         
@@ -112,11 +124,18 @@ public class MembershipCardService {
         membershipCardRepository.deleteById(id);
     }
     
+    public MembershipCardDTO getDefaultMembershipCard() {
+        MembershipCard defaultCard = membershipCardRepository.findByIsDefaultTrue()
+                .orElseThrow(() -> new ResourceNotFoundException("No default membership card found"));
+        return convertToDTO(defaultCard);
+    }
+    
     private MembershipCardDTO convertToDTO(MembershipCard membershipCard) {
         MembershipCardDTO dto = new MembershipCardDTO();
         dto.setMembershipCardId(membershipCard.getMembershipCardId());
         dto.setMembershipCardName(membershipCard.getMembershipCardName());
         dto.setDiscountId(membershipCard.getDiscountId());
+        dto.setIsDefault(membershipCard.getIsDefault());
         
         if (membershipCard.getDiscount() != null) {
             dto.setDiscountName(membershipCard.getDiscount().getDiscountName());
