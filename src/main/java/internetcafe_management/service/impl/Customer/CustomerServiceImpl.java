@@ -30,8 +30,8 @@ public class CustomerServiceImpl implements CustomerService {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
         Customer entity = customerMapper.toEntity(dto);
         
-        // If no membership card is specified, try to set default membership card
-        if (entity.getMembershipCardId() == null) {
+        // If no membership card is specified (null or 0), try to set default membership card
+        if (entity.getMembershipCardId() == null || entity.getMembershipCardId() == 0) {
             try {
                 var defaultMembershipCard = membershipCardService.getDefaultMembershipCard();
                 entity.setMembershipCardId(defaultMembershipCard.getMembershipCardId());
@@ -39,6 +39,7 @@ public class CustomerServiceImpl implements CustomerService {
             } catch (Exception e) {
                 // If no default membership card exists, leave it as null
                 System.out.println("No default membership card found, leaving customer without membership card: " + e.getMessage());
+                entity.setMembershipCardId(null);
             }
         }
         
