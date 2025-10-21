@@ -28,11 +28,11 @@ public class SaleMapper {
     }
 
 
-    public Sale toEntity(SaleDTO dto) {
+    public Sale toEntity(SaleDTO dto, Customer customer) {
         if (dto == null) return null;
         Sale entity = new Sale();
         entity.setSaleId(dto.getSaleId());
-        entity.setCustomer(entity.getCustomer());
+        entity.setCustomer(customer);
         entity.setSaleDate(dto.getSaleDate());
         entity.setDiscountId(dto.getDiscountId());
         entity.setPaymentMethod(dto.getPaymentMethod());
