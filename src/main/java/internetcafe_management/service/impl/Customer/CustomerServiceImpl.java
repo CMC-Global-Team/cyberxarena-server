@@ -29,10 +29,12 @@ public class CustomerServiceImpl implements CustomerService {
     public CustomerDTO createCustomer(CustomerDTO dto) {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
         
-        // For create operation, always set customerId to null to let database auto-generate
-        dto.setCustomerId(null);
-        
-        Customer entity = customerMapper.toEntity(dto);
+        // Create new entity without setting customerId
+        Customer entity = new Customer();
+        entity.setCustomerName(dto.getCustomerName());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setMembershipCardId(dto.getMembershipCardId());
+        entity.setBalance(dto.getBalance());
         
         // If no membership card is specified (null or 0), try to set default membership card
         if (entity.getMembershipCardId() == null || entity.getMembershipCardId() == 0) {
@@ -47,7 +49,9 @@ public class CustomerServiceImpl implements CustomerService {
             }
         }
         
+        System.out.println("Entity before save: " + entity);
         Customer saved = customerRepository.save(entity);
+        System.out.println("Entity after save: " + saved);
         return customerMapper.toDTO(saved);
     }
 
