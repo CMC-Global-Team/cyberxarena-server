@@ -2,6 +2,7 @@ package internetcafe_management.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import java.math.BigDecimal;
 
 public class CreateMembershipCardRequestDTO {
     
@@ -11,6 +12,8 @@ public class CreateMembershipCardRequestDTO {
     
     private Integer discountId;
     
+    private BigDecimal rechargeThreshold = BigDecimal.ZERO;
+    
     private Boolean isDefault = false;
     
     // Constructors
@@ -19,12 +22,21 @@ public class CreateMembershipCardRequestDTO {
     public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId) {
         this.membershipCardName = membershipCardName;
         this.discountId = discountId;
+        this.rechargeThreshold = BigDecimal.ZERO;
         this.isDefault = false;
     }
     
-    public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId, Boolean isDefault) {
+    public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId, BigDecimal rechargeThreshold) {
         this.membershipCardName = membershipCardName;
         this.discountId = discountId;
+        this.rechargeThreshold = rechargeThreshold != null ? rechargeThreshold : BigDecimal.ZERO;
+        this.isDefault = false;
+    }
+    
+    public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId, BigDecimal rechargeThreshold, Boolean isDefault) {
+        this.membershipCardName = membershipCardName;
+        this.discountId = discountId;
+        this.rechargeThreshold = rechargeThreshold != null ? rechargeThreshold : BigDecimal.ZERO;
         this.isDefault = isDefault;
     }
     
@@ -51,5 +63,13 @@ public class CreateMembershipCardRequestDTO {
     
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
+    }
+    
+    public BigDecimal getRechargeThreshold() {
+        return rechargeThreshold;
+    }
+    
+    public void setRechargeThreshold(BigDecimal rechargeThreshold) {
+        this.rechargeThreshold = rechargeThreshold;
     }
 }
