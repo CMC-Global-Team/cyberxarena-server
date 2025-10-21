@@ -2,6 +2,7 @@ package internetcafe_management.controller;
 
 
 import internetcafe_management.dto.SaleDTO;
+import internetcafe_management.dto.UpdateSaleRequestDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
 import internetcafe_management.service.sale.SaleService;
@@ -23,5 +24,9 @@ public class SaleController {
     @PostMapping
     public Sale createSession(@RequestBody SaleDTO sale, @RequestParam Integer customerId) {
         return saleService.create(sale, customerId);
+    }
+    @PutMapping("/{id}")
+    public Sale updateSale(@PathVariable Integer id, @RequestBody UpdateSaleRequestDTO dto) {
+        return saleService.update(id, dto);
     }
 }
