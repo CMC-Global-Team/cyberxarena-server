@@ -1,5 +1,6 @@
-create database test;
-use test;
+-- ======================
+-- XÓA & TẠO LẠI DATABASE
+-- ======================
 DROP DATABASE IF EXISTS internet_cafe;
 CREATE DATABASE internet_cafe;
 USE internet_cafe;
@@ -49,6 +50,20 @@ CREATE TABLE customer (
   CONSTRAINT fk_customer_membership FOREIGN KEY (membership_card_id)
     REFERENCES membership_card(membership_card_id)
     ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ======================
+--  BẢNG RECHARGE_HISTORY (LỊCH SỬ NẠP TIỀN)
+-- ======================
+CREATE TABLE recharge_history (
+  recharge_id INT NOT NULL AUTO_INCREMENT,
+  customer_id INT NOT NULL,
+  amount DECIMAL(12,2) NOT NULL,
+  recharge_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (recharge_id),
+  CONSTRAINT fk_recharge_customer FOREIGN KEY (customer_id)
+    REFERENCES customer(customer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ======================
@@ -103,9 +118,11 @@ CREATE TABLE sale (
   note VARCHAR(200),
   PRIMARY KEY (sale_id),
   CONSTRAINT fk_sale_customer FOREIGN KEY (customer_id)
-    REFERENCES customer(customer_id),
+    REFERENCES customer(customer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_sale_discount FOREIGN KEY (discount_id)
     REFERENCES discount(discount_id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ======================
@@ -134,6 +151,7 @@ CREATE TABLE sale_detail (
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_detail_item FOREIGN KEY (item_id)
     REFERENCES item(item_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ======================
@@ -147,9 +165,11 @@ CREATE TABLE session (
   end_time DATETIME DEFAULT NULL,
   PRIMARY KEY (session_id),
   CONSTRAINT fk_session_customer FOREIGN KEY (customer_id)
-    REFERENCES customer(customer_id),
+    REFERENCES customer(customer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_session_computer FOREIGN KEY (computer_id)
     REFERENCES computer(computer_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ======================
