@@ -173,6 +173,20 @@ create table session_price(
     session_id int,
     total_amount DECIMAL(10,2)
 );
+-- --------------------------------------------------------
+--
+-- Cấu trúc bảng cho bảng `session_usage`
+--
+
+CREATE TABLE `session_usage` (
+  `session_id` INT NOT NULL,
+  `duration_hours` DECIMAL(10,2) DEFAULT 0.00,
+  `remaining_hours` DECIMAL(10,2) DEFAULT 0.00,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`session_id`),
+  CONSTRAINT `session_usage_ibfk_1` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Chỉ mục cho các bảng đã đổ
