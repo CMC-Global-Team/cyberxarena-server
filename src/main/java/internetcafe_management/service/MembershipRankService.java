@@ -32,6 +32,8 @@ public class MembershipRankService {
      * @param newRechargeAmount Số tiền nạp mới
      */
     public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
+        System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
+        
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
         
@@ -41,22 +43,35 @@ public class MembershipRankService {
             currentTotalRecharge = BigDecimal.ZERO;
         }
         
+        System.out.println("Current total recharge: " + currentTotalRecharge);
+        System.out.println("Current membership card ID: " + customer.getMembershipCardId());
+        
         // Tìm membership card phù hợp dựa trên tổng số tiền nạp
         MembershipCard appropriateCard = findAppropriateMembershipCard(currentTotalRecharge);
+        
+        System.out.println("Appropriate card found: " + (appropriateCard != null ? 
+            appropriateCard.getMembershipCardName() + " (ID: " + appropriateCard.getMembershipCardId() + ")" : "null"));
         
         // Cập nhật membership card cho khách hàng nếu cần
         if (appropriateCard != null && 
             (customer.getMembershipCardId() == null || 
              !customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId()))) {
             
+            System.out.println("Updating customer membership from " + customer.getMembershipCardId() + 
+                             " to " + appropriateCard.getMembershipCardId());
+            
             customer.setMembershipCardId(appropriateCard.getMembershipCardId());
             customerRepository.save(customer);
             
             // Log hoặc thông báo về việc cập nhật membership
-            System.out.println("Customer " + customerId + " upgraded to membership: " + 
+            System.out.println("✅ Customer " + customerId + " upgraded to membership: " + 
                              appropriateCard.getMembershipCardName() + 
                              " (Total recharge: " + currentTotalRecharge + ")");
+        } else {
+            System.out.println("❌ No membership update needed for customer " + customerId);
         }
+        
+        System.out.println("=== End membership rank update ===");
     }
     
     /**
@@ -65,15 +80,34 @@ public class MembershipRankService {
      * @return MembershipCard phù hợp hoặc null nếu không tìm thấy
      */
     private MembershipCard findAppropriateMembershipCard(BigDecimal totalRechargeAmount) {
-        // Lấy tất cả membership cards, sắp xếp theo recharge threshold giảm dần
+        System.out.println("Finding appropriate card for total recharge: " + totalRechargeAmount);
+        
+        // Lấy tất cả membership cards
         List<MembershipCard> allCards = membershipCardRepository.findAll();
+        System.out.println("Total membership cards available: " + allCards.size());
+        
+        // Log tất cả cards
+        for (MembershipCard card : allCards) {
+            System.out.println("Card: " + card.getMembershipCardName() + 
+                             ", Threshold: " + card.getRechargeThreshold() + 
+                             ", ID: " + card.getMembershipCardId());
+        }
         
         // Tìm card có threshold cao nhất mà khách hàng đạt được
-        return allCards.stream()
+        MembershipCard appropriateCard = allCards.stream()
                 .filter(card -> card.getRechargeThreshold() != null && 
                                card.getRechargeThreshold().compareTo(totalRechargeAmount) <= 0)
                 .max((card1, card2) -> card1.getRechargeThreshold().compareTo(card2.getRechargeThreshold()))
                 .orElse(getDefaultMembershipCard());
+        
+        if (appropriateCard != null) {
+            System.out.println("Selected card: " + appropriateCard.getMembershipCardName() + 
+                             " with threshold: " + appropriateCard.getRechargeThreshold());
+        } else {
+            System.out.println("No appropriate card found, using default");
+        }
+        
+        return appropriateCard;
     }
     
     /**
@@ -81,8 +115,39 @@ public class MembershipRankService {
      * @return MembershipCard mặc định
      */
     private MembershipCard getDefaultMembershipCard() {
-        return membershipCardRepository.findByIsDefaultTrue()
+        MembershipCard defaultCard = membershipCardRepository.findByIsDefaultTrue()
                 .orElse(null);
+        
+        if (defaultCard != null) {
+            System.out.println("Default card found: " + defaultCard.getMembershipCardName() + 
+                             " (ID: " + defaultCard.getMembershipCardId() + ")");
+        } else {
+            System.out.println("❌ No default card found!");
+        }
+        
+        return defaultCard;
+    }
+    
+    /**
+     * Debug method để kiểm tra dữ liệu membership cards
+     */
+    public void debugMembershipCards() {
+        System.out.println("=== DEBUG: Membership Cards ===");
+        List<MembershipCard> allCards = membershipCardRepository.findAll();
+        
+        if (allCards.isEmpty()) {
+            System.out.println("❌ No membership cards found in database!");
+            return;
+        }
+        
+        System.out.println("Total membership cards: " + allCards.size());
+        for (MembershipCard card : allCards) {
+            System.out.println("ID: " + card.getMembershipCardId() + 
+                             ", Name: " + card.getMembershipCardName() + 
+                             ", Threshold: " + card.getRechargeThreshold() + 
+                             ", Is Default: " + card.getIsDefault());
+        }
+        System.out.println("=== END DEBUG ===");
     }
     
     /**

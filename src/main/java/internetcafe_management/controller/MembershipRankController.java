@@ -53,4 +53,11 @@ public class MembershipRankController {
         membershipRankService.updateAllCustomersMembershipRank();
         return ResponseEntity.ok("All customers membership ranks have been updated successfully");
     }
+    
+    @GetMapping("/debug/cards")
+    @Operation(summary = "Debug membership cards", description = "Debug and display all membership cards information")
+    public ResponseEntity<String> debugMembershipCards() {
+        membershipRankService.debugMembershipCards();
+        return ResponseEntity.ok("Debug information printed to console");
+    }
 }
