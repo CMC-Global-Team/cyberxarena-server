@@ -4,6 +4,7 @@ import internetcafe_management.dto.CustomerDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
+import internetcafe_management.service.MembershipCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import internetcafe_management.service.Customer.CustomerService;
@@ -19,12 +20,27 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private CustomerMapper customerMapper;
+    
+    @Autowired
+    private MembershipCardService membershipCardService;
 
 
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
         Customer entity = customerMapper.toEntity(dto);
+        
+        // If no membership card is specified, set default membership card
+        if (entity.getMembershipCardId() == null) {
+            try {
+                var defaultMembershipCard = membershipCardService.getDefaultMembershipCard();
+                entity.setMembershipCardId(defaultMembershipCard.getMembershipCardId());
+            } catch (Exception e) {
+                // If no default membership card exists, leave it as null
+                System.out.println("No default membership card found, leaving customer without membership card");
+            }
+        }
+        
         Customer saved = customerRepository.save(entity);
         return customerMapper.toDTO(saved);
     }
