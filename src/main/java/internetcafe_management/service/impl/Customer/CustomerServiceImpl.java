@@ -28,6 +28,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
+        
+        // For create operation, always set customerId to null to let database auto-generate
+        dto.setCustomerId(null);
+        
         Customer entity = customerMapper.toEntity(dto);
         
         // If no membership card is specified (null or 0), try to set default membership card
