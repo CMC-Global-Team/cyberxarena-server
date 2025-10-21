@@ -11,12 +11,21 @@ public class CreateMembershipCardRequestDTO {
     
     private Integer discountId;
     
+    private Boolean isDefault = false;
+    
     // Constructors
     public CreateMembershipCardRequestDTO() {}
     
     public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId) {
         this.membershipCardName = membershipCardName;
         this.discountId = discountId;
+        this.isDefault = false;
+    }
+    
+    public CreateMembershipCardRequestDTO(String membershipCardName, Integer discountId, Boolean isDefault) {
+        this.membershipCardName = membershipCardName;
+        this.discountId = discountId;
+        this.isDefault = isDefault;
     }
     
     // Getters and Setters
@@ -34,5 +43,13 @@ public class CreateMembershipCardRequestDTO {
     
     public void setDiscountId(Integer discountId) {
         this.discountId = discountId;
+    }
+    
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
+    
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
     }
 }
