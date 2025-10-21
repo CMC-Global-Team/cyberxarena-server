@@ -81,7 +81,7 @@ public class AccountController {
      * @param username tên đăng nhập (optional)
      * @param customerName tên khách hàng (optional)
      * @param phoneNumber số điện thoại (optional)
-     * @param membershipCard thẻ thành viên (optional)
+     * @param membershipCardId ID thẻ thành viên (optional)
      * @param page số trang (default: 0)
      * @param size kích thước trang (default: 10)
      * @param sortBy trường sắp xếp (default: accountId)
@@ -93,7 +93,7 @@ public class AccountController {
             @RequestParam(required = false) String username,
             @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String phoneNumber,
-            @RequestParam(required = false) String membershipCard,
+            @RequestParam(required = false) Integer membershipCardId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(defaultValue = "accountId") String sortBy,
@@ -103,7 +103,7 @@ public class AccountController {
         searchRequest.setUsername(username);
         searchRequest.setCustomerName(customerName);
         searchRequest.setPhoneNumber(phoneNumber);
-        searchRequest.setMembershipCard(membershipCard);
+        searchRequest.setMembershipCardId(membershipCardId);
         searchRequest.setPage(page);
         searchRequest.setSize(size);
         searchRequest.setSortBy(sortBy);
