@@ -1,5 +1,6 @@
 package internetcafe_management.service.impl.session;
 
+import internetcafe_management.dto.SessionDetailsDTO;
 import internetcafe_management.entity.Session;
 import internetcafe_management.repository.session.SessionRepository;
 import internetcafe_management.service.session.SessionService;
@@ -42,21 +43,12 @@ public class SessionServiceImpl implements SessionService {
         if (!sessionRepository.existsById(id))
             throw new RuntimeException("Session not found");
         sessionRepository.deleteById(id);
+    }@Override
+    public List<SessionDetailsDTO> getSessionsWithTotalAmount() {
+        return sessionRepository.findAllWithDetails();
     }
-    @Override
-    public List<Map<String, Object>> getSessionsWithTotalAmount() {
-        List<Object[]> result = sessionRepository.findAllWithTotalAmount();
-        List<Map<String, Object>> list = new ArrayList<>();
-        for (Object[] row : result) {
-            Session s = (Session) row[0];
-            BigDecimal total = (BigDecimal) row[1];
-            Map<String, Object> map = new HashMap<>();
-            map.put("session", s);
-            map.put("totalAmount", total);
-            list.add(map);
-        }
-        return list;
-    }
+
+
     @Override
     public List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime) {
         return sessionRepository.searchSessions(customerId, computerId, startTime, endTime);
