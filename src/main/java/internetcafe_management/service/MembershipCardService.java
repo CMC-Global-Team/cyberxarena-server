@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,7 @@ public class MembershipCardService {
         MembershipCard membershipCard = new MembershipCard();
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setRechargeThreshold(request.getRechargeThreshold() != null ? request.getRechargeThreshold() : BigDecimal.ZERO);
         membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : false);
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
@@ -101,6 +103,7 @@ public class MembershipCardService {
         
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setRechargeThreshold(request.getRechargeThreshold() != null ? request.getRechargeThreshold() : membershipCard.getRechargeThreshold());
         membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : membershipCard.getIsDefault());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
@@ -135,6 +138,7 @@ public class MembershipCardService {
         dto.setMembershipCardId(membershipCard.getMembershipCardId());
         dto.setMembershipCardName(membershipCard.getMembershipCardName());
         dto.setDiscountId(membershipCard.getDiscountId());
+        dto.setRechargeThreshold(membershipCard.getRechargeThreshold());
         dto.setIsDefault(membershipCard.getIsDefault());
         
         if (membershipCard.getDiscount() != null) {

@@ -2,8 +2,10 @@ package internetcafe_management.controller;
 
 import internetcafe_management.dto.CreateMembershipCardRequestDTO;
 import internetcafe_management.dto.MembershipCardDTO;
+import internetcafe_management.dto.MembershipRankInfoDTO;
 import internetcafe_management.dto.UpdateMembershipCardRequestDTO;
 import internetcafe_management.service.MembershipCardService;
+import internetcafe_management.service.MembershipRankService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -21,6 +23,9 @@ public class MembershipCardController {
     
     @Autowired
     private MembershipCardService membershipCardService;
+    
+    @Autowired
+    private MembershipRankService membershipRankService;
     
     @PostMapping
     @Operation(summary = "Create a new membership card", description = "Create a new membership card with optional discount")
@@ -57,5 +62,26 @@ public class MembershipCardController {
     public ResponseEntity<Void> deleteMembershipCard(@PathVariable Integer id) {
         membershipCardService.deleteMembershipCard(id);
         return ResponseEntity.noContent().build();
+    }
+    
+    @GetMapping("/default")
+    @Operation(summary = "Get default membership card", description = "Retrieve the default membership card")
+    public ResponseEntity<MembershipCardDTO> getDefaultMembershipCard() {
+        MembershipCardDTO defaultCard = membershipCardService.getDefaultMembershipCard();
+        return ResponseEntity.ok(defaultCard);
+    }
+    
+    @GetMapping("/rank-info/{customerId}")
+    @Operation(summary = "Get customer membership rank info", description = "Get detailed membership rank information for a customer")
+    public ResponseEntity<MembershipRankInfoDTO> getCustomerMembershipRankInfo(@PathVariable Integer customerId) {
+        MembershipRankInfoDTO rankInfo = membershipRankService.getMembershipRankInfo(customerId);
+        return ResponseEntity.ok(rankInfo);
+    }
+    
+    @PostMapping("/update-all-ranks")
+    @Operation(summary = "Update all customers membership ranks", description = "Batch update membership ranks for all customers based on their recharge history")
+    public ResponseEntity<String> updateAllCustomersMembershipRanks() {
+        membershipRankService.updateAllCustomersMembershipRank();
+        return ResponseEntity.ok("All customers membership ranks have been updated successfully");
     }
 }

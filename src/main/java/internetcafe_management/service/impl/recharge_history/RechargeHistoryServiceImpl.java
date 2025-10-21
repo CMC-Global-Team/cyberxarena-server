@@ -10,6 +10,7 @@ import internetcafe_management.mapper.recharge_history.RechargeHistoryMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.recharge_history.RechargeHistoryRepository;
 import internetcafe_management.service.recharge_history.RechargeHistoryService;
+import internetcafe_management.service.MembershipRankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,9 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
     @Autowired
     private RechargeHistoryMapper rechargeHistoryMapper;
     
+    @Autowired
+    private MembershipRankService membershipRankService;
+    
     @Override
     public RechargeHistoryDTO createRechargeHistory(CreateRechargeHistoryRequestDTO request) {
         // Validate customer exists
@@ -53,6 +57,9 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         BigDecimal currentBalance = customer.getBalance() != null ? customer.getBalance() : BigDecimal.ZERO;
         customer.setBalance(currentBalance.add(request.getAmount()));
         customerRepository.save(customer);
+        
+        // Update membership rank based on new recharge amount
+        membershipRankService.updateMembershipRank(request.getCustomerId(), request.getAmount());
         
         return rechargeHistoryMapper.toDTO(savedRechargeHistory);
     }
@@ -152,6 +159,10 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         customer.setBalance(currentBalance.subtract(rechargeHistory.getAmount()));
         customerRepository.save(customer);
         
+        // Delete the recharge history
         rechargeHistoryRepository.deleteById(rechargeId);
+        
+        // Update membership rank after deletion (recalculate based on remaining recharge history)
+        membershipRankService.updateMembershipRank(rechargeHistory.getCustomerId(), BigDecimal.ZERO);
     }
 }
