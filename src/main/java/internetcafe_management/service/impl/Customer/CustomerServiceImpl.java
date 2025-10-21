@@ -46,7 +46,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
         existing.setCustomerName(dto.getCustomerName());
         existing.setPhoneNumber(dto.getPhoneNumber());
-        existing.setMembershipCard(dto.getMembershipCard());
+        existing.setMembershipCardId(dto.getMembershipCardId());
         existing.setBalance(dto.getBalance());
         Customer updated = customerRepository.save(existing);
         return customerMapper.toDTO(updated);
