@@ -29,12 +29,14 @@ CREATE TABLE membership_card (
   membership_card_id INT NOT NULL AUTO_INCREMENT,
   membership_card_name VARCHAR(100) NOT NULL,
   discount_id INT,
+  recharge_threshold DECIMAL(12,2) DEFAULT 0.00, -- Ngưỡng tổng tiền nạp để đạt thẻ này
   is_default BOOLEAN DEFAULT FALSE,
   PRIMARY KEY (membership_card_id),
   CONSTRAINT fk_membership_discount FOREIGN KEY (discount_id)
     REFERENCES discount(discount_id)
     ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 
 -- ======================
 --  BẢNG CUSTOMER
