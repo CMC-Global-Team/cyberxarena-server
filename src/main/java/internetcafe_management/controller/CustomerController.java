@@ -18,8 +18,14 @@ public class CustomerController {
     private CustomerService customerService;
 
     @PostMapping
-    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO dto) { // Thêm @Valid để kích hoạt validation
-        return ResponseEntity.ok(customerService.createCustomer(dto));
+    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO dto) {
+        try {
+            return ResponseEntity.ok(customerService.createCustomer(dto));
+        } catch (Exception e) {
+            System.err.println("Error creating customer: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
     @DeleteMapping("/{customerId}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable Integer customerId) {
@@ -38,7 +44,13 @@ public class CustomerController {
 
     @GetMapping
     public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+        try {
+            return ResponseEntity.ok(customerService.getAllCustomers());
+        } catch (Exception e) {
+            System.err.println("Error getting all customers: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/search")
@@ -48,6 +60,12 @@ public class CustomerController {
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) String email) {
-        return ResponseEntity.ok(customerService.searchCustomers(sortBy, sortOrder, name, phone, email));
+        try {
+            return ResponseEntity.ok(customerService.searchCustomers(sortBy, sortOrder, name, phone, email));
+        } catch (Exception e) {
+            System.err.println("Error searching customers: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
     }
 }

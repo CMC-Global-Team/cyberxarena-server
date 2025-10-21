@@ -28,20 +28,30 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
-        Customer entity = customerMapper.toEntity(dto);
         
-        // If no membership card is specified, set default membership card
-        if (entity.getMembershipCardId() == null) {
+        // Create new entity without setting customerId
+        Customer entity = new Customer();
+        entity.setCustomerName(dto.getCustomerName());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setMembershipCardId(dto.getMembershipCardId());
+        entity.setBalance(dto.getBalance());
+        
+        // If no membership card is specified (null or 0), try to set default membership card
+        if (entity.getMembershipCardId() == null || entity.getMembershipCardId() == 0) {
             try {
                 var defaultMembershipCard = membershipCardService.getDefaultMembershipCard();
                 entity.setMembershipCardId(defaultMembershipCard.getMembershipCardId());
+                System.out.println("Set default membership card ID: " + defaultMembershipCard.getMembershipCardId());
             } catch (Exception e) {
                 // If no default membership card exists, leave it as null
-                System.out.println("No default membership card found, leaving customer without membership card");
+                System.out.println("No default membership card found, leaving customer without membership card: " + e.getMessage());
+                entity.setMembershipCardId(null);
             }
         }
         
+        System.out.println("Entity before save: " + entity);
         Customer saved = customerRepository.save(entity);
+        System.out.println("Entity after save: " + saved);
         return customerMapper.toDTO(saved);
     }
 

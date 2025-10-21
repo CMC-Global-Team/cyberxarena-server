@@ -30,6 +30,7 @@ public class CorsFilter implements Filter {
         // Set CORS headers
         String origin = request.getHeader("Origin");
         if (origin != null && (
+            origin.contains("cyberxarena-client.vercel.app") ||
             origin.contains("cyberxarena-server.onrender.com") ||
             origin.contains("cyberxarena-server.herokuapp.com") ||
             origin.contains("localhost") ||
