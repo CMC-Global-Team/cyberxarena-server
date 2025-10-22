@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/sessions")
@@ -49,7 +48,6 @@ public class SessionController {
         return ResponseEntity.noContent().build();
     }
 
-    // Tìm kiếm session theo điều kiện
     @GetMapping("/search")
     public List<Session> searchSessions(
             @RequestParam(required = false) Integer customerId,
@@ -59,7 +57,6 @@ public class SessionController {
         return sessionService.searchSessions(customerId, computerId, startTime, endTime);
     }
 
-    // Lấy session kèm tổng tiền và thời lượng sử dụng
     @GetMapping("/with-details")
     public List<SessionDetailsDTO> getAllWithTotalAndUsage() {
         return sessionService.getSessionsWithTotalAmount();
