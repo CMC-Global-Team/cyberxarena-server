@@ -85,8 +85,8 @@ public class MembershipRankService {
             System.out.println("🔄 Updating customer membership from " + customer.getMembershipCardId() + 
                              " to " + appropriateCard.getMembershipCardId());
             
-            // Retry mechanism for lock timeout
-            int maxRetries = 3;
+            // Retry mechanism for lock timeout with exponential backoff
+            int maxRetries = 5;
             int retryCount = 0;
             boolean success = false;
             
@@ -95,17 +95,23 @@ public class MembershipRankService {
                     retryCount++;
                     System.out.println("🔄 Attempt " + retryCount + " to update customer " + customerId + " membership");
                     
-                    // Fetch fresh customer data to avoid stale object
-                    Customer freshCustomer = customerRepository.findById(customerId)
-                            .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+                    // Wait before retry (exponential backoff)
+                    if (retryCount > 1) {
+                        long waitTime = 1000 * (long) Math.pow(2, retryCount - 2); // 1s, 2s, 4s, 8s
+                        System.out.println("⏳ Waiting " + waitTime + "ms before retry...");
+                        Thread.sleep(waitTime);
+                    }
                     
-                    freshCustomer.setMembershipCardId(appropriateCard.getMembershipCardId());
-                    Customer savedCustomer = customerRepository.save(freshCustomer);
+                    // Try direct update query first to avoid lock timeout
+                    int updatedRows = customerRepository.updateMembershipCardId(customerId, appropriateCard.getMembershipCardId());
                     
-                    // Verify the save was successful
-                    System.out.println("💾 Customer saved with membership card ID: " + savedCustomer.getMembershipCardId());
-                    System.out.println("💾 Customer saved with name: " + savedCustomer.getCustomerName());
-                    System.out.println("💾 Customer saved with balance: " + savedCustomer.getBalance());
+                    if (updatedRows > 0) {
+                        System.out.println("💾 Direct query update successful - " + updatedRows + " row(s) updated");
+                        success = true;
+                    } else {
+                        System.err.println("❌ Direct query update failed - no rows updated");
+                        throw new RuntimeException("No rows updated for customer " + customerId);
+                    }
                     
                     // Double-check by fetching from database
                     Customer verifyCustomer = customerRepository.findById(customerId).orElse(null);
@@ -113,9 +119,16 @@ public class MembershipRankService {
                         System.out.println("🔍 Database verification - Customer " + customerId + " membership card ID: " + verifyCustomer.getMembershipCardId());
                         System.out.println("🔍 Database verification - Customer " + customerId + " name: " + verifyCustomer.getCustomerName());
                         System.out.println("🔍 Database verification - Customer " + customerId + " balance: " + verifyCustomer.getBalance());
-                        success = true;
+                        
+                        if (verifyCustomer.getMembershipCardId().equals(appropriateCard.getMembershipCardId())) {
+                            System.out.println("✅ Verification successful - membership card updated correctly");
+                        } else {
+                            System.err.println("❌ Verification failed - membership card not updated correctly");
+                            throw new RuntimeException("Membership card update verification failed");
+                        }
                     } else {
-                        System.err.println("❌ ERROR: Could not find customer " + customerId + " after save!");
+                        System.err.println("❌ ERROR: Could not find customer " + customerId + " after update!");
+                        throw new RuntimeException("Customer not found after update");
                     }
                     
                     // Log hoặc thông báo về việc cập nhật membership
@@ -126,18 +139,20 @@ public class MembershipRankService {
                 } catch (Exception e) {
                     System.err.println("❌ ERROR saving customer " + customerId + " (attempt " + retryCount + "): " + e.getMessage());
                     
-                    if (retryCount < maxRetries) {
-                        try {
-                            // Wait before retry (exponential backoff)
-                            long waitTime = 1000 * retryCount; // 1s, 2s, 3s
-                            System.out.println("⏳ Waiting " + waitTime + "ms before retry...");
-                            Thread.sleep(waitTime);
-                        } catch (InterruptedException ie) {
-                            Thread.currentThread().interrupt();
-                            break;
-                        }
+                    // Check if it's a lock timeout error
+                    boolean isLockTimeout = e.getMessage() != null && 
+                        (e.getMessage().contains("Lock wait timeout") || 
+                         e.getMessage().contains("PessimisticLockingFailureException"));
+                    
+                    if (isLockTimeout && retryCount < maxRetries) {
+                        System.out.println("🔒 Lock timeout detected, will retry...");
+                    } else if (retryCount < maxRetries) {
+                        System.out.println("🔄 Other error, will retry...");
                     } else {
                         System.err.println("❌ FAILED to update customer " + customerId + " after " + maxRetries + " attempts");
+                        if (isLockTimeout) {
+                            System.err.println("🔒 Final error was lock timeout - customer may need manual rank update");
+                        }
                         e.printStackTrace();
                     }
                 }
