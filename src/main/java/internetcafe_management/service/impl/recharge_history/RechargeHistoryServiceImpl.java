@@ -60,6 +60,9 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         
         // Tự động cập nhật rank cho TẤT CẢ khách hàng khi nạp tiền
         try {
+            // Force flush để đảm bảo recharge history đã được lưu
+            rechargeHistoryRepository.flush();
+            
             // Tính tổng số tiền nạp của khách hàng sau khi nạp thêm
             BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(request.getCustomerId());
             if (totalRecharge == null) {
@@ -68,12 +71,14 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
             
             System.out.println("🔄 Customer " + request.getCustomerId() + " total recharge after new recharge: " + totalRecharge);
             System.out.println("🔄 Current membership card ID: " + customer.getMembershipCardId());
+            System.out.println("🔄 Recharge amount just added: " + request.getAmount());
             
             membershipRankService.updateMembershipRankSync(request.getCustomerId(), totalRecharge);
             System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
                              " after recharge (auto-updated)");
         } catch (Exception rankError) {
             System.err.println("❌ Error updating membership rank after recharge: " + rankError.getMessage());
+            rankError.printStackTrace();
         }
         
         return rechargeHistoryMapper.toDTO(savedRechargeHistory);

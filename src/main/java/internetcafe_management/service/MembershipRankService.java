@@ -60,6 +60,12 @@ public class MembershipRankService {
         boolean needsUpdate = false;
         String updateReason = "";
         
+        System.out.println("🔍 Comparing membership cards:");
+        System.out.println("  Current customer membership card ID: " + customer.getMembershipCardId());
+        System.out.println("  Appropriate card ID: " + (appropriateCard != null ? appropriateCard.getMembershipCardId() : "null"));
+        System.out.println("  Appropriate card name: " + (appropriateCard != null ? appropriateCard.getMembershipCardName() : "null"));
+        System.out.println("  Appropriate card threshold: " + (appropriateCard != null ? appropriateCard.getRechargeThreshold() : "null"));
+        
         if (appropriateCard == null) {
             updateReason = "No appropriate card found";
         } else if (customer.getMembershipCardId() == null) {
