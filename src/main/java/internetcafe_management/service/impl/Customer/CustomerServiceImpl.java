@@ -76,20 +76,22 @@ public class CustomerServiceImpl implements CustomerService {
                 System.out.println("✅ Created initial recharge history for customer " + saved.getCustomerId() + 
                                  " with amount: " + saved.getBalance());
                 
-                // Chỉ tự động cập nhật rank nếu không có thẻ thành viên được chọn cụ thể
-                // (tức là đang sử dụng thẻ mặc định)
-                boolean isUsingDefaultCard = (dto.getMembershipCardId() == null || dto.getMembershipCardId() == 0);
-                if (isUsingDefaultCard) {
-                    try {
-                        membershipRankService.updateMembershipRank(saved.getCustomerId(), saved.getBalance());
-                        System.out.println("✅ Updated membership rank for customer " + saved.getCustomerId() + 
-                                         " (using default card, auto-updated)");
-                    } catch (Exception rankError) {
-                        System.err.println("❌ Error updating membership rank: " + rankError.getMessage());
+                // Tự động cập nhật rank cho TẤT CẢ khách hàng khi có số dư ban đầu
+                try {
+                    // Tính tổng số tiền nạp của khách hàng (số dư ban đầu)
+                    BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(saved.getCustomerId());
+                    if (totalRecharge == null) {
+                        totalRecharge = BigDecimal.ZERO;
                     }
-                } else {
-                    System.out.println("ℹ️ Customer " + saved.getCustomerId() + " using specific membership card " + 
-                                     dto.getMembershipCardId() + ", skipping auto rank update");
+                    
+                    System.out.println("🔄 Customer " + saved.getCustomerId() + " total recharge (initial balance): " + totalRecharge);
+                    System.out.println("🔄 Current membership card ID: " + saved.getMembershipCardId());
+                    
+                    membershipRankService.updateMembershipRank(saved.getCustomerId(), totalRecharge);
+                    System.out.println("✅ Updated membership rank for customer " + saved.getCustomerId() + 
+                                     " (auto-updated based on initial balance)");
+                } catch (Exception rankError) {
+                    System.err.println("❌ Error updating membership rank: " + rankError.getMessage());
                 }
             } catch (Exception e) {
                 System.err.println("❌ Error creating initial recharge history: " + e.getMessage());
@@ -141,20 +143,22 @@ public class CustomerServiceImpl implements CustomerService {
                 System.out.println("✅ Created recharge history for customer " + customerId + 
                                  " with additional amount: " + rechargeAmount);
                 
-                // Chỉ tự động cập nhật rank nếu không có thẻ thành viên được chọn cụ thể
-                // (tức là đang sử dụng thẻ mặc định)
-                boolean isUsingDefaultCard = (dto.getMembershipCardId() == null || dto.getMembershipCardId() == 0);
-                if (isUsingDefaultCard) {
-                    try {
-                        membershipRankService.updateMembershipRank(customerId, dto.getBalance());
-                        System.out.println("✅ Updated membership rank for customer " + customerId + 
-                                         " after balance update (using default card, auto-updated)");
-                    } catch (Exception rankError) {
-                        System.err.println("❌ Error updating membership rank after balance update: " + rankError.getMessage());
+                // Tự động cập nhật rank cho TẤT CẢ khách hàng khi cập nhật số dư
+                try {
+                    // Tính tổng số tiền nạp của khách hàng sau khi cập nhật
+                    BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customerId);
+                    if (totalRecharge == null) {
+                        totalRecharge = BigDecimal.ZERO;
                     }
-                } else {
-                    System.out.println("ℹ️ Customer " + customerId + " using specific membership card " + 
-                                     dto.getMembershipCardId() + ", skipping auto rank update after balance update");
+                    
+                    System.out.println("🔄 Customer " + customerId + " total recharge after balance update: " + totalRecharge);
+                    System.out.println("🔄 Current membership card ID: " + updated.getMembershipCardId());
+                    
+                    membershipRankService.updateMembershipRank(customerId, totalRecharge);
+                    System.out.println("✅ Updated membership rank for customer " + customerId + 
+                                     " after balance update (auto-updated)");
+                } catch (Exception rankError) {
+                    System.err.println("❌ Error updating membership rank after balance update: " + rankError.getMessage());
                 }
             } catch (Exception e) {
                 System.err.println("❌ Error creating recharge history for balance update: " + e.getMessage());

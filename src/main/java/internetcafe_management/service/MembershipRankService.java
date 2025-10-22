@@ -113,14 +113,6 @@ public class MembershipRankService {
                              ", Eligible: " + isEligible);
         }
         
-        // Tìm gói mặc định trước (nếu có ngưỡng = 0)
-        MembershipCard defaultCard = getDefaultMembershipCard();
-        if (defaultCard != null && defaultCard.getRechargeThreshold() != null && 
-            defaultCard.getRechargeThreshold().compareTo(BigDecimal.ZERO) == 0) {
-            System.out.println("✅ Found default card with threshold 0: " + defaultCard.getMembershipCardName());
-            return defaultCard;
-        }
-        
         // Tìm card có threshold cao nhất mà khách hàng đạt được
         List<MembershipCard> eligibleCards = allCards.stream()
                 .filter(card -> card.getRechargeThreshold() != null && 
