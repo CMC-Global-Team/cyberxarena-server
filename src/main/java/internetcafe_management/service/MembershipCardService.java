@@ -236,16 +236,24 @@ public class MembershipCardService {
                     customerInfo.put("totalRecharge", totalRecharge);
                     customerInfo.put("currentMembershipCardId", customer.getMembershipCardId());
                     
-                    // Lấy tên gói thành viên hiện tại
+                    // Lấy tên gói thành viên hiện tại và ngưỡng
                     if (customer.getMembershipCardId() != null) {
                         try {
                             MembershipCard currentCard = membershipCardRepository.findById(customer.getMembershipCardId()).orElse(null);
-                            customerInfo.put("currentMembershipCardName", currentCard != null ? currentCard.getMembershipCardName() : "Unknown");
+                            if (currentCard != null) {
+                                customerInfo.put("currentMembershipCardName", currentCard.getMembershipCardName());
+                                customerInfo.put("currentMembershipThreshold", currentCard.getRechargeThreshold());
+                            } else {
+                                customerInfo.put("currentMembershipCardName", "Unknown");
+                                customerInfo.put("currentMembershipThreshold", null);
+                            }
                         } catch (Exception e) {
                             customerInfo.put("currentMembershipCardName", "Unknown");
+                            customerInfo.put("currentMembershipThreshold", null);
                         }
                     } else {
                         customerInfo.put("currentMembershipCardName", "No membership");
+                        customerInfo.put("currentMembershipThreshold", null);
                     }
                     
                     return customerInfo;
