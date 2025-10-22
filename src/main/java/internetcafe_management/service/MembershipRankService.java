@@ -29,13 +29,12 @@ public class MembershipRankService {
     private MembershipCardRepository membershipCardRepository;
     
     /**
-     * Cập nhật membership rank cho khách hàng dựa trên tổng số tiền nạp
+     * Cập nhật membership rank cho khách hàng dựa trên tổng số tiền nạp (Synchronous)
      * @param customerId ID của khách hàng
      * @param newRechargeAmount Số tiền nạp mới
      */
-    @Async("membershipRankExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
+    public void updateMembershipRankSync(Integer customerId, BigDecimal newRechargeAmount) {
         System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
         System.out.println("New recharge amount: " + newRechargeAmount);
         
@@ -141,6 +140,17 @@ public class MembershipRankService {
         }
         
         System.out.println("=== End membership rank update ===");
+    }
+
+    /**
+     * Cập nhật membership rank cho khách hàng dựa trên tổng số tiền nạp (Asynchronous - for backward compatibility)
+     * @param customerId ID của khách hàng
+     * @param newRechargeAmount Số tiền nạp mới
+     */
+    @Async("membershipRankExecutor")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
+        updateMembershipRankSync(customerId, newRechargeAmount);
     }
     
     /**

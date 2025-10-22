@@ -69,7 +69,7 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
             System.out.println("🔄 Customer " + request.getCustomerId() + " total recharge after new recharge: " + totalRecharge);
             System.out.println("🔄 Current membership card ID: " + customer.getMembershipCardId());
             
-            membershipRankService.updateMembershipRank(request.getCustomerId(), totalRecharge);
+            membershipRankService.updateMembershipRankSync(request.getCustomerId(), totalRecharge);
             System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
                              " after recharge (auto-updated)");
         } catch (Exception rankError) {
@@ -178,6 +178,6 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         rechargeHistoryRepository.deleteById(rechargeId);
         
         // Update membership rank after deletion (recalculate based on remaining recharge history)
-        membershipRankService.updateMembershipRank(rechargeHistory.getCustomerId(), BigDecimal.ZERO);
+        membershipRankService.updateMembershipRankSync(rechargeHistory.getCustomerId(), BigDecimal.ZERO);
     }
 }

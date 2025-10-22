@@ -87,7 +87,7 @@ public class CustomerServiceImpl implements CustomerService {
                     System.out.println("🔄 Customer " + saved.getCustomerId() + " total recharge (initial balance): " + totalRecharge);
                     System.out.println("🔄 Current membership card ID: " + saved.getMembershipCardId());
                     
-                    membershipRankService.updateMembershipRank(saved.getCustomerId(), totalRecharge);
+                    membershipRankService.updateMembershipRankSync(saved.getCustomerId(), totalRecharge);
                     System.out.println("✅ Updated membership rank for customer " + saved.getCustomerId() + 
                                      " (auto-updated based on initial balance)");
                 } catch (Exception rankError) {
@@ -154,7 +154,7 @@ public class CustomerServiceImpl implements CustomerService {
                     System.out.println("🔄 Customer " + customerId + " total recharge after balance update: " + totalRecharge);
                     System.out.println("🔄 Current membership card ID: " + updated.getMembershipCardId());
                     
-                    membershipRankService.updateMembershipRank(customerId, totalRecharge);
+                    membershipRankService.updateMembershipRankSync(customerId, totalRecharge);
                     System.out.println("✅ Updated membership rank for customer " + customerId + 
                                      " after balance update (auto-updated)");
                 } catch (Exception rankError) {
