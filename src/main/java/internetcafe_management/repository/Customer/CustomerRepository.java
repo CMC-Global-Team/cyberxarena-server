@@ -32,4 +32,15 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Query(value = "UPDATE customer SET membership_card_id = :membershipCardId WHERE customer_id = :customerId", nativeQuery = true)
     int updateMembershipCardId(@Param("customerId") Integer customerId, @Param("membershipCardId") Integer membershipCardId);
+    
+    /**
+     * Cập nhật membership card ID cho tất cả khách hàng có membership card cũ
+     * @param oldMembershipCardId ID của membership card cũ
+     * @param newMembershipCardId ID của membership card mới
+     * @return Số dòng được cập nhật
+     */
+    @Modifying
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query(value = "UPDATE customer SET membership_card_id = :newMembershipCardId WHERE membership_card_id = :oldMembershipCardId", nativeQuery = true)
+    int updateAllCustomersWithOldMembershipCard(@Param("oldMembershipCardId") Integer oldMembershipCardId, @Param("newMembershipCardId") Integer newMembershipCardId);
 }

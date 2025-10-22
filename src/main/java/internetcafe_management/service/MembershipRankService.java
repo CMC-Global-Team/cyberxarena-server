@@ -357,6 +357,97 @@ public class MembershipRankService {
     }
     
     /**
+     * Cập nhật membership rank cho tất cả khách hàng (Asynchronous)
+     * @return CompletableFuture để track completion
+     */
+    @Async("membershipRankExecutor")
+    public void updateAllCustomersMembershipRankAsync() {
+        System.out.println("🔄 Starting ASYNC bulk membership rank update ===");
+        try {
+            updateAllCustomersMembershipRank();
+            System.out.println("✅ ASYNC bulk membership rank update completed successfully");
+        } catch (Exception e) {
+            System.err.println("❌ ASYNC bulk membership rank update failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * Cập nhật rank cho khách hàng sau khi xóa membership card
+     * @param deletedMembershipCardId ID của membership card bị xóa
+     */
+    @Async("membershipRankExecutor")
+    public void updateCustomersAfterMembershipCardDeletion(Integer deletedMembershipCardId) {
+        System.out.println("🔄 Starting rank update after deleting membership card: " + deletedMembershipCardId);
+        
+        try {
+            // Debug available membership cards
+            debugMembershipCards();
+            
+            // Tìm default membership card
+            MembershipCard defaultCard = getDefaultMembershipCard();
+            if (defaultCard == null) {
+                System.err.println("❌ No default membership card found! Cannot update customers.");
+                return;
+            }
+            
+            System.out.println("Default card found: " + defaultCard.getMembershipCardName() + " (ID: " + defaultCard.getMembershipCardId() + ")");
+            
+            // Lấy tất cả khách hàng có membership card bị xóa
+            List<Customer> customersWithDeletedCard = customerRepository.findAll().stream()
+                .filter(customer -> customer.getMembershipCardId() != null && 
+                                 customer.getMembershipCardId().equals(deletedMembershipCardId))
+                .toList();
+            
+            System.out.println("Found " + customersWithDeletedCard.size() + " customers with deleted membership card");
+            
+            int updatedCount = 0;
+            for (Customer customer : customersWithDeletedCard) {
+                try {
+                    BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
+                    if (totalRecharge == null) {
+                        totalRecharge = BigDecimal.ZERO;
+                    }
+                    
+                    System.out.println("Processing customer " + customer.getCustomerId() + 
+                                     " with total recharge: " + totalRecharge);
+                    
+                    MembershipCard appropriateCard = findAppropriateMembershipCard(totalRecharge);
+                    
+                    if (appropriateCard != null) {
+                        System.out.println("🔄 Updating customer " + customer.getCustomerId() + 
+                                         " from deleted card to " + appropriateCard.getMembershipCardName());
+                        
+                        // Use direct SQL update to avoid lock issues
+                        int updatedRows = customerRepository.updateMembershipCardId(
+                            customer.getCustomerId(), 
+                            appropriateCard.getMembershipCardId()
+                        );
+                        
+                        if (updatedRows > 0) {
+                            updatedCount++;
+                            System.out.println("✅ Updated customer " + customer.getCustomerId() + 
+                                             " to " + appropriateCard.getMembershipCardName());
+                        } else {
+                            System.err.println("❌ Failed to update customer " + customer.getCustomerId());
+                        }
+                    } else {
+                        System.err.println("❌ No appropriate card found for customer " + customer.getCustomerId());
+                    }
+                } catch (Exception e) {
+                    System.err.println("❌ Error updating customer " + customer.getCustomerId() + ": " + e.getMessage());
+                }
+            }
+            
+            System.out.println("✅ Completed rank update after membership card deletion - Updated " + updatedCount + " customers");
+            
+        } catch (Exception e) {
+            System.err.println("❌ Error in updateCustomersAfterMembershipCardDeletion: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
      * Lấy thông tin membership card hiện tại của khách hàng
      * @param customerId ID của khách hàng
      * @return MembershipCard hiện tại

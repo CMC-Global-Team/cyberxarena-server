@@ -169,11 +169,14 @@ public class MembershipCardService {
         
         // Tự động cập nhật rank của tất cả khách hàng sau khi xóa gói thành viên
         try {
-            System.out.println("🔄 Starting rank update for all customers after deleting membership card: " + membershipCardName);
-            membershipRankService.updateAllCustomersMembershipRank();
-            System.out.println("✅ Successfully updated all customer ranks after deleting membership card: " + membershipCardName);
+            System.out.println("🔄 Starting rank update for all customers after deleting membership card: " + membershipCardName + " (ID: " + id + ")");
+            
+            // Use specialized method for membership card deletion
+            membershipRankService.updateCustomersAfterMembershipCardDeletion(id);
+            
+            System.out.println("✅ Triggered specialized rank update for customers with deleted membership card: " + membershipCardName);
         } catch (Exception e) {
-            System.err.println("❌ Error updating customer ranks after deleting membership card: " + e.getMessage());
+            System.err.println("❌ Error triggering rank update after deleting membership card: " + e.getMessage());
             e.printStackTrace();
             // Không throw exception để không ảnh hưởng đến việc xóa gói thành viên
         }
