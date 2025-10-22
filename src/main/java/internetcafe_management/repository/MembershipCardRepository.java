@@ -30,4 +30,8 @@ public interface MembershipCardRepository extends JpaRepository<MembershipCard, 
     @Transactional
     @Query("UPDATE MembershipCard mc SET mc.isDefault = false WHERE mc.isDefault = true")
     void unsetAllDefaultCards();
+    
+    @Query("SELECT c.customerId, c.customerName, c.phoneNumber, c.balance " +
+           "FROM Customer c WHERE c.membershipCardId = :membershipCardId")
+    List<Object[]> findCustomersUsingMembershipCard(@Param("membershipCardId") Integer membershipCardId);
 }

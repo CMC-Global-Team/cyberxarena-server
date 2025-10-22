@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -118,6 +120,31 @@ public class MembershipCardService {
         }
         
         return convertToDTO(savedMembershipCard);
+    }
+    
+    public Map<String, Object> checkMembershipCardUsage(Integer id) {
+        if (!membershipCardRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Membership card with ID " + id + " not found");
+        }
+        
+        // Check if membership card is used by any customers
+        List<Object[]> usageResults = membershipCardRepository.findCustomersUsingMembershipCard(id);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("isUsed", !usageResults.isEmpty());
+        result.put("usageCount", usageResults.size());
+        result.put("customers", usageResults.stream()
+            .map(row -> {
+                Map<String, Object> customer = new HashMap<>();
+                customer.put("customerId", row[0]);
+                customer.put("customerName", row[1]);
+                customer.put("phoneNumber", row[2]);
+                customer.put("balance", row[3]);
+                return customer;
+            })
+            .toList());
+        
+        return result;
     }
     
     public void deleteMembershipCard(Integer id) {

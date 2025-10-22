@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/membership-cards") // Fixed: removed duplicate /api prefix
@@ -55,6 +56,13 @@ public class MembershipCardController {
             @Valid @RequestBody UpdateMembershipCardRequestDTO request) {
         MembershipCardDTO membershipCard = membershipCardService.updateMembershipCard(id, request);
         return ResponseEntity.ok(membershipCard);
+    }
+    
+    @GetMapping("/{id}/usage")
+    @Operation(summary = "Check membership card usage", description = "Check if membership card is being used by any customers")
+    public ResponseEntity<Map<String, Object>> checkMembershipCardUsage(@PathVariable Integer id) {
+        Map<String, Object> usageInfo = membershipCardService.checkMembershipCardUsage(id);
+        return ResponseEntity.ok(usageInfo);
     }
     
     @DeleteMapping("/{id}")

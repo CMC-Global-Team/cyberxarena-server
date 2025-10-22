@@ -9,7 +9,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -76,6 +78,36 @@ public class DiscountServiceImpl implements DiscountService {
     public List<Discount> getDiscountsByType(Discount.DiscountType type) {
         log.info("Fetching discounts by type={}", type);
         return discountRepository.findByDiscountType(type);
+    }
+
+    @Override
+    public Map<String, Object> checkDiscountUsage(Integer id) {
+        log.info("Checking discount usage for id={}", id);
+        
+        if (!discountRepository.existsById(id)) {
+            throw new IllegalArgumentException("Discount not found with id=" + id);
+        }
+        
+        // Check if discount is used by any membership cards
+        List<Object[]> usageResults = discountRepository.findMembershipCardsUsingDiscount(id);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("isUsed", !usageResults.isEmpty());
+        result.put("usageCount", usageResults.size());
+        result.put("membershipCards", usageResults.stream()
+            .map(row -> {
+                Map<String, Object> card = new HashMap<>();
+                card.put("membershipCardId", row[0]);
+                card.put("membershipCardName", row[1]);
+                card.put("rechargeThreshold", row[2]);
+                return card;
+            })
+            .toList());
+        
+        log.info("Discount usage check completed for id={}, isUsed={}, count={}", 
+                id, result.get("isUsed"), result.get("usageCount"));
+        
+        return result;
     }
 
     @Override
