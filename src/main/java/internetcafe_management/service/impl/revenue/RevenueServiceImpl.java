@@ -22,4 +22,14 @@ public class RevenueServiceImpl implements RevenueService {
         this.revenueMapper = revenueMapper;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<RevenueDTO> getAllRevenue(Pageable pageable) {
+        // 1. Lấy Page<Revenue> từ DB
+        Page<Revenue> revenuePage = revenueRepository.findAll(pageable);
+
+        // 2. Dùng mapper để chuyển đổi Page<Revenue> thành Page<RevenueDTO>
+        // Mapper sẽ tự động tính totalRevenue cho chúng ta
+        return revenuePage.map(revenueMapper::toDto);
+    }
 }
