@@ -36,6 +36,21 @@ public class MembershipRankService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateMembershipRankSync(Integer customerId, BigDecimal newRechargeAmount) {
+        try {
+            updateMembershipRankInternal(customerId, newRechargeAmount);
+        } catch (Exception e) {
+            System.err.println("❌ Sync update failed, trying async: " + e.getMessage());
+            // Fallback to async if sync fails
+            updateMembershipRank(customerId, newRechargeAmount);
+        }
+    }
+    
+    /**
+     * Internal method for membership rank update
+     * @param customerId ID của khách hàng
+     * @param newRechargeAmount Số tiền nạp mới
+     */
+    private void updateMembershipRankInternal(Integer customerId, BigDecimal newRechargeAmount) {
         System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
         System.out.println("New recharge amount: " + newRechargeAmount);
         
@@ -103,14 +118,28 @@ public class MembershipRankService {
                     }
                     
                     // Try direct update query first to avoid lock timeout
-                    int updatedRows = customerRepository.updateMembershipCardId(customerId, appropriateCard.getMembershipCardId());
-                    
-                    if (updatedRows > 0) {
-                        System.out.println("💾 Direct query update successful - " + updatedRows + " row(s) updated");
+                    try {
+                        int updatedRows = customerRepository.updateMembershipCardId(customerId, appropriateCard.getMembershipCardId());
+                        
+                        if (updatedRows > 0) {
+                            System.out.println("💾 Direct query update successful - " + updatedRows + " row(s) updated");
+                            success = true;
+                        } else {
+                            System.err.println("❌ Direct query update failed - no rows updated");
+                            throw new RuntimeException("No rows updated for customer " + customerId);
+                        }
+                    } catch (Exception directUpdateError) {
+                        System.err.println("❌ Direct update failed, trying entity update: " + directUpdateError.getMessage());
+                        
+                        // Fallback to entity update if direct query fails
+                        Customer freshCustomer = customerRepository.findById(customerId)
+                                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+                        
+                        freshCustomer.setMembershipCardId(appropriateCard.getMembershipCardId());
+                        Customer savedCustomer = customerRepository.save(freshCustomer);
+                        
+                        System.out.println("💾 Entity update successful as fallback");
                         success = true;
-                    } else {
-                        System.err.println("❌ Direct query update failed - no rows updated");
-                        throw new RuntimeException("No rows updated for customer " + customerId);
                     }
                     
                     // Double-check by fetching from database

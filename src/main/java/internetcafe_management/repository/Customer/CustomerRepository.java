@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -28,7 +29,7 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
      * @return Số dòng được cập nhật
      */
     @Modifying
-    @Transactional
-    @Query("UPDATE Customer c SET c.membershipCardId = :membershipCardId WHERE c.customerId = :customerId")
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    @Query(value = "UPDATE customer SET membership_card_id = :membershipCardId WHERE customer_id = :customerId", nativeQuery = true)
     int updateMembershipCardId(@Param("customerId") Integer customerId, @Param("membershipCardId") Integer membershipCardId);
 }

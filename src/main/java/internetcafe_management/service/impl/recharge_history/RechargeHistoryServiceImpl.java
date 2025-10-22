@@ -78,7 +78,8 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
             System.out.println("🔄 Recharge amount just added: " + request.getAmount());
             System.out.println("🔄 Current balance: " + currentBalance);
             
-            membershipRankService.updateMembershipRankSync(request.getCustomerId(), totalRecharge);
+            // Use async to avoid lock timeout with current transaction
+            membershipRankService.updateMembershipRank(request.getCustomerId(), totalRecharge);
             System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
                              " after recharge (auto-updated)");
         } catch (Exception rankError) {
