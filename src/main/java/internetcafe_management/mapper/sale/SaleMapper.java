@@ -6,8 +6,10 @@ import internetcafe_management.dto.SaleDetailDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
 import internetcafe_management.entity.SaleDetail;
+import internetcafe_management.entity.SaleTotal;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.stream.Collectors;
 
 @Component
@@ -29,7 +31,11 @@ public class SaleMapper {
 
 
     public Sale toEntity(SaleDTO dto, Customer customer) {
-        if (dto == null) return null;
+        if (dto == null) {
+            throw new IllegalArgumentException("SaleDTO cannot be null");
+        }
+
+
         Sale entity = new Sale();
         entity.setSaleId(dto.getSaleId());
         entity.setCustomer(customer);
@@ -37,7 +43,9 @@ public class SaleMapper {
         entity.setDiscountId(dto.getDiscountId());
         entity.setPaymentMethod(dto.getPaymentMethod());
         entity.setNote(dto.getNote());
-        entity.setSaleDetails(dto.getItems() != null ? dto.getItems().stream()
+
+        // Map SaleDetailDTO to SaleDetail
+        entity.setSaleDetails(dto.getItems().stream()
                 .map(item -> {
                     SaleDetail detail = new SaleDetail();
                     detail.setItemId(item.getItemId());
@@ -45,7 +53,14 @@ public class SaleMapper {
                     detail.setSale(entity);
                     return detail;
                 })
-                .collect(Collectors.toList()) : null);
+                .collect(Collectors.toList()));
+
+        // Initialize SaleTotal without setting saleId
+        SaleTotal saleTotal = new SaleTotal();
+        saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+        saleTotal.setSaleId(dto.getSaleId());
+        entity.setSaleTotal(saleTotal);
+
         return entity;
     }
 }
