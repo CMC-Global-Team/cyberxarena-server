@@ -9,12 +9,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +22,13 @@ public class SessionServiceImpl implements SessionService {
     public Page<Session> getAllSessions(Pageable pageable) {
         return sessionRepository.findAll(pageable);
     }
+
     @Override
     public Session createSession(Session session) {
         session.setEndTime(null);
         return sessionRepository.save(session);
     }
+
     @Override
     public Session updateSession(Integer id, Session session) {
         Session existing = sessionRepository.findById(id)
@@ -38,18 +36,21 @@ public class SessionServiceImpl implements SessionService {
         existing.setEndTime(session.getEndTime());
         return sessionRepository.save(existing);
     }
+
     @Override
     public void deleteSession(Integer id) {
         if (!sessionRepository.existsById(id))
             throw new RuntimeException("Session not found");
         sessionRepository.deleteById(id);
-    }@Override
+    }
+
+    @Override
     public List<SessionDetailsDTO> getSessionsWithTotalAmount() {
         return sessionRepository.findAllWithDetails();
     }
 
-
     @Override
     public List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime) {
         return sessionRepository.searchSessions(customerId, computerId, startTime, endTime);
-    }}
+    }
+}
