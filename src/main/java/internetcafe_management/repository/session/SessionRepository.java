@@ -9,28 +9,27 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 public interface SessionRepository extends JpaRepository<Session, Integer> {
 
     Page<Session> findAll(Pageable pageable);
 
     @Query("""
-    SELECT new internetcafe_management.dto.SessionDetailsDTO(
-        s.sessionId,
-        s.customerId,
-        s.computerId,
-        s.startTime,
-        s.endTime,
-        sp.totalAmount,
-        su.durationHours
-    )
-    FROM Session s
-    LEFT JOIN SessionPrice sp ON s.sessionId = sp.sessionId
-    LEFT JOIN SessionUsage su ON s.sessionId = su.sessionId
-""")
+        SELECT new internetcafe_management.dto.SessionDetailsDTO(
+            s.sessionId,
+            s.customerId,
+            s.computerId,
+            s.startTime,
+            s.endTime,
+            sp.totalAmount,
+            su.durationHours,
+            su.remainingHours
+        )
+        FROM Session s
+        LEFT JOIN SessionPrice sp ON s.sessionId = sp.sessionId
+        LEFT JOIN SessionUsage su ON s.sessionId = su.sessionId
+    """)
     List<SessionDetailsDTO> findAllWithDetails();
-
 
     @Query("""
         SELECT s FROM Session s
