@@ -72,14 +72,15 @@ public class SaleServiceImpl implements SaleService {
         saleRepository.deleteById(saleId);
     }
 
-    @Override
-    public SaleDTO getSaleById(Integer saleId) {
-        return null;
-    }
+
 
     @Override
-    public List<SaleDTO> searchSale(String sortBy, String sortOrder, Integer saleId, Integer customerId, String customerName) {
-        return List.of();
+    public SaleDTO getSaleById(Integer saleId) {
+        Sale s = saleRepository.findById(saleId)
+                .orElseThrow(() -> new RuntimeException("Sale not found"));
+        return saleMapper.toDTO(s);
     }
+
+
 
 }
