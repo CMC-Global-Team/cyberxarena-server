@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import internetcafe_management.entity.Customer;
 
 @Service
 @Transactional
@@ -31,6 +32,9 @@ public class MembershipCardService {
     
     @Autowired
     private MembershipRankService membershipRankService;
+    
+    @Autowired
+    private internetcafe_management.repository.Customer.CustomerRepository customerRepository;
     
     public MembershipCardDTO createMembershipCard(CreateMembershipCardRequestDTO request) {
         // Check if membership card name already exists
@@ -194,5 +198,79 @@ public class MembershipCardService {
         }
         
         return dto;
+    }
+    
+    /**
+     * Lấy danh sách khách hàng phù hợp với gói thành viên mới
+     */
+    public List<Map<String, Object>> getEligibleCustomersForMembershipCard(Integer membershipCardId) {
+        // Lấy thông tin gói thành viên
+        MembershipCard membershipCard = membershipCardRepository.findById(membershipCardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Membership card not found with id: " + membershipCardId));
+        
+        // Lấy tất cả khách hàng
+        List<Customer> allCustomers = customerRepository.findAll();
+        
+        return allCustomers.stream()
+                .filter(customer -> {
+                    // Tính tổng số tiền nạp của khách hàng
+                    BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
+                    if (totalRecharge == null) {
+                        totalRecharge = BigDecimal.ZERO;
+                    }
+                    
+                    // Kiểm tra xem khách hàng có đủ điều kiện cho gói thành viên mới không
+                    return totalRecharge.compareTo(membershipCard.getRechargeThreshold()) >= 0;
+                })
+                .map(customer -> {
+                    BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
+                    if (totalRecharge == null) {
+                        totalRecharge = BigDecimal.ZERO;
+                    }
+                    
+                    Map<String, Object> customerInfo = new HashMap<>();
+                    customerInfo.put("customerId", customer.getCustomerId());
+                    customerInfo.put("customerName", customer.getCustomerName());
+                    customerInfo.put("phoneNumber", customer.getPhoneNumber());
+                    customerInfo.put("currentBalance", customer.getBalance());
+                    customerInfo.put("totalRecharge", totalRecharge);
+                    customerInfo.put("currentMembershipCardId", customer.getMembershipCardId());
+                    
+                    // Lấy tên gói thành viên hiện tại
+                    if (customer.getMembershipCardId() != null) {
+                        try {
+                            MembershipCard currentCard = membershipCardRepository.findById(customer.getMembershipCardId()).orElse(null);
+                            customerInfo.put("currentMembershipCardName", currentCard != null ? currentCard.getMembershipCardName() : "Unknown");
+                        } catch (Exception e) {
+                            customerInfo.put("currentMembershipCardName", "Unknown");
+                        }
+                    } else {
+                        customerInfo.put("currentMembershipCardName", "No membership");
+                    }
+                    
+                    return customerInfo;
+                })
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Cập nhật khách hàng lên gói thành viên mới
+     */
+    public void updateCustomersToMembershipCard(Integer membershipCardId, List<Integer> customerIds) {
+        // Validate membership card exists
+        if (!membershipCardRepository.existsById(membershipCardId)) {
+            throw new ResourceNotFoundException("Membership card not found with id: " + membershipCardId);
+        }
+        
+        // Update each customer
+        for (Integer customerId : customerIds) {
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id: " + customerId));
+            
+            customer.setMembershipCardId(membershipCardId);
+            customerRepository.save(customer);
+            
+            System.out.println("✅ Updated customer " + customerId + " to membership card " + membershipCardId);
+        }
     }
 }

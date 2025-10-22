@@ -86,6 +86,22 @@ public class MembershipCardController {
         return ResponseEntity.ok(rankInfo);
     }
     
+    @GetMapping("/{id}/eligible-customers")
+    @Operation(summary = "Get customers eligible for membership card", description = "Get list of customers who are eligible for a specific membership card based on their recharge amount")
+    public ResponseEntity<List<Map<String, Object>>> getEligibleCustomers(@PathVariable Integer id) {
+        List<Map<String, Object>> eligibleCustomers = membershipCardService.getEligibleCustomersForMembershipCard(id);
+        return ResponseEntity.ok(eligibleCustomers);
+    }
+    
+    @PostMapping("/{id}/update-eligible-customers")
+    @Operation(summary = "Update eligible customers to new membership card", description = "Update specific customers to the new membership card")
+    public ResponseEntity<String> updateEligibleCustomers(
+            @PathVariable Integer id,
+            @RequestBody List<Integer> customerIds) {
+        membershipCardService.updateCustomersToMembershipCard(id, customerIds);
+        return ResponseEntity.ok("Successfully updated " + customerIds.size() + " customers to new membership card");
+    }
+    
     @PostMapping("/update-all-ranks")
     @Operation(summary = "Update all customers membership ranks", description = "Batch update membership ranks for all customers based on their recharge history")
     public ResponseEntity<String> updateAllCustomersMembershipRanks() {
