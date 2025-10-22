@@ -304,6 +304,9 @@ public class MembershipRankService {
     public void updateAllCustomersMembershipRank() {
         System.out.println("=== Starting bulk membership rank update ===");
         
+        // Debug available membership cards
+        debugMembershipCards();
+        
         List<Customer> allCustomers = customerRepository.findAll();
         System.out.println("Total customers to process: " + allCustomers.size());
         
@@ -316,9 +319,13 @@ public class MembershipRankService {
                 }
                 
                 System.out.println("Processing customer " + customer.getCustomerId() + 
-                                 " with total recharge: " + totalRecharge);
+                                 " with total recharge: " + totalRecharge + 
+                                 " current membership: " + customer.getMembershipCardId());
                 
                 MembershipCard appropriateCard = findAppropriateMembershipCard(totalRecharge);
+                
+                System.out.println("  Appropriate card: " + (appropriateCard != null ? 
+                    appropriateCard.getMembershipCardName() + " (ID: " + appropriateCard.getMembershipCardId() + ")" : "null"));
                 
                 if (appropriateCard != null && 
                     (customer.getMembershipCardId() == null || 
@@ -329,13 +336,17 @@ public class MembershipRankService {
                                      " to " + appropriateCard.getMembershipCardId());
                     
                     customer.setMembershipCardId(appropriateCard.getMembershipCardId());
-                    customerRepository.save(customer);
+                    Customer savedCustomer = customerRepository.save(customer);
+                    
+                    // Verify the update
+                    System.out.println("  After save - membership card ID: " + savedCustomer.getMembershipCardId());
                     updatedCount++;
                     
                     System.out.println("✅ Updated customer " + customer.getCustomerId() + 
                                      " to " + appropriateCard.getMembershipCardName());
                 } else {
-                    System.out.println("ℹ️ No update needed for customer " + customer.getCustomerId());
+                    System.out.println("ℹ️ No update needed for customer " + customer.getCustomerId() + 
+                                     " - already has appropriate membership");
                 }
             } catch (Exception e) {
                 System.err.println("❌ Error updating customer " + customer.getCustomerId() + ": " + e.getMessage());
