@@ -7,6 +7,7 @@ import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.MembershipCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -31,6 +32,7 @@ public class MembershipRankService {
      * @param customerId ID của khách hàng
      * @param newRechargeAmount Số tiền nạp mới
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
         System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
         System.out.println("New recharge amount: " + newRechargeAmount);
@@ -75,13 +77,29 @@ public class MembershipRankService {
             System.out.println("🔄 Updating customer membership from " + customer.getMembershipCardId() + 
                              " to " + appropriateCard.getMembershipCardId());
             
-            customer.setMembershipCardId(appropriateCard.getMembershipCardId());
-            customerRepository.save(customer);
-            
-            // Log hoặc thông báo về việc cập nhật membership
-            System.out.println("✅ Customer " + customerId + " upgraded to membership: " + 
-                             appropriateCard.getMembershipCardName() + 
-                             " (Total recharge: " + currentTotalRecharge + ")");
+            try {
+                customer.setMembershipCardId(appropriateCard.getMembershipCardId());
+                Customer savedCustomer = customerRepository.save(customer);
+                
+                // Verify the save was successful
+                System.out.println("💾 Customer saved with membership card ID: " + savedCustomer.getMembershipCardId());
+                
+                // Double-check by fetching from database
+                Customer verifyCustomer = customerRepository.findById(customerId).orElse(null);
+                if (verifyCustomer != null) {
+                    System.out.println("🔍 Database verification - Customer " + customerId + " membership card ID: " + verifyCustomer.getMembershipCardId());
+                } else {
+                    System.err.println("❌ ERROR: Could not find customer " + customerId + " after save!");
+                }
+                
+                // Log hoặc thông báo về việc cập nhật membership
+                System.out.println("✅ Customer " + customerId + " upgraded to membership: " + 
+                                 appropriateCard.getMembershipCardName() + 
+                                 " (Total recharge: " + currentTotalRecharge + ")");
+            } catch (Exception e) {
+                System.err.println("❌ ERROR saving customer " + customerId + ": " + e.getMessage());
+                e.printStackTrace();
+            }
         } else {
             System.out.println("ℹ️ No membership update needed for customer " + customerId + " - " + updateReason);
         }
@@ -185,6 +203,7 @@ public class MembershipRankService {
      * Cập nhật membership rank cho tất cả khách hàng
      * (Dùng để chạy batch job hoặc khi cần cập nhật hàng loạt)
      */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateAllCustomersMembershipRank() {
         System.out.println("=== Starting bulk membership rank update ===");
         
