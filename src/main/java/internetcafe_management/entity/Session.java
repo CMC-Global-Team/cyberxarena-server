@@ -27,15 +27,12 @@ public class Session {
 
     @Column(name = "end_time")
     private LocalDateTime endTime;
-    @Transient
-    private Double durationHours;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id", referencedColumnName = "session_id", insertable = false, updatable = false)
     private SessionPrice sessionPrice;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "session_id", referencedColumnName = "session_id", insertable = false, updatable = false)
     private SessionUsage sessionUsage;
-
 }
