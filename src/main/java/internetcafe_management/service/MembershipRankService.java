@@ -393,16 +393,42 @@ public class MembershipRankService {
             
             System.out.println("Default card found: " + defaultCard.getMembershipCardName() + " (ID: " + defaultCard.getMembershipCardId() + ")");
             
-            // Lấy tất cả khách hàng có membership card bị xóa
-            List<Customer> customersWithDeletedCard = customerRepository.findAll().stream()
-                .filter(customer -> customer.getMembershipCardId() != null && 
-                                 customer.getMembershipCardId().equals(deletedMembershipCardId))
+            // Lấy TẤT CẢ khách hàng để cập nhật rank (vì có thể membership card đã bị xóa)
+            List<Customer> allCustomers = customerRepository.findAll();
+            System.out.println("Total customers to check: " + allCustomers.size());
+            
+            // Debug: Show all customers and their current membership
+            for (Customer customer : allCustomers) {
+                System.out.println("Customer " + customer.getCustomerId() + 
+                                 " - Name: " + customer.getCustomerName() + 
+                                 " - Current membership: " + customer.getMembershipCardId() + 
+                                 " - Balance: " + customer.getBalance());
+            }
+            
+            // Filter customers that need rank update (those with null membership or need upgrade)
+            List<Customer> customersNeedingUpdate = allCustomers.stream()
+                .filter(customer -> {
+                    // Include customers with null membership card
+                    if (customer.getMembershipCardId() == null) {
+                        System.out.println("Customer " + customer.getCustomerId() + " has null membership - needs update");
+                        return true;
+                    }
+                    
+                    // Check if current membership card still exists
+                    boolean membershipExists = membershipCardRepository.existsById(customer.getMembershipCardId());
+                    if (!membershipExists) {
+                        System.out.println("Customer " + customer.getCustomerId() + " has deleted membership card " + customer.getMembershipCardId() + " - needs update");
+                        return true;
+                    }
+                    
+                    return false;
+                })
                 .toList();
             
-            System.out.println("Found " + customersWithDeletedCard.size() + " customers with deleted membership card");
+            System.out.println("Found " + customersNeedingUpdate.size() + " customers needing rank update");
             
             int updatedCount = 0;
-            for (Customer customer : customersWithDeletedCard) {
+            for (Customer customer : customersNeedingUpdate) {
                 try {
                     BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
                     if (totalRecharge == null) {
