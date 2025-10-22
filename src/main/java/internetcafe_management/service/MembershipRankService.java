@@ -33,6 +33,7 @@ public class MembershipRankService {
      */
     public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
         System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
+        System.out.println("New recharge amount: " + newRechargeAmount);
         
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
@@ -53,11 +54,25 @@ public class MembershipRankService {
             appropriateCard.getMembershipCardName() + " (ID: " + appropriateCard.getMembershipCardId() + ")" : "null"));
         
         // Cập nhật membership card cho khách hàng nếu cần
-        if (appropriateCard != null && 
-            (customer.getMembershipCardId() == null || 
-             !customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId()))) {
-            
-            System.out.println("Updating customer membership from " + customer.getMembershipCardId() + 
+        boolean needsUpdate = false;
+        String updateReason = "";
+        
+        if (appropriateCard == null) {
+            updateReason = "No appropriate card found";
+        } else if (customer.getMembershipCardId() == null) {
+            needsUpdate = true;
+            updateReason = "Customer has no membership card";
+        } else if (!customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId())) {
+            needsUpdate = true;
+            updateReason = "Customer needs upgrade from " + customer.getMembershipCardId() + " to " + appropriateCard.getMembershipCardId();
+        } else {
+            updateReason = "Customer already has the appropriate membership";
+        }
+        
+        System.out.println("Update needed: " + needsUpdate + " - Reason: " + updateReason);
+        
+        if (needsUpdate && appropriateCard != null) {
+            System.out.println("🔄 Updating customer membership from " + customer.getMembershipCardId() + 
                              " to " + appropriateCard.getMembershipCardId());
             
             customer.setMembershipCardId(appropriateCard.getMembershipCardId());
@@ -68,7 +83,7 @@ public class MembershipRankService {
                              appropriateCard.getMembershipCardName() + 
                              " (Total recharge: " + currentTotalRecharge + ")");
         } else {
-            System.out.println("❌ No membership update needed for customer " + customerId);
+            System.out.println("ℹ️ No membership update needed for customer " + customerId + " - " + updateReason);
         }
         
         System.out.println("=== End membership rank update ===");
@@ -80,31 +95,46 @@ public class MembershipRankService {
      * @return MembershipCard phù hợp hoặc null nếu không tìm thấy
      */
     private MembershipCard findAppropriateMembershipCard(BigDecimal totalRechargeAmount) {
-        System.out.println("Finding appropriate card for total recharge: " + totalRechargeAmount);
+        System.out.println("🔍 Finding appropriate card for total recharge: " + totalRechargeAmount);
         
         // Lấy tất cả membership cards
         List<MembershipCard> allCards = membershipCardRepository.findAll();
         System.out.println("Total membership cards available: " + allCards.size());
         
-        // Log tất cả cards
+        // Log tất cả cards với so sánh
+        System.out.println("=== Available membership cards ===");
         for (MembershipCard card : allCards) {
+            boolean isEligible = card.getRechargeThreshold() != null && 
+                               card.getRechargeThreshold().compareTo(totalRechargeAmount) <= 0;
             System.out.println("Card: " + card.getMembershipCardName() + 
                              ", Threshold: " + card.getRechargeThreshold() + 
-                             ", ID: " + card.getMembershipCardId());
+                             ", ID: " + card.getMembershipCardId() +
+                             ", Eligible: " + isEligible);
         }
         
         // Tìm card có threshold cao nhất mà khách hàng đạt được
-        MembershipCard appropriateCard = allCards.stream()
+        List<MembershipCard> eligibleCards = allCards.stream()
                 .filter(card -> card.getRechargeThreshold() != null && 
                                card.getRechargeThreshold().compareTo(totalRechargeAmount) <= 0)
-                .max((card1, card2) -> card1.getRechargeThreshold().compareTo(card2.getRechargeThreshold()))
-                .orElse(getDefaultMembershipCard());
+                .collect(java.util.stream.Collectors.toList());
+        
+        System.out.println("Eligible cards count: " + eligibleCards.size());
+        
+        MembershipCard appropriateCard;
+        if (eligibleCards.isEmpty()) {
+            System.out.println("No eligible cards found, using default");
+            appropriateCard = getDefaultMembershipCard();
+        } else {
+            appropriateCard = eligibleCards.stream()
+                    .max((card1, card2) -> card1.getRechargeThreshold().compareTo(card2.getRechargeThreshold()))
+                    .orElse(getDefaultMembershipCard());
+        }
         
         if (appropriateCard != null) {
-            System.out.println("Selected card: " + appropriateCard.getMembershipCardName() + 
+            System.out.println("✅ Selected card: " + appropriateCard.getMembershipCardName() + 
                              " with threshold: " + appropriateCard.getRechargeThreshold());
         } else {
-            System.out.println("No appropriate card found, using default");
+            System.out.println("❌ No appropriate card found, using default");
         }
         
         return appropriateCard;
@@ -155,24 +185,47 @@ public class MembershipRankService {
      * (Dùng để chạy batch job hoặc khi cần cập nhật hàng loạt)
      */
     public void updateAllCustomersMembershipRank() {
-        List<Customer> allCustomers = customerRepository.findAll();
+        System.out.println("=== Starting bulk membership rank update ===");
         
+        List<Customer> allCustomers = customerRepository.findAll();
+        System.out.println("Total customers to process: " + allCustomers.size());
+        
+        int updatedCount = 0;
         for (Customer customer : allCustomers) {
-            BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
-            if (totalRecharge == null) {
-                totalRecharge = BigDecimal.ZERO;
-            }
-            
-            MembershipCard appropriateCard = findAppropriateMembershipCard(totalRecharge);
-            
-            if (appropriateCard != null && 
-                (customer.getMembershipCardId() == null || 
-                 !customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId()))) {
+            try {
+                BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(customer.getCustomerId());
+                if (totalRecharge == null) {
+                    totalRecharge = BigDecimal.ZERO;
+                }
                 
-                customer.setMembershipCardId(appropriateCard.getMembershipCardId());
-                customerRepository.save(customer);
+                System.out.println("Processing customer " + customer.getCustomerId() + 
+                                 " with total recharge: " + totalRecharge);
+                
+                MembershipCard appropriateCard = findAppropriateMembershipCard(totalRecharge);
+                
+                if (appropriateCard != null && 
+                    (customer.getMembershipCardId() == null || 
+                     !customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId()))) {
+                    
+                    System.out.println("🔄 Updating customer " + customer.getCustomerId() + 
+                                     " from " + customer.getMembershipCardId() + 
+                                     " to " + appropriateCard.getMembershipCardId());
+                    
+                    customer.setMembershipCardId(appropriateCard.getMembershipCardId());
+                    customerRepository.save(customer);
+                    updatedCount++;
+                    
+                    System.out.println("✅ Updated customer " + customer.getCustomerId() + 
+                                     " to " + appropriateCard.getMembershipCardName());
+                } else {
+                    System.out.println("ℹ️ No update needed for customer " + customer.getCustomerId());
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Error updating customer " + customer.getCustomerId() + ": " + e.getMessage());
             }
         }
+        
+        System.out.println("=== End bulk membership rank update - Updated " + updatedCount + " customers ===");
     }
     
     /**

@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -107,5 +108,16 @@ public class MembershipCardController {
     public ResponseEntity<String> updateAllCustomersMembershipRanks() {
         membershipRankService.updateAllCustomersMembershipRank();
         return ResponseEntity.ok("All customers membership ranks have been updated successfully");
+    }
+    
+    @PostMapping("/force-update-customer-rank/{customerId}")
+    @Operation(summary = "Force update customer membership rank", description = "Force update a specific customer's membership rank based on their total recharge amount")
+    public ResponseEntity<String> forceUpdateCustomerRank(@PathVariable Integer customerId) {
+        try {
+            membershipRankService.updateMembershipRank(customerId, BigDecimal.ZERO);
+            return ResponseEntity.ok("Customer " + customerId + " membership rank has been updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating customer rank: " + e.getMessage());
+        }
     }
 }
