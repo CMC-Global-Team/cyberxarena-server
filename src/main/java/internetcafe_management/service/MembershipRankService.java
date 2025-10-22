@@ -98,11 +98,15 @@ public class MembershipRankService {
                     
                     // Verify the save was successful
                     System.out.println("💾 Customer saved with membership card ID: " + savedCustomer.getMembershipCardId());
+                    System.out.println("💾 Customer saved with name: " + savedCustomer.getCustomerName());
+                    System.out.println("💾 Customer saved with balance: " + savedCustomer.getBalance());
                     
                     // Double-check by fetching from database
                     Customer verifyCustomer = customerRepository.findById(customerId).orElse(null);
                     if (verifyCustomer != null) {
                         System.out.println("🔍 Database verification - Customer " + customerId + " membership card ID: " + verifyCustomer.getMembershipCardId());
+                        System.out.println("🔍 Database verification - Customer " + customerId + " name: " + verifyCustomer.getCustomerName());
+                        System.out.println("🔍 Database verification - Customer " + customerId + " balance: " + verifyCustomer.getBalance());
                         success = true;
                     } else {
                         System.err.println("❌ ERROR: Could not find customer " + customerId + " after save!");

@@ -52,6 +52,21 @@ public class CustomerController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    
+    @GetMapping("/{customerId}/debug")
+    public ResponseEntity<Object> debugCustomer(@PathVariable Integer customerId) {
+        try {
+            CustomerDTO customer = customerService.getCustomerById(customerId);
+            System.out.println("🔍 DEBUG - Customer " + customerId + " membership card ID: " + customer.getMembershipCardId());
+            System.out.println("🔍 DEBUG - Customer " + customerId + " name: " + customer.getCustomerName());
+            System.out.println("🔍 DEBUG - Customer " + customerId + " balance: " + customer.getBalance());
+            return ResponseEntity.ok(customer);
+        } catch (Exception e) {
+            System.err.println("Error getting customer debug info: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
 
     @GetMapping("/search")
     public ResponseEntity<List<CustomerDTO>> searchCustomers(
