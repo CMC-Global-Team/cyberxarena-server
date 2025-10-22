@@ -6,7 +6,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,4 +43,8 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     """)
     List<Session> searchSessions(Integer customerId, Integer computerId,
                                  LocalDateTime startTime, LocalDateTime endTime);
+
+    @Query("SELECT SUM(sp.total_amount) FROM SessionPrice sp JOIN sp.session s " +
+            "WHERE FUNCTION('DATE', s.end_time) = :date")
+    BigDecimal sumTotalAmountByEndDateTime(@Param("date") LocalDate date);
 }
