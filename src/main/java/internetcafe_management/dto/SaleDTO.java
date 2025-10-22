@@ -29,6 +29,7 @@ public class SaleDTO {
     @Size(max = 50, message = "Phương thức thanh toán không được vượt quá 50 ký tự")
     private String paymentMethod;
 
+    private BigDecimal totalAmount;
     @NotNull(message = "discountId không được để trống")
     private Integer discountId;
 
