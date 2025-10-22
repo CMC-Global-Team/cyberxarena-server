@@ -36,4 +36,12 @@ public class RevenueController {
         List<RevenueDTO> reports = revenueService.generateRevenueReports(startDate, endDate);
         return new ResponseEntity<>(reports, HttpStatus.CREATED);
     }
+
+    @PutMapping("/recalculate")
+    public ResponseEntity<RevenueDTO> recalculateRevenueReport(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        RevenueDTO updatedReport = revenueService.recalculateRevenueReport(date);
+        return ResponseEntity.ok(updatedReport); // Trả về 200 OK
+    }
 }

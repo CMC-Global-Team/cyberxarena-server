@@ -80,4 +80,24 @@ public class RevenueServiceImpl implements RevenueService {
 
         return generatedReports;
     }
+
+    @Override
+    public RevenueDTO recalculateRevenueReport(LocalDate date) {
+        // Phải tìm báo cáo đã tồn tại, nếu không thì báo lỗi
+        Revenue existingReport = revenueRepository.findByDate(date)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy báo cáo doanh thu cho ngày " + date));
+
+        BigDecimal computerTotal = Optional.ofNullable(sessionRepository.sumTotalAmountByEndDateTime(date))
+                .orElse(BigDecimal.ZERO);
+
+        BigDecimal salesTotal = Optional.ofNullable(saleRepository.sumTotalAmountBySaleDate(date))
+                .orElse(BigDecimal.ZERO);
+
+        existingReport.setComputerUsageRevenue(computerTotal);
+        existingReport.setSalesRevenue(salesTotal);
+
+        Revenue updatedReport = revenueRepository.save(existingReport);
+
+        return revenueMapper.toDto(updatedReport);
+    }
 }
