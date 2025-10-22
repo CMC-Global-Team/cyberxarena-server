@@ -183,6 +183,38 @@ public class MembershipCardService {
         return convertToDTO(defaultCard);
     }
     
+    /**
+     * Set a membership card as default and update all customers
+     */
+    public void setDefaultMembershipCard(Integer membershipCardId) {
+        // Tìm gói thành viên cần set default
+        MembershipCard newDefaultCard = membershipCardRepository.findById(membershipCardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Membership card not found with id: " + membershipCardId));
+        
+        // Bỏ default của tất cả gói hiện tại
+        List<MembershipCard> allCards = membershipCardRepository.findAll();
+        for (MembershipCard card : allCards) {
+            card.setIsDefault(false);
+            membershipCardRepository.save(card);
+        }
+        
+        // Set gói mới làm default và set ngưỡng = 0
+        newDefaultCard.setIsDefault(true);
+        newDefaultCard.setRechargeThreshold(BigDecimal.ZERO);
+        membershipCardRepository.save(newDefaultCard);
+        
+        System.out.println("✅ Set membership card " + membershipCardId + " as default with threshold 0");
+        
+        // Cập nhật tất cả khách hàng lên gói mới này
+        try {
+            membershipRankService.updateAllCustomersMembershipRank();
+            System.out.println("✅ Updated all customers to new default membership card");
+        } catch (Exception e) {
+            System.err.println("❌ Error updating all customers to new default membership card: " + e.getMessage());
+            throw new RuntimeException("Failed to update customers to new default membership card", e);
+        }
+    }
+    
     private MembershipCardDTO convertToDTO(MembershipCard membershipCard) {
         MembershipCardDTO dto = new MembershipCardDTO();
         dto.setMembershipCardId(membershipCard.getMembershipCardId());

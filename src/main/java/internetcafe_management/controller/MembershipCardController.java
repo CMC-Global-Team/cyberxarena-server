@@ -120,4 +120,15 @@ public class MembershipCardController {
             return ResponseEntity.badRequest().body("Error updating customer rank: " + e.getMessage());
         }
     }
+    
+    @PostMapping("/{id}/set-default")
+    @Operation(summary = "Set membership card as default", description = "Set a membership card as the default card and update all customers with threshold 0")
+    public ResponseEntity<String> setDefaultMembershipCard(@PathVariable Integer id) {
+        try {
+            membershipCardService.setDefaultMembershipCard(id);
+            return ResponseEntity.ok("Membership card " + id + " has been set as default and all customers have been updated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error setting default membership card: " + e.getMessage());
+        }
+    }
 }

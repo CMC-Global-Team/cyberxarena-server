@@ -63,7 +63,14 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         boolean isUsingDefaultCard = (customer.getMembershipCardId() == null || customer.getMembershipCardId() == 0);
         if (isUsingDefaultCard) {
             try {
-                membershipRankService.updateMembershipRank(request.getCustomerId(), request.getAmount());
+                // Tính tổng số tiền nạp của khách hàng sau khi nạp thêm
+                BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(request.getCustomerId());
+                if (totalRecharge == null) {
+                    totalRecharge = BigDecimal.ZERO;
+                }
+                
+                System.out.println("🔄 Customer " + request.getCustomerId() + " total recharge after new recharge: " + totalRecharge);
+                membershipRankService.updateMembershipRank(request.getCustomerId(), totalRecharge);
                 System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
                                  " after recharge (using default card, auto-updated)");
             } catch (Exception rankError) {
