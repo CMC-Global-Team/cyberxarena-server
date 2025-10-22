@@ -2,6 +2,7 @@ package internetcafe_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "session_usage")
@@ -11,13 +12,15 @@ import lombok.*;
 public class SessionUsage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "usage_id")
-    private Integer usageId;
-
-    @Column(name = "session_id", nullable = false)
+    @Column(name = "session_id")
     private Integer sessionId;
 
     @Column(name = "duration_hours")
     private Double durationHours;
+
+    @Column(name = "remaining_hours")
+    private Double remainingHours;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 }
