@@ -7,6 +7,7 @@ import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.MembershipCardRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +33,7 @@ public class MembershipRankService {
      * @param customerId ID của khách hàng
      * @param newRechargeAmount Số tiền nạp mới
      */
+    @Async("membershipRankExecutor")
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updateMembershipRank(Integer customerId, BigDecimal newRechargeAmount) {
         System.out.println("=== Starting membership rank update for customer: " + customerId + " ===");
@@ -77,28 +79,58 @@ public class MembershipRankService {
             System.out.println("🔄 Updating customer membership from " + customer.getMembershipCardId() + 
                              " to " + appropriateCard.getMembershipCardId());
             
-            try {
-                customer.setMembershipCardId(appropriateCard.getMembershipCardId());
-                Customer savedCustomer = customerRepository.save(customer);
-                
-                // Verify the save was successful
-                System.out.println("💾 Customer saved with membership card ID: " + savedCustomer.getMembershipCardId());
-                
-                // Double-check by fetching from database
-                Customer verifyCustomer = customerRepository.findById(customerId).orElse(null);
-                if (verifyCustomer != null) {
-                    System.out.println("🔍 Database verification - Customer " + customerId + " membership card ID: " + verifyCustomer.getMembershipCardId());
-                } else {
-                    System.err.println("❌ ERROR: Could not find customer " + customerId + " after save!");
+            // Retry mechanism for lock timeout
+            int maxRetries = 3;
+            int retryCount = 0;
+            boolean success = false;
+            
+            while (retryCount < maxRetries && !success) {
+                try {
+                    retryCount++;
+                    System.out.println("🔄 Attempt " + retryCount + " to update customer " + customerId + " membership");
+                    
+                    // Fetch fresh customer data to avoid stale object
+                    Customer freshCustomer = customerRepository.findById(customerId)
+                            .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+                    
+                    freshCustomer.setMembershipCardId(appropriateCard.getMembershipCardId());
+                    Customer savedCustomer = customerRepository.save(freshCustomer);
+                    
+                    // Verify the save was successful
+                    System.out.println("💾 Customer saved with membership card ID: " + savedCustomer.getMembershipCardId());
+                    
+                    // Double-check by fetching from database
+                    Customer verifyCustomer = customerRepository.findById(customerId).orElse(null);
+                    if (verifyCustomer != null) {
+                        System.out.println("🔍 Database verification - Customer " + customerId + " membership card ID: " + verifyCustomer.getMembershipCardId());
+                        success = true;
+                    } else {
+                        System.err.println("❌ ERROR: Could not find customer " + customerId + " after save!");
+                    }
+                    
+                    // Log hoặc thông báo về việc cập nhật membership
+                    System.out.println("✅ Customer " + customerId + " upgraded to membership: " + 
+                                     appropriateCard.getMembershipCardName() + 
+                                     " (Total recharge: " + currentTotalRecharge + ")");
+                    
+                } catch (Exception e) {
+                    System.err.println("❌ ERROR saving customer " + customerId + " (attempt " + retryCount + "): " + e.getMessage());
+                    
+                    if (retryCount < maxRetries) {
+                        try {
+                            // Wait before retry (exponential backoff)
+                            long waitTime = 1000 * retryCount; // 1s, 2s, 3s
+                            System.out.println("⏳ Waiting " + waitTime + "ms before retry...");
+                            Thread.sleep(waitTime);
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            break;
+                        }
+                    } else {
+                        System.err.println("❌ FAILED to update customer " + customerId + " after " + maxRetries + " attempts");
+                        e.printStackTrace();
+                    }
                 }
-                
-                // Log hoặc thông báo về việc cập nhật membership
-                System.out.println("✅ Customer " + customerId + " upgraded to membership: " + 
-                                 appropriateCard.getMembershipCardName() + 
-                                 " (Total recharge: " + currentTotalRecharge + ")");
-            } catch (Exception e) {
-                System.err.println("❌ ERROR saving customer " + customerId + ": " + e.getMessage());
-                e.printStackTrace();
             }
         } else {
             System.out.println("ℹ️ No membership update needed for customer " + customerId + " - " + updateReason);
