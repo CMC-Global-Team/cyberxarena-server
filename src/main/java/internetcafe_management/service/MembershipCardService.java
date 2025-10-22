@@ -8,6 +8,7 @@ import internetcafe_management.repository.MembershipCardRepository;
 import internetcafe_management.repository.discount.DiscountRepository;
 import internetcafe_management.exception.ResourceNotFoundException;
 import internetcafe_management.exception.DuplicateResourceException;
+import internetcafe_management.service.MembershipRankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,9 @@ public class MembershipCardService {
     
     @Autowired
     private DiscountRepository discountRepository;
+    
+    @Autowired
+    private MembershipRankService membershipRankService;
     
     public MembershipCardDTO createMembershipCard(CreateMembershipCardRequestDTO request) {
         // Check if membership card name already exists
@@ -151,7 +155,22 @@ public class MembershipCardService {
         if (!membershipCardRepository.existsById(id)) {
             throw new ResourceNotFoundException("Membership card with ID " + id + " not found");
         }
+        
+        // Lấy thông tin gói thành viên trước khi xóa để log
+        MembershipCard membershipCard = membershipCardRepository.findById(id).orElse(null);
+        String membershipCardName = membershipCard != null ? membershipCard.getMembershipCardName() : "Unknown";
+        
+        // Xóa gói thành viên
         membershipCardRepository.deleteById(id);
+        
+        // Tự động cập nhật rank của tất cả khách hàng sau khi xóa gói thành viên
+        try {
+            membershipRankService.updateAllCustomersMembershipRank();
+            System.out.println("✅ Successfully updated all customer ranks after deleting membership card: " + membershipCardName);
+        } catch (Exception e) {
+            System.err.println("❌ Error updating customer ranks after deleting membership card: " + e.getMessage());
+            // Không throw exception để không ảnh hưởng đến việc xóa gói thành viên
+        }
     }
     
     public MembershipCardDTO getDefaultMembershipCard() {
