@@ -81,6 +81,78 @@ public class SaleServiceImpl implements SaleService {
         return saleMapper.toDTO(s);
     }
 
+    @Override
+    public List<SaleDTO> searchSale(String sortBy, String sortOrder, Integer saleId, Integer customerId, String customerName) {
+        List<Sale> sales = saleRepository.findAll();
 
+        // Filter by saleId if provided
+        if (saleId != null && saleId > 0) {
+            sales = sales.stream()
+                    .filter(sale -> sale.getSaleId().equals(saleId))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by customerId if provided
+        if (customerId != null && customerId > 0) {
+            sales = sales.stream()
+                    .filter(sale -> sale.getCustomer().getCustomerId().equals(customerId))
+                    .collect(Collectors.toList());
+        }
+
+        // Filter by name if provided
+        if (customerName != null && !customerName.trim().isEmpty()) {
+            sales = sales.stream()
+                    .filter(sale -> sale.getCustomer().getCustomerName().contains(customerName))
+                    .collect(Collectors.toList());
+        }
+
+        // Sort by specified field and order
+        if (sortBy != null && !sortBy.trim().isEmpty()) {
+            String order = (sortOrder != null && sortOrder.equalsIgnoreCase("desc")) ? "desc" : "asc";
+
+            switch (sortBy.toLowerCase()) {
+                case "saleid":
+                    sales = sales.stream()
+                            .sorted((s1, s2) -> order.equals("desc") ?
+                                    s2.getSaleId().compareTo(s1.getSaleId()) :
+                                    s1.getSaleId().compareTo(s2.getSaleId()))
+                            .collect(Collectors.toList());
+                    break;
+                case "date":
+                    sales = sales.stream()
+                            .sorted((s1, s2) -> order.equals("desc") ?
+                                    s2.getSaleDate().compareTo(s1.getSaleDate()) :
+                                    s1.getSaleDate().compareTo(s2.getSaleDate()))
+                            .collect(Collectors.toList());
+                    break;
+                case "saletotal":
+                    sales = sales.stream()
+                            .sorted((s1, s2) -> order.equals("desc") ?
+                                    s2.getSaleTotal().getTotalAmount().compareTo(s1.getSaleTotal().getTotalAmount()) :
+                                    s1.getSaleTotal().getTotalAmount().compareTo(s2.getSaleTotal().getTotalAmount()))
+                            .collect(Collectors.toList());
+                    break;
+
+                case "customername":
+                    sales = sales.stream()
+                            .sorted((s1, s2) -> order.equals("desc") ?
+                                    s2.getCustomer().getCustomerName().compareTo(s1.getCustomer().getCustomerName()) :
+                                    s1.getCustomer().getCustomerName().compareTo(s2.getCustomer().getCustomerName()))
+                            .collect(Collectors.toList());
+                    break;
+
+                default:
+                    // Default sort by saleId ascending
+                    sales = sales.stream()
+                            .sorted((s1, s2) -> s1.getSaleId().compareTo(s2.getSaleId()))
+                            .collect(Collectors.toList());
+                    break;
+            }
+        }
+
+        return sales.stream()
+                .map(saleMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
 }
