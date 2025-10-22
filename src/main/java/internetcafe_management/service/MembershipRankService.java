@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Service để xử lý logic tự động cập nhật membership rank cho khách hàng
@@ -71,7 +72,7 @@ public class MembershipRankService {
         } else if (customer.getMembershipCardId() == null) {
             needsUpdate = true;
             updateReason = "Customer has no membership card";
-        } else if (!customer.getMembershipCardId().equals(appropriateCard.getMembershipCardId())) {
+        } else if (!Objects.equals(customer.getMembershipCardId(), appropriateCard.getMembershipCardId())) {
             needsUpdate = true;
             updateReason = "Customer needs upgrade from " + customer.getMembershipCardId() + " to " + appropriateCard.getMembershipCardId();
         } else {

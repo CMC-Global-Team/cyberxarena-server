@@ -69,9 +69,14 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
                 totalRecharge = BigDecimal.ZERO;
             }
             
+            // Tính tổng thủ công để so sánh
+            BigDecimal manualTotal = currentBalance.add(request.getAmount());
+            
             System.out.println("🔄 Customer " + request.getCustomerId() + " total recharge after new recharge: " + totalRecharge);
+            System.out.println("🔄 Manual calculation (balance + recharge): " + manualTotal);
             System.out.println("🔄 Current membership card ID: " + customer.getMembershipCardId());
             System.out.println("🔄 Recharge amount just added: " + request.getAmount());
+            System.out.println("🔄 Current balance: " + currentBalance);
             
             membershipRankService.updateMembershipRankSync(request.getCustomerId(), totalRecharge);
             System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
