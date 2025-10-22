@@ -13,4 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/revenue")
 public class RevenueController {
 
+    private final RevenueService revenueService;
+
+    public RevenueController(RevenueService revenueService) {
+        this.revenueService = revenueService;
+    }
+
+    @GetMapping
+    public ResponseEntity<Page<RevenueDTO>> getAllRevenue(Pageable pageable) {
+        Page<RevenueDTO> revenuePage = revenueService.getAllRevenue(pageable);
+        return ResponseEntity.ok(revenuePage);
+    }
 }
