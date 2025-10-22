@@ -11,10 +11,11 @@ public class SessionDetailsDTO {
     private LocalDateTime endTime;
     private BigDecimal totalAmount;
     private Double durationHours;
+    private Double remainingHours;
 
     public SessionDetailsDTO(Integer sessionId, Integer customerId, Integer computerId,
                              LocalDateTime startTime, LocalDateTime endTime,
-                             BigDecimal totalAmount, Double durationHours) {
+                             BigDecimal totalAmount, Double durationHours, Double remainingHours) {
         this.sessionId = sessionId;
         this.customerId = customerId;
         this.computerId = computerId;
@@ -22,6 +23,7 @@ public class SessionDetailsDTO {
         this.endTime = endTime;
         this.totalAmount = totalAmount;
         this.durationHours = durationHours;
+        this.remainingHours = remainingHours;
     }
 
     // Getters
@@ -32,4 +34,5 @@ public class SessionDetailsDTO {
     public LocalDateTime getEndTime() { return endTime; }
     public BigDecimal getTotalAmount() { return totalAmount; }
     public Double getDurationHours() { return durationHours; }
+    public Double getRemainingHours() { return remainingHours; }
 }
