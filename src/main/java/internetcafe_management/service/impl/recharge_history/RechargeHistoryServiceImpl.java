@@ -58,8 +58,21 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         customer.setBalance(currentBalance.add(request.getAmount()));
         customerRepository.save(customer);
         
-        // Update membership rank based on new recharge amount
-        membershipRankService.updateMembershipRank(request.getCustomerId(), request.getAmount());
+        // Chỉ tự động cập nhật rank nếu không có thẻ thành viên được chọn cụ thể
+        // (tức là đang sử dụng thẻ mặc định)
+        boolean isUsingDefaultCard = (customer.getMembershipCardId() == null || customer.getMembershipCardId() == 0);
+        if (isUsingDefaultCard) {
+            try {
+                membershipRankService.updateMembershipRank(request.getCustomerId(), request.getAmount());
+                System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
+                                 " after recharge (using default card, auto-updated)");
+            } catch (Exception rankError) {
+                System.err.println("❌ Error updating membership rank after recharge: " + rankError.getMessage());
+            }
+        } else {
+            System.out.println("ℹ️ Customer " + request.getCustomerId() + " using specific membership card " + 
+                             customer.getMembershipCardId() + ", skipping auto rank update after recharge");
+        }
         
         return rechargeHistoryMapper.toDTO(savedRechargeHistory);
     }

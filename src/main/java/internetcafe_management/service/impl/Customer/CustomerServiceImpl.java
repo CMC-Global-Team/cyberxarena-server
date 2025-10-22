@@ -7,6 +7,7 @@ import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.recharge_history.RechargeHistoryRepository;
 import internetcafe_management.service.MembershipCardService;
+import internetcafe_management.service.MembershipRankService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import internetcafe_management.service.Customer.CustomerService;
@@ -30,6 +31,9 @@ public class CustomerServiceImpl implements CustomerService {
     
     @Autowired
     private RechargeHistoryRepository rechargeHistoryRepository;
+    
+    @Autowired
+    private MembershipRankService membershipRankService;
 
 
     @Override
@@ -60,7 +64,7 @@ public class CustomerServiceImpl implements CustomerService {
         Customer saved = customerRepository.save(entity);
         System.out.println("Entity after save: " + saved);
         
-        // Nếu có số dư ban đầu > 0, tạo record trong lịch sử nạp tiền
+        // Nếu có số dư ban đầu > 0, tạo record trong lịch sử nạp tiền và cập nhật rank
         if (saved.getBalance() != null && saved.getBalance().compareTo(BigDecimal.ZERO) > 0) {
             try {
                 RechargeHistory initialRecharge = new RechargeHistory();
@@ -71,6 +75,22 @@ public class CustomerServiceImpl implements CustomerService {
                 rechargeHistoryRepository.save(initialRecharge);
                 System.out.println("✅ Created initial recharge history for customer " + saved.getCustomerId() + 
                                  " with amount: " + saved.getBalance());
+                
+                // Chỉ tự động cập nhật rank nếu không có thẻ thành viên được chọn cụ thể
+                // (tức là đang sử dụng thẻ mặc định)
+                boolean isUsingDefaultCard = (dto.getMembershipCardId() == null || dto.getMembershipCardId() == 0);
+                if (isUsingDefaultCard) {
+                    try {
+                        membershipRankService.updateMembershipRank(saved.getCustomerId(), saved.getBalance());
+                        System.out.println("✅ Updated membership rank for customer " + saved.getCustomerId() + 
+                                         " (using default card, auto-updated)");
+                    } catch (Exception rankError) {
+                        System.err.println("❌ Error updating membership rank: " + rankError.getMessage());
+                    }
+                } else {
+                    System.out.println("ℹ️ Customer " + saved.getCustomerId() + " using specific membership card " + 
+                                     dto.getMembershipCardId() + ", skipping auto rank update");
+                }
             } catch (Exception e) {
                 System.err.println("❌ Error creating initial recharge history: " + e.getMessage());
                 // Không throw exception để không ảnh hưởng đến việc tạo khách hàng
@@ -106,7 +126,7 @@ public class CustomerServiceImpl implements CustomerService {
         
         Customer updated = customerRepository.save(existing);
         
-        // Nếu số dư mới > số dư cũ, tạo record nạp tiền cho phần chênh lệch
+        // Nếu số dư mới > số dư cũ, tạo record nạp tiền cho phần chênh lệch và cập nhật rank
         if (dto.getBalance() != null && oldBalance != null && 
             dto.getBalance().compareTo(oldBalance) > 0) {
             
@@ -120,6 +140,22 @@ public class CustomerServiceImpl implements CustomerService {
                 rechargeHistoryRepository.save(rechargeHistory);
                 System.out.println("✅ Created recharge history for customer " + customerId + 
                                  " with additional amount: " + rechargeAmount);
+                
+                // Chỉ tự động cập nhật rank nếu không có thẻ thành viên được chọn cụ thể
+                // (tức là đang sử dụng thẻ mặc định)
+                boolean isUsingDefaultCard = (dto.getMembershipCardId() == null || dto.getMembershipCardId() == 0);
+                if (isUsingDefaultCard) {
+                    try {
+                        membershipRankService.updateMembershipRank(customerId, dto.getBalance());
+                        System.out.println("✅ Updated membership rank for customer " + customerId + 
+                                         " after balance update (using default card, auto-updated)");
+                    } catch (Exception rankError) {
+                        System.err.println("❌ Error updating membership rank after balance update: " + rankError.getMessage());
+                    }
+                } else {
+                    System.out.println("ℹ️ Customer " + customerId + " using specific membership card " + 
+                                     dto.getMembershipCardId() + ", skipping auto rank update after balance update");
+                }
             } catch (Exception e) {
                 System.err.println("❌ Error creating recharge history for balance update: " + e.getMessage());
             }
