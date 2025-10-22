@@ -11,10 +11,14 @@ import internetcafe_management.repository.discount.DiscountRepository;
 import internetcafe_management.repository.sale.SaleRepository;
 import internetcafe_management.service.Customer.CustomerService;
 import internetcafe_management.service.sale.SaleService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,16 +32,18 @@ public class SaleServiceImpl implements SaleService {
     private final CustomerRepository customerRepository;
     private final DiscountRepository discountRepository;
     @Override
-    public Sale create(SaleDTO dto, Integer customer) {
-        Sale entity = saleMapper.toEntity(dto,customerMapper.toEntity(customerService.getCustomerById(customer)));
-        return saleRepository.save(entity);
+    @Transactional
+    public SaleDTO create(SaleDTO dto, Integer customerId) {
+        Sale entity = saleMapper.toEntity(dto, customerMapper.toEntity(customerService.getCustomerById(customerId)));
+        Sale savedEntity = saleRepository.save(entity);
+        return saleMapper.toDTO(savedEntity);
     }
 
     @Override
-    public Sale update(Integer saleId, UpdateSaleRequestDTO dto) {
+    public SaleDTO update(Integer saleId, UpdateSaleRequestDTO dto) {
         Sale existingS = saleRepository.findById(saleId)
                 .orElseThrow(() -> new RuntimeException("Sale not found"));
-        if(dto.getDiscountId()!=null){
+        if(dto.getDiscountId()!=null && dto.getDiscountId() > 0){
             Customer existingC = customerRepository.findById(dto.getCustomerId())
                     .orElseThrow(() -> new RuntimeException("Customer not found"));
             existingS.setCustomer(existingC);
@@ -45,7 +51,7 @@ public class SaleServiceImpl implements SaleService {
         if(dto.getPaymentMethod() != null){
             existingS.setPaymentMethod(dto.getPaymentMethod());
         }
-        if(dto.getDiscountId()!=null) {
+        if(dto.getDiscountId()!=null && dto.getDiscountId()>0) {
             if(!discountRepository.existsById(dto.getDiscountId())){
                 throw new RuntimeException("Mã giảm giá '" + dto.getDiscountId() + "' không tồn tại");
             }
@@ -57,11 +63,23 @@ public class SaleServiceImpl implements SaleService {
         if(dto.getNote() != null){
             existingS.setNote(dto.getNote());
         }
-        return null;
+        Sale savedEntity = saleRepository.save(existingS);
+        return saleMapper.toDTO(savedEntity);
     }
 
     @Override
     public void delete(Integer saleId) {
         saleRepository.deleteById(saleId);
     }
+
+    @Override
+    public SaleDTO getSaleById(Integer saleId) {
+        return null;
+    }
+
+    @Override
+    public List<SaleDTO> searchSale(String sortBy, String sortOrder, Integer saleId, Integer customerId, String customerName) {
+        return List.of();
+    }
+
 }
