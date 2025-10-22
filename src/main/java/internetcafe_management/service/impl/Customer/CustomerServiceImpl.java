@@ -4,6 +4,7 @@ import internetcafe_management.dto.CustomerDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
+import internetcafe_management.service.MembershipCardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import internetcafe_management.service.Customer.CustomerService;
@@ -19,13 +20,38 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private CustomerMapper customerMapper;
+    
+    @Autowired
+    private MembershipCardService membershipCardService;
 
 
     @Override
     public CustomerDTO createCustomer(CustomerDTO dto) {
         System.out.println("Creating customer with DTO: " + dto); // Log DTO
-        Customer entity = customerMapper.toEntity(dto);
+        
+        // Create new entity without setting customerId
+        Customer entity = new Customer();
+        entity.setCustomerName(dto.getCustomerName());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setMembershipCardId(dto.getMembershipCardId());
+        entity.setBalance(dto.getBalance());
+        
+        // If no membership card is specified (null or 0), try to set default membership card
+        if (entity.getMembershipCardId() == null || entity.getMembershipCardId() == 0) {
+            try {
+                var defaultMembershipCard = membershipCardService.getDefaultMembershipCard();
+                entity.setMembershipCardId(defaultMembershipCard.getMembershipCardId());
+                System.out.println("Set default membership card ID: " + defaultMembershipCard.getMembershipCardId());
+            } catch (Exception e) {
+                // If no default membership card exists, leave it as null
+                System.out.println("No default membership card found, leaving customer without membership card: " + e.getMessage());
+                entity.setMembershipCardId(null);
+            }
+        }
+        
+        System.out.println("Entity before save: " + entity);
         Customer saved = customerRepository.save(entity);
+        System.out.println("Entity after save: " + saved);
         return customerMapper.toDTO(saved);
     }
 
@@ -46,7 +72,7 @@ public class CustomerServiceImpl implements CustomerService {
                 .orElseThrow(() -> new RuntimeException("Customer not found with id: " + customerId));
         existing.setCustomerName(dto.getCustomerName());
         existing.setPhoneNumber(dto.getPhoneNumber());
-        existing.setMembershipCard(dto.getMembershipCard());
+        existing.setMembershipCardId(dto.getMembershipCardId());
         existing.setBalance(dto.getBalance());
         Customer updated = customerRepository.save(existing);
         return customerMapper.toDTO(updated);

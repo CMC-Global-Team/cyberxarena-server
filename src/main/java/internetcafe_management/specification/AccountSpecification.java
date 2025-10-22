@@ -8,7 +8,7 @@ import java.util.List;
 
 public class AccountSpecification {
 
-    public static Specification<Account> search(String username, String customerName, String phoneNumber, String membershipCard) {
+    public static Specification<Account> search(String username, String customerName, String phoneNumber, Integer membershipCardId) {
         return (root, query, criteriaBuilder) -> {
             // Tạo một danh sách để chứa các điều kiện
             List<Predicate> predicates = new ArrayList<>();
@@ -39,13 +39,13 @@ public class AccountSpecification {
                 ));
             }
 
-            // Thêm điều kiện tìm kiếm theo Membership Card
-            if (membershipCard != null && !membershipCard.trim().isEmpty()) {
-                // Join với bảng Customer và tìm kiếm theo membership_card
-                // Tương đương với: WHERE customer.membership_card LIKE '%membershipCard%'
-                predicates.add(criteriaBuilder.like(
-                    root.get("customer").get("membershipCard"), 
-                    "%" + membershipCard + "%"
+            // Thêm điều kiện tìm kiếm theo Membership Card ID
+            if (membershipCardId != null) {
+                // Join với bảng Customer và tìm kiếm theo membership_card_id
+                // Tương đương với: WHERE customer.membership_card_id = membershipCardId
+                predicates.add(criteriaBuilder.equal(
+                    root.get("customer").get("membershipCardId"), 
+                    membershipCardId
                 ));
             }
 

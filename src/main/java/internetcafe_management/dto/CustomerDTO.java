@@ -20,8 +20,7 @@ public class CustomerDTO {
     @Pattern(regexp = "^($|(\\+84|0)[0-9]{9,10})$", message = "Số điện thoại không hợp lệ (bắt đầu bằng 0 hoặc +84, gồm 10-11 số)")
     private String phoneNumber;
 
-    @Size(max = 50, message = "Loại thẻ không vượt quá 50 ký tự")
-    private String membershipCard;
+    private Integer membershipCardId;
 
     @NotNull(message = "Số dư không được để trống")
     @DecimalMin(value = "0.00", inclusive = true, message = "Số dư không được âm")

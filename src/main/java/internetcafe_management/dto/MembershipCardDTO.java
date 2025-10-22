@@ -1,5 +1,7 @@
 package internetcafe_management.dto;
 
+import java.math.BigDecimal;
+
 public class MembershipCardDTO {
     private Integer membershipCardId;
     private String membershipCardName;
@@ -7,18 +9,34 @@ public class MembershipCardDTO {
     private String discountName;
     private String discountType;
     private Double discountValue;
+    private BigDecimal rechargeThreshold;
+    private Boolean isDefault;
     
     // Constructors
     public MembershipCardDTO() {}
     
     public MembershipCardDTO(Integer membershipCardId, String membershipCardName, Integer discountId, 
-                           String discountName, String discountType, Double discountValue) {
+                           String discountName, String discountType, Double discountValue, BigDecimal rechargeThreshold) {
         this.membershipCardId = membershipCardId;
         this.membershipCardName = membershipCardName;
         this.discountId = discountId;
         this.discountName = discountName;
         this.discountType = discountType;
         this.discountValue = discountValue;
+        this.rechargeThreshold = rechargeThreshold;
+        this.isDefault = false;
+    }
+    
+    public MembershipCardDTO(Integer membershipCardId, String membershipCardName, Integer discountId, 
+                           String discountName, String discountType, Double discountValue, BigDecimal rechargeThreshold, Boolean isDefault) {
+        this.membershipCardId = membershipCardId;
+        this.membershipCardName = membershipCardName;
+        this.discountId = discountId;
+        this.discountName = discountName;
+        this.discountType = discountType;
+        this.discountValue = discountValue;
+        this.rechargeThreshold = rechargeThreshold;
+        this.isDefault = isDefault;
     }
     
     // Getters and Setters
@@ -68,5 +86,21 @@ public class MembershipCardDTO {
     
     public void setDiscountValue(Double discountValue) {
         this.discountValue = discountValue;
+    }
+    
+    public Boolean getIsDefault() {
+        return isDefault;
+    }
+    
+    public void setIsDefault(Boolean isDefault) {
+        this.isDefault = isDefault;
+    }
+    
+    public BigDecimal getRechargeThreshold() {
+        return rechargeThreshold;
+    }
+    
+    public void setRechargeThreshold(BigDecimal rechargeThreshold) {
+        this.rechargeThreshold = rechargeThreshold;
     }
 }

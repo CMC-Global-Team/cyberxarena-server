@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,9 +39,16 @@ public class MembershipCardService {
             }
         }
         
+        // If setting as default, unset all other default cards first
+        if (request.getIsDefault() != null && request.getIsDefault()) {
+            membershipCardRepository.unsetAllDefaultCards();
+        }
+        
         MembershipCard membershipCard = new MembershipCard();
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setRechargeThreshold(request.getRechargeThreshold() != null ? request.getRechargeThreshold() : BigDecimal.ZERO);
+        membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : false);
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
         
@@ -88,8 +96,15 @@ public class MembershipCardService {
             }
         }
         
+        // If setting as default, unset all other default cards first
+        if (request.getIsDefault() != null && request.getIsDefault()) {
+            membershipCardRepository.unsetAllDefaultCards();
+        }
+        
         membershipCard.setMembershipCardName(request.getMembershipCardName());
         membershipCard.setDiscountId(request.getDiscountId());
+        membershipCard.setRechargeThreshold(request.getRechargeThreshold() != null ? request.getRechargeThreshold() : membershipCard.getRechargeThreshold());
+        membershipCard.setIsDefault(request.getIsDefault() != null ? request.getIsDefault() : membershipCard.getIsDefault());
         
         MembershipCard savedMembershipCard = membershipCardRepository.save(membershipCard);
         
@@ -112,11 +127,19 @@ public class MembershipCardService {
         membershipCardRepository.deleteById(id);
     }
     
+    public MembershipCardDTO getDefaultMembershipCard() {
+        MembershipCard defaultCard = membershipCardRepository.findByIsDefaultTrue()
+                .orElseThrow(() -> new ResourceNotFoundException("No default membership card found"));
+        return convertToDTO(defaultCard);
+    }
+    
     private MembershipCardDTO convertToDTO(MembershipCard membershipCard) {
         MembershipCardDTO dto = new MembershipCardDTO();
         dto.setMembershipCardId(membershipCard.getMembershipCardId());
         dto.setMembershipCardName(membershipCard.getMembershipCardName());
         dto.setDiscountId(membershipCard.getDiscountId());
+        dto.setRechargeThreshold(membershipCard.getRechargeThreshold());
+        dto.setIsDefault(membershipCard.getIsDefault());
         
         if (membershipCard.getDiscount() != null) {
             dto.setDiscountName(membershipCard.getDiscount().getDiscountName());

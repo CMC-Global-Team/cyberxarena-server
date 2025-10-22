@@ -22,8 +22,8 @@ public class CustomerSortDateDesc {
     @Column(name = "phone_number", length = 15)
     private String phoneNumber;
 
-    @Column(name = "membership_card", length = 50)
-    private String membershipCard;
+    @Column(name = "membership_card_id")
+    private Integer membershipCardId;
 
     @Column(name = "balance", precision = 12, scale = 2)
     private BigDecimal balance;

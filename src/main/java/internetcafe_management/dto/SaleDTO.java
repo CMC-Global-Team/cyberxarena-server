@@ -3,6 +3,7 @@ package internetcafe_management.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -11,8 +12,12 @@ import java.util.List;
 public class SaleDTO {
 
     private Integer saleId;
+
     @NotNull(message = "customerId không được để trống")
     private Integer customerId;
+
+    @NotNull(message = "saleDate không được để trống")
+    private LocalDateTime saleDate;
 
     /**
      * Danh sách mặt hàng trong hóa đơn — mỗi phần tử chỉ cần itemId và quantity.
@@ -21,15 +26,13 @@ public class SaleDTO {
     private List<SaleDetailDTO> items;
 
     @NotBlank(message = "Phương thức thanh toán không được để trống")
-    @Size(max = 50)
+    @Size(max = 50, message = "Phương thức thanh toán không được vượt quá 50 ký tự")
     private String paymentMethod;
 
-    @NotNull(message = "discountType không được để trống")
-    private String discountType;
+    private BigDecimal totalAmount;
+    @NotNull(message = "discountId không được để trống")
+    private Integer discountId;
 
-    @DecimalMin(value = "0.00", inclusive = true, message = "Giảm giá không âm")
-    private BigDecimal discount = BigDecimal.ZERO;
-
-    @Size(max = 200)
+    @Size(max = 200, message = "Ghi chú không được vượt quá 200 ký tự")
     private String note;
 }

@@ -18,7 +18,7 @@ public class Revenue {
     @Column(name = "revenue_id")
     private Integer revenueId;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "date", nullable = false, unique = true)
     private LocalDateTime date;
 
     @Column(name = "computer_usage_revenue", nullable = false, precision = 10, scale = 2)
@@ -26,8 +26,5 @@ public class Revenue {
 
     @Column(name = "sales_revenue", nullable = false, precision = 10, scale = 2)
     private BigDecimal salesRevenue;
-
-    @Column(name = "operating_expense", nullable = false, precision = 10, scale = 2)
-    private BigDecimal operatingExpense;
 
 }

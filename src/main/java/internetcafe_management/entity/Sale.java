@@ -2,6 +2,7 @@ package internetcafe_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,12 +27,8 @@ public class Sale {
     @Column(name = "sale_date", nullable = false)
     private LocalDateTime saleDate;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "discount_type", length = 20)
-    private DiscountType discountType = DiscountType.Flat;
-
-    @Column(name = "discount", precision = 10, scale = 2)
-    private BigDecimal discount = BigDecimal.ZERO;
+    @Column(name = "discount_id", nullable = false)
+    private Integer discountId = 1;
 
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
@@ -43,14 +40,17 @@ public class Sale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "sale_total", nullable = false)
+    private SaleTotal saleTotal;
+
     @PrePersist
     protected void onCreate() {
-        if (saleDate == null) saleDate = LocalDateTime.now();
-        if (discountType == null) discountType = DiscountType.Flat;
-        if (discount == null) discount = BigDecimal.ZERO;
-    }
-
-    public enum DiscountType {
-        Percentage, Flat
+        if (saleDate == null) {
+            saleDate = LocalDateTime.now();
+        }
+        if (discountId == null) {
+            discountId = 1;
+        }
     }
 }

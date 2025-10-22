@@ -124,7 +124,7 @@ public class AccountServiceImpl implements AccountService {
             searchRequest.getUsername(),
             searchRequest.getCustomerName(),
             searchRequest.getPhoneNumber(),
-            searchRequest.getMembershipCard()
+            searchRequest.getMembershipCardId()
         );
         
         // Tạo Sort object
@@ -153,7 +153,7 @@ public class AccountServiceImpl implements AccountService {
         dto.setPassword(account.getPassword()); // Trong thực tế không nên trả về password
         dto.setCustomerName(account.getCustomer().getCustomerName());
         dto.setPhoneNumber(account.getCustomer().getPhoneNumber());
-        dto.setMembershipCard(account.getCustomer().getMembershipCard());
+        dto.setMembershipCardId(account.getCustomer().getMembershipCardId());
         
         return dto;
     }
