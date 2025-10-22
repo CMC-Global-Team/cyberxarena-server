@@ -2,6 +2,7 @@ package internetcafe_management.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "session_usage")
@@ -21,5 +22,5 @@ public class SessionUsage {
     private Double remainingHours;
 
     @Column(name = "updated_at")
-    private java.time.LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
 }
