@@ -9,4 +9,5 @@ import java.util.List;
 public interface RevenueService {
     Page<RevenueDTO> getAllRevenue(Pageable pageable);
     List<RevenueDTO> generateRevenueReports(LocalDate startDate, LocalDate endDate);
+    RevenueDTO recalculateRevenueReport(LocalDate date);
 }
