@@ -3,6 +3,7 @@ package internetcafe_management.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,9 +40,17 @@ public class Sale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "sale_total", nullable = false)
+    private SaleTotal saleTotal;
+
     @PrePersist
     protected void onCreate() {
-        if (saleDate == null) saleDate = LocalDateTime.now();
-        if (discountId == null) discountId = 1;
+        if (saleDate == null) {
+            saleDate = LocalDateTime.now();
+        }
+        if (discountId == null) {
+            discountId = 1;
+        }
     }
 }
