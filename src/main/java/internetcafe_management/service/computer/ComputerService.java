@@ -10,5 +10,5 @@ public interface ComputerService {
     ComputerDTO createComputer(ComputerDTO computerDTO);
     ComputerDTO updateComputer(Integer id, ComputerDTO computerDTO);
     void deleteComputer(Integer id);
-    ComputerUsageStats getComputerUsageStats(Integer computerId);
+    ComputerUsageStats getComputerUsageStats(Integer id);
 }
