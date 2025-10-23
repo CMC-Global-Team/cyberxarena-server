@@ -55,10 +55,7 @@ public class SaleMapper {
                     .collect(Collectors.toList()));
         }
 
-        // Initialize SaleTotal - don't set saleId here, it will be set after entity is saved
-        SaleTotal saleTotal = new SaleTotal();
-        saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-        entity.setSaleTotal(saleTotal);
+        // Note: SaleTotal is now managed separately, not through Sale entity
 
         return entity;
     }

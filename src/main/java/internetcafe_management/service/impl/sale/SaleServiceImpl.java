@@ -170,11 +170,8 @@ public class SaleServiceImpl implements SaleService {
                             .collect(Collectors.toList());
                     break;
                 case "saletotal":
-                    sales = sales.stream()
-                            .sorted((s1, s2) -> order.equals("desc") ?
-                                    s2.getSaleTotal().getTotalAmount().compareTo(s1.getSaleTotal().getTotalAmount()) :
-                                    s1.getSaleTotal().getTotalAmount().compareTo(s2.getSaleTotal().getTotalAmount()))
-                            .collect(Collectors.toList());
+                    // Note: SaleTotal sorting is not available since we removed the relationship
+                    // This would require a separate query to SaleTotal table
                     break;
 
                 case "customername":
