@@ -40,8 +40,7 @@ public class Sale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "sale_total", nullable = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "sale")
     private SaleTotal saleTotal;
 
     @PrePersist

@@ -66,10 +66,11 @@ public class SaleServiceImpl implements SaleService {
             // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Create SaleTotal with the real saleId
+            // Create SaleTotal with the real saleId and set bidirectional relationship
             SaleTotal saleTotal = new SaleTotal();
             saleTotal.setSaleId(savedEntity.getSaleId());
             saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+            saleTotal.setSale(savedEntity);
             
             // Set SaleTotal to Sale and save again
             savedEntity.setSaleTotal(saleTotal);
