@@ -16,6 +16,10 @@ public class SaleDTO {
     @NotNull(message = "customerId không được để trống")
     private Integer customerId;
 
+    // Thông tin khách hàng để hiển thị
+    private String customerName;
+    private String customerPhone;
+
     @NotNull(message = "saleDate không được để trống")
     private LocalDateTime saleDate;
 
