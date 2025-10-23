@@ -52,5 +52,10 @@ public class Sale {
         if (discountId == null) {
             discountId = 1;
         }
+        // Create SaleTotal if not exists
+        if (saleTotal == null) {
+            saleTotal = new SaleTotal();
+            saleTotal.setTotalAmount(BigDecimal.ZERO);
+        }
     }
 }

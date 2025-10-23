@@ -42,7 +42,7 @@ public class SaleServiceImpl implements SaleService {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
             
-            // Create sale entity without SaleTotal first
+            // Create sale entity (SaleTotal will be created automatically in @PrePersist)
             Sale entity = new Sale();
             entity.setCustomer(customer);
             entity.setSaleDate(dto.getSaleDate());
@@ -63,19 +63,18 @@ public class SaleServiceImpl implements SaleService {
                         .collect(Collectors.toList()));
             }
             
-            // Save sale first to get saleId
+            // Save sale (SaleTotal will be created automatically)
             Sale savedEntity = saleRepository.save(entity);
             
-            // Now create SaleTotal with the real saleId
-            SaleTotal saleTotal = new SaleTotal();
-            saleTotal.setSaleId(savedEntity.getSaleId());
-            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-            savedEntity.setSaleTotal(saleTotal);
+            // Update SaleTotal with the real saleId and total amount
+            if (savedEntity.getSaleTotal() != null) {
+                savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
+                savedEntity.getSaleTotal().setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+                Sale finalEntity = saleRepository.save(savedEntity);
+                return saleMapper.toDTO(finalEntity);
+            }
             
-            // Save again to persist SaleTotal
-            Sale finalEntity = saleRepository.save(savedEntity);
-            
-            return saleMapper.toDTO(finalEntity);
+            return saleMapper.toDTO(savedEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create sale: " + e.getMessage());
