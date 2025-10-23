@@ -9,6 +9,8 @@ import internetcafe_management.mapper.computer.ComputerMapper;
 import internetcafe_management.repository.computer.ComputerRepository;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.session.SessionRepository;
+import internetcafe_management.repository.MembershipCardRepository;
+import internetcafe_management.repository.account.AccountRepository;
 import internetcafe_management.service.computer.ComputerService;
 import internetcafe_management.specification.ComputerSpecification;
 import org.slf4j.Logger;
@@ -34,12 +36,18 @@ public class ComputerServiceImpl implements ComputerService {
     private final ComputerMapper computerMapper;
     private final SessionRepository sessionRepository;
     private final CustomerRepository customerRepository;
+    private final MembershipCardRepository membershipCardRepository;
+    private final AccountRepository accountRepository;
 
-    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper, SessionRepository sessionRepository, CustomerRepository customerRepository) {
+    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper, SessionRepository sessionRepository, 
+                             CustomerRepository customerRepository, MembershipCardRepository membershipCardRepository,
+                             AccountRepository accountRepository) {
         this.computerRepository = repo;
         this.computerMapper = mapper;
         this.sessionRepository = sessionRepository;
         this.customerRepository = customerRepository;
+        this.membershipCardRepository = membershipCardRepository;
+        this.accountRepository = accountRepository;
     }
 
     @Override
@@ -149,9 +157,29 @@ public class ComputerServiceImpl implements ComputerService {
                             .map(customer -> customer.getCustomerName())
                             .orElse("Khách hàng #" + session.getCustomerId());
                     
+                    // Get customer phone
+                    String customerPhone = customerRepository.findById(session.getCustomerId())
+                            .map(customer -> customer.getPhoneNumber())
+                            .orElse(null);
+                    
+                    // Get membership card name
+                    String membershipCardName = customerRepository.findById(session.getCustomerId())
+                            .flatMap(customer -> Optional.ofNullable(customer.getMembershipCardId())
+                                    .flatMap(membershipCardRepository::findById)
+                                    .map(membershipCard -> membershipCard.getMembershipCardName()))
+                            .orElse(null);
+                    
+                    // Get account username
+                    String accountUsername = accountRepository.findByCustomerCustomerId(session.getCustomerId())
+                            .map(account -> account.getUsername())
+                            .orElse(null);
+                    
                     return new ComputerUsageStats.SessionUsageHistory(
                             session.getSessionId(),
                             customerName,
+                            customerPhone,
+                            membershipCardName,
+                            accountUsername,
                             session.getStartTime(),
                             session.getEndTime(),
                             durationHours,

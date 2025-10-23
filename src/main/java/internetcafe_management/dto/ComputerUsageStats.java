@@ -24,9 +24,13 @@ public class ComputerUsageStats {
     public static class SessionUsageHistory {
         private Integer sessionId;
         private String customerName;
+        private String customerPhone;
+        private String membershipCardName;
+        private String accountUsername;
         private LocalDateTime startTime;
         private LocalDateTime endTime;
         private Double durationHours;
         private String status;
     }
 }
+
