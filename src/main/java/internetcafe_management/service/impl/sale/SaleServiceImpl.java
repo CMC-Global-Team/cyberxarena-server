@@ -4,6 +4,8 @@ import internetcafe_management.dto.SaleDTO;
 import internetcafe_management.dto.UpdateSaleRequestDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
+import internetcafe_management.entity.SaleDetail;
+import internetcafe_management.entity.SaleTotal;
 import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.mapper.sale.SaleMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
@@ -39,17 +41,40 @@ public class SaleServiceImpl implements SaleService {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
             
-            // Create sale entity
-            Sale entity = saleMapper.toEntity(dto, customer);
-            Sale savedEntity = saleRepository.save(entity);
+            // Create sale entity without SaleTotal first
+            Sale entity = new Sale();
+            entity.setCustomer(customer);
+            entity.setSaleDate(dto.getSaleDate());
+            entity.setDiscountId(dto.getDiscountId() != null ? dto.getDiscountId() : 1);
+            entity.setPaymentMethod(dto.getPaymentMethod());
+            entity.setNote(dto.getNote());
             
-            // Set saleId for SaleTotal after entity is saved
-            if (savedEntity.getSaleTotal() != null) {
-                savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
-                saleRepository.save(savedEntity); // Save again to update SaleTotal
+            // Map SaleDetailDTO to SaleDetail - handle null items
+            if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+                entity.setSaleDetails(dto.getItems().stream()
+                        .map(item -> {
+                            SaleDetail detail = new SaleDetail();
+                            detail.setItemId(item.getItemId());
+                            detail.setQuantity(item.getQuantity());
+                            detail.setSale(entity);
+                            return detail;
+                        })
+                        .collect(Collectors.toList()));
             }
             
-            return saleMapper.toDTO(savedEntity);
+            // Save sale first to get saleId
+            Sale savedEntity = saleRepository.save(entity);
+            
+            // Now create SaleTotal with the saleId
+            SaleTotal saleTotal = new SaleTotal();
+            saleTotal.setSaleId(savedEntity.getSaleId());
+            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+            savedEntity.setSaleTotal(saleTotal);
+            
+            // Save again to persist SaleTotal
+            Sale finalEntity = saleRepository.save(savedEntity);
+            
+            return saleMapper.toDTO(finalEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create sale: " + e.getMessage());
