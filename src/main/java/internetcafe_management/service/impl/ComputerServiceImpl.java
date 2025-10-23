@@ -1,10 +1,13 @@
 package internetcafe_management.service.impl;
 
 import internetcafe_management.dto.ComputerDTO;
+import internetcafe_management.dto.ComputerUsageStats;
 import internetcafe_management.entity.Computer;
 import internetcafe_management.entity.Computer.ComputerStatus;
+import internetcafe_management.entity.Session;
 import internetcafe_management.mapper.computer.ComputerMapper;
 import internetcafe_management.repository.computer.ComputerRepository;
+import internetcafe_management.repository.session.SessionRepository;
 import internetcafe_management.service.computer.ComputerService;
 import internetcafe_management.specification.ComputerSpecification;
 import org.slf4j.Logger;
@@ -15,6 +18,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @Transactional
 public class ComputerServiceImpl implements ComputerService {
@@ -23,10 +30,12 @@ public class ComputerServiceImpl implements ComputerService {
 
     private final ComputerRepository computerRepository;
     private final ComputerMapper computerMapper;
+    private final SessionRepository sessionRepository;
 
-    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper) {
+    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper, SessionRepository sessionRepository) {
         this.computerRepository = repo;
         this.computerMapper = mapper;
+        this.sessionRepository = sessionRepository;
     }
 
     @Override
@@ -94,5 +103,61 @@ public class ComputerServiceImpl implements ComputerService {
         }
 
         computerRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ComputerUsageStats getComputerUsageStats(Integer computerId) {
+        Computer computer = computerRepository.findById(computerId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy máy tính với ID: " + computerId));
+
+        // Get all sessions for this computer
+        List<Session> sessions = sessionRepository.findByComputerIdOrderByStartTimeDesc(computerId);
+        
+        // Calculate total hours
+        double totalHours = sessions.stream()
+                .filter(session -> session.getEndTime() != null)
+                .mapToDouble(session -> {
+                    long seconds = java.time.Duration.between(session.getStartTime(), session.getEndTime()).getSeconds();
+                    return seconds / 3600.0; // Convert to hours
+                })
+                .sum();
+
+        // Get last used time
+        LocalDateTime lastUsed = sessions.stream()
+                .filter(session -> session.getEndTime() != null)
+                .map(Session::getEndTime)
+                .max(LocalDateTime::compareTo)
+                .orElse(null);
+
+        // Get recent sessions (last 10)
+        List<ComputerUsageStats.SessionUsageHistory> recentSessions = sessions.stream()
+                .limit(10)
+                .map(session -> {
+                    double durationHours = 0.0;
+                    if (session.getEndTime() != null) {
+                        long seconds = java.time.Duration.between(session.getStartTime(), session.getEndTime()).getSeconds();
+                        durationHours = seconds / 3600.0;
+                    }
+                    
+                    return new ComputerUsageStats.SessionUsageHistory(
+                            session.getSessionId(),
+                            session.getCustomerId().toString(), // We'll need to fetch customer name separately
+                            session.getStartTime(),
+                            session.getEndTime(),
+                            durationHours,
+                            session.getEndTime() != null ? "Ended" : "Active"
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ComputerUsageStats(
+                computer.getComputerId(),
+                computer.getComputerName(),
+                lastUsed,
+                totalHours,
+                sessions.size(),
+                recentSessions
+        );
     }
 }
