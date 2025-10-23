@@ -63,18 +63,19 @@ public class SaleServiceImpl implements SaleService {
                         .collect(Collectors.toList()));
             }
             
-            // Save sale (SaleTotal will be created automatically)
+            // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Update SaleTotal with the real saleId and total amount
-            if (savedEntity.getSaleTotal() != null) {
-                savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
-                savedEntity.getSaleTotal().setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-                Sale finalEntity = saleRepository.save(savedEntity);
-                return saleMapper.toDTO(finalEntity);
-            }
+            // Create SaleTotal with the real saleId
+            SaleTotal saleTotal = new SaleTotal();
+            saleTotal.setSaleId(savedEntity.getSaleId());
+            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
             
-            return saleMapper.toDTO(savedEntity);
+            // Set SaleTotal to Sale and save again
+            savedEntity.setSaleTotal(saleTotal);
+            Sale finalEntity = saleRepository.save(savedEntity);
+            
+            return saleMapper.toDTO(finalEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create sale: " + e.getMessage());
