@@ -10,8 +10,9 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public interface SaleRepository extends JpaRepository<Sale, Integer> {
-    @Query("SELECT SUM(s.saleTotal.totalAmount) FROM Sale s " +
-            "WHERE FUNCTION('DATE', s.saleDate) = :date")
+    @Query(value = "SELECT SUM(st.total_amount) FROM sale s " +
+            "JOIN sale_total st ON s.sale_id = st.sale_id " +
+            "WHERE DATE(s.sale_date) = :date", nativeQuery = true)
     BigDecimal sumTotalAmountBySaleDate(@Param("date") LocalDate date);
     
     @Modifying
