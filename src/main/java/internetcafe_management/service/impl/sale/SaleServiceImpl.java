@@ -66,27 +66,15 @@ public class SaleServiceImpl implements SaleService {
             // Save sale (SaleTotal will be created automatically)
             Sale savedEntity = saleRepository.save(entity);
             
-            // Call stored procedure to calculate total with discount logic
-            try {
-                // Execute the stored procedure to calculate total amount
-                saleRepository.callUpdateSaleTotal(savedEntity.getSaleId());
-                
-                // Refresh the entity to get updated SaleTotal
-                savedEntity = saleRepository.findById(savedEntity.getSaleId())
-                        .orElseThrow(() -> new RuntimeException("Sale not found after update"));
-                
-                return saleMapper.toDTO(savedEntity);
-            } catch (Exception e) {
-                log.error("Error calling update_sale_total procedure: {}", e.getMessage(), e);
-                // Fallback to manual calculation if procedure fails
-                if (savedEntity.getSaleTotal() != null) {
-                    savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
-                    savedEntity.getSaleTotal().setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-                    Sale finalEntity = saleRepository.save(savedEntity);
-                    return saleMapper.toDTO(finalEntity);
-                }
-                return saleMapper.toDTO(savedEntity);
+            // Update SaleTotal with the real saleId and total amount
+            if (savedEntity.getSaleTotal() != null) {
+                savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
+                savedEntity.getSaleTotal().setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+                Sale finalEntity = saleRepository.save(savedEntity);
+                return saleMapper.toDTO(finalEntity);
             }
+            
+            return saleMapper.toDTO(savedEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create sale: " + e.getMessage());
