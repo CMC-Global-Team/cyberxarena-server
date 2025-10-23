@@ -36,12 +36,12 @@ public class Sale {
     @Column(name = "note", length = 200)
     private String note;
 
+    @Column(name = "sale_total", precision = 10, scale = 2)
+    private BigDecimal saleTotal;
+
     // Quan hệ 1->N tới sale_detail
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
-
-    // Remove direct relationship to SaleTotal to avoid database constraint issues
-    // SaleTotal will be managed separately
 
     @PrePersist
     protected void onCreate() {
