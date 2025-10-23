@@ -68,13 +68,18 @@ public class SaleServiceImpl implements SaleService {
             // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Create SaleTotal separately
-            SaleTotal saleTotal = new SaleTotal();
-            saleTotal.setSaleId(savedEntity.getSaleId());
-            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-            
-            // Save SaleTotal separately
-            saleTotalRepository.save(saleTotal);
+            // Use stored procedure to calculate and create SaleTotal
+            try {
+                saleRepository.callUpdateSaleTotal(savedEntity.getSaleId());
+                log.info("Successfully called update_sale_total procedure for saleId: {}", savedEntity.getSaleId());
+            } catch (Exception e) {
+                log.error("Error calling update_sale_total procedure: {}", e.getMessage(), e);
+                // Fallback: create SaleTotal manually
+                SaleTotal saleTotal = new SaleTotal();
+                saleTotal.setSaleId(savedEntity.getSaleId());
+                saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+                saleTotalRepository.save(saleTotal);
+            }
             
             return saleMapper.toDTO(savedEntity);
         } catch (Exception e) {
