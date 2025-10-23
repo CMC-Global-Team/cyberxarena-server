@@ -6,6 +6,7 @@ import internetcafe_management.entity.*;
 import internetcafe_management.exception.ResourceNotFoundException;
 import internetcafe_management.repository.refund.RefundRepository;
 import internetcafe_management.repository.sale.SaleRepository;
+import internetcafe_management.repository.product.ProductRepository;
 import internetcafe_management.service.refund.RefundService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class RefundServiceImpl implements RefundService {
 
     private final RefundRepository refundRepository;
     private final SaleRepository saleRepository;
+    private final ProductRepository productRepository;
 
     @Override
     @Transactional
@@ -239,12 +241,27 @@ public class RefundServiceImpl implements RefundService {
                         detailDTO.setSaleDetailId(detail.getSaleDetail().getSaleDetailId());
                         detailDTO.setQuantity(detail.getQuantity());
 
-                        // Thông tin sản phẩm
-                        if (detail.getSaleDetail().getItem() != null) {
-                            detailDTO.setItemName(detail.getSaleDetail().getItem().getItemName());
-                            detailDTO.setItemPrice(detail.getSaleDetail().getItem().getPrice());
-                            detailDTO.setTotalAmount(detail.getSaleDetail().getItem().getPrice()
-                                    .multiply(BigDecimal.valueOf(detail.getQuantity())));
+                        // Thông tin sản phẩm - lấy từ ProductRepository
+                        Integer itemId = detail.getSaleDetail().getItemId();
+                        if (itemId != null) {
+                            try {
+                                Product product = productRepository.findById(itemId).orElse(null);
+                                if (product != null) {
+                                    detailDTO.setItemName(product.getItemName());
+                                    detailDTO.setItemPrice(product.getPrice());
+                                    detailDTO.setTotalAmount(product.getPrice()
+                                            .multiply(BigDecimal.valueOf(detail.getQuantity())));
+                                } else {
+                                    detailDTO.setItemName("Sản phẩm #" + itemId + " (không tồn tại)");
+                                    detailDTO.setItemPrice(BigDecimal.ZERO);
+                                    detailDTO.setTotalAmount(BigDecimal.ZERO);
+                                }
+                            } catch (Exception e) {
+                                log.warn("Không thể lấy thông tin sản phẩm với ID: {}", itemId, e);
+                                detailDTO.setItemName("Sản phẩm #" + itemId);
+                                detailDTO.setItemPrice(BigDecimal.ZERO);
+                                detailDTO.setTotalAmount(BigDecimal.ZERO);
+                            }
                         }
                         return detailDTO;
                     })
