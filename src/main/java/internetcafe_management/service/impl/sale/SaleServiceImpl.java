@@ -42,7 +42,7 @@ public class SaleServiceImpl implements SaleService {
             Customer customer = customerRepository.findById(customerId)
                     .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
             
-            // Create sale entity with SaleTotal
+            // Create sale entity without SaleTotal first
             Sale entity = new Sale();
             entity.setCustomer(customer);
             entity.setSaleDate(dto.getSaleDate());
@@ -63,17 +63,16 @@ public class SaleServiceImpl implements SaleService {
                         .collect(Collectors.toList()));
             }
             
-            // Create SaleTotal with temporary saleId (will be updated after save)
-            SaleTotal saleTotal = new SaleTotal();
-            saleTotal.setSaleId(0); // Temporary ID
-            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-            entity.setSaleTotal(saleTotal);
-            
-            // Save sale (this will generate the real saleId)
+            // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Update SaleTotal with the real saleId
-            savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
+            // Now create SaleTotal with the real saleId
+            SaleTotal saleTotal = new SaleTotal();
+            saleTotal.setSaleId(savedEntity.getSaleId());
+            saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+            savedEntity.setSaleTotal(saleTotal);
+            
+            // Save again to persist SaleTotal
             Sale finalEntity = saleRepository.save(savedEntity);
             
             return saleMapper.toDTO(finalEntity);

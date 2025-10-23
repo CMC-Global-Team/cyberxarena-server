@@ -41,7 +41,7 @@ public class Sale {
     private List<SaleDetail> saleDetails;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "sale_total", nullable = false)
+    @JoinColumn(name = "sale_total", nullable = true)
     private SaleTotal saleTotal;
 
     @PrePersist
