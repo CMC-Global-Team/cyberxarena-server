@@ -26,6 +26,10 @@ public class SaleMapper {
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
                 .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);
+        
+        // Map totalAmount từ SaleTotal
+        dto.setTotalAmount(entity.getSaleTotal() != null ? entity.getSaleTotal().getTotalAmount() : BigDecimal.ZERO);
+        
         return dto;
     }
 
@@ -35,31 +39,27 @@ public class SaleMapper {
             throw new IllegalArgumentException("SaleDTO cannot be null");
         }
 
-
         Sale entity = new Sale();
-        entity.setSaleId(dto.getSaleId());
         entity.setCustomer(customer);
         entity.setSaleDate(dto.getSaleDate());
         entity.setDiscountId(dto.getDiscountId());
         entity.setPaymentMethod(dto.getPaymentMethod());
         entity.setNote(dto.getNote());
 
-        // Map SaleDetailDTO to SaleDetail
-        entity.setSaleDetails(dto.getItems().stream()
-                .map(item -> {
-                    SaleDetail detail = new SaleDetail();
-                    detail.setItemId(item.getItemId());
-                    detail.setQuantity(item.getQuantity());
-                    detail.setSale(entity);
-                    return detail;
-                })
-                .collect(Collectors.toList()));
+        // Map SaleDetailDTO to SaleDetail - handle null items
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            entity.setSaleDetails(dto.getItems().stream()
+                    .map(item -> {
+                        SaleDetail detail = new SaleDetail();
+                        detail.setItemId(item.getItemId());
+                        detail.setQuantity(item.getQuantity());
+                        detail.setSale(entity);
+                        return detail;
+                    })
+                    .collect(Collectors.toList()));
+        }
 
-        // Initialize SaleTotal without setting saleId
-        SaleTotal saleTotal = new SaleTotal();
-        saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-        saleTotal.setSaleId(dto.getSaleId());
-        entity.setSaleTotal(saleTotal);
+        // Note: SaleTotal is now managed separately, not through Sale entity
 
         return entity;
     }

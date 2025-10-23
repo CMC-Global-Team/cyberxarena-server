@@ -53,4 +53,35 @@ public class SessionServiceImpl implements SessionService {
     public List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime) {
         return sessionRepository.searchSessions(customerId, computerId, startTime, endTime);
     }
+
+    @Override
+    public Session endSession(Integer id) {
+        Session session = sessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        
+        if (session.getEndTime() != null) {
+            throw new RuntimeException("Session already ended");
+        }
+        
+        // Set end time to current time
+        session.setEndTime(LocalDateTime.now());
+        
+        // The trigger will handle the rest (computer status, billing, etc.)
+        return sessionRepository.save(session);
+    }
+
+    @Override
+    public Session changeComputer(Integer id, Integer newComputerId) {
+        Session session = sessionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Session not found"));
+        
+        if (session.getEndTime() != null) {
+            throw new RuntimeException("Cannot change computer for ended session");
+        }
+        
+        // Update computer ID - the trigger will handle computer status changes
+        session.setComputerId(newComputerId);
+        
+        return sessionRepository.save(session);
+    }
 }

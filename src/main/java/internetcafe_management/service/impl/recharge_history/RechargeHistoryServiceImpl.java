@@ -58,8 +58,34 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         customer.setBalance(currentBalance.add(request.getAmount()));
         customerRepository.save(customer);
         
-        // Update membership rank based on new recharge amount
-        membershipRankService.updateMembershipRank(request.getCustomerId(), request.getAmount());
+        // Tự động cập nhật rank cho TẤT CẢ khách hàng khi nạp tiền
+        try {
+            // Force flush để đảm bảo recharge history đã được lưu
+            rechargeHistoryRepository.flush();
+            
+            // Tính tổng số tiền nạp của khách hàng sau khi nạp thêm
+            BigDecimal totalRecharge = customerRepository.getTotalRechargeAmountByCustomerId(request.getCustomerId());
+            if (totalRecharge == null) {
+                totalRecharge = BigDecimal.ZERO;
+            }
+            
+            // Tính tổng thủ công để so sánh
+            BigDecimal manualTotal = currentBalance.add(request.getAmount());
+            
+            System.out.println("🔄 Customer " + request.getCustomerId() + " total recharge after new recharge: " + totalRecharge);
+            System.out.println("🔄 Manual calculation (balance + recharge): " + manualTotal);
+            System.out.println("🔄 Current membership card ID: " + customer.getMembershipCardId());
+            System.out.println("🔄 Recharge amount just added: " + request.getAmount());
+            System.out.println("🔄 Current balance: " + currentBalance);
+            
+            // Use async to avoid lock timeout with current transaction
+            membershipRankService.updateMembershipRank(request.getCustomerId(), totalRecharge);
+            System.out.println("✅ Updated membership rank for customer " + request.getCustomerId() + 
+                             " after recharge (auto-updated)");
+        } catch (Exception rankError) {
+            System.err.println("❌ Error updating membership rank after recharge: " + rankError.getMessage());
+            rankError.printStackTrace();
+        }
         
         return rechargeHistoryMapper.toDTO(savedRechargeHistory);
     }
@@ -163,6 +189,6 @@ public class RechargeHistoryServiceImpl implements RechargeHistoryService {
         rechargeHistoryRepository.deleteById(rechargeId);
         
         // Update membership rank after deletion (recalculate based on remaining recharge history)
-        membershipRankService.updateMembershipRank(rechargeHistory.getCustomerId(), BigDecimal.ZERO);
+        membershipRankService.updateMembershipRankSync(rechargeHistory.getCustomerId(), BigDecimal.ZERO);
     }
 }

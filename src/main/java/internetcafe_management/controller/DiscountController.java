@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import internetcafe_management.entity.Discount.DiscountType;
 
@@ -93,6 +94,19 @@ public class DiscountController {
         log.info("Received request to get discounts by type={}", type);
         List<Discount> discounts = discountService.getDiscountsByType(type);
         return ResponseEntity.ok(discounts);
+    }
+
+    @GetMapping("/{id}/usage")
+    @Operation(summary = "Check discount usage", description = "Check if discount is being used by any membership cards")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Usage information retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Discount not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> checkDiscountUsage(@PathVariable Integer id) {
+        log.info("Received request to check discount usage for id={}", id);
+        Map<String, Object> usageInfo = discountService.checkDiscountUsage(id);
+        return ResponseEntity.ok(usageInfo);
     }
 
     @DeleteMapping("/{id}")

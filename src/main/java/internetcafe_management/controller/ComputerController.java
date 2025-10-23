@@ -1,6 +1,7 @@
 package internetcafe_management.controller;
 
 import internetcafe_management.dto.ComputerDTO;
+import internetcafe_management.dto.ComputerUsageStats;
 import internetcafe_management.service.computer.ComputerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -155,5 +156,18 @@ public class ComputerController {
             @Parameter(description = "Computer ID to delete") @PathVariable Integer id) {
         computerService.deleteComputer(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/usage-history")
+    @Operation(summary = "Get computer usage history", description = "Get usage history and statistics for a specific computer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved usage history",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "404", description = "Computer not found")
+    })
+    public ResponseEntity<ComputerUsageStats> getComputerUsageHistory(
+            @Parameter(description = "Computer ID") @PathVariable Integer id) {
+        ComputerUsageStats stats = computerService.getComputerUsageStats(id);
+        return ResponseEntity.ok(stats);
     }
 }

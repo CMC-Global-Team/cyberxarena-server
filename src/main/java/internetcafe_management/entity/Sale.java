@@ -3,7 +3,6 @@ package internetcafe_management.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -27,8 +26,8 @@ public class Sale {
     @Column(name = "sale_date", nullable = false)
     private LocalDateTime saleDate;
 
-    @Column(name = "discount_id", nullable = false)
-    private Integer discountId = 1;
+    @Column(name = "discount_id")
+    private Integer discountId;
 
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
@@ -40,8 +39,9 @@ public class Sale {
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "sale_total", nullable = false)
+    // Quan hệ 1->1 tới sale_total
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "sale_id")
     private SaleTotal saleTotal;
 
     @PrePersist
@@ -49,8 +49,6 @@ public class Sale {
         if (saleDate == null) {
             saleDate = LocalDateTime.now();
         }
-        if (discountId == null) {
-            discountId = 1;
-        }
+        // discountId can be null according to database schema
     }
 }

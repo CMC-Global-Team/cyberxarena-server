@@ -14,7 +14,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/membership-cards") // Fixed: removed duplicate /api prefix
@@ -57,6 +59,13 @@ public class MembershipCardController {
         return ResponseEntity.ok(membershipCard);
     }
     
+    @GetMapping("/{id}/usage")
+    @Operation(summary = "Check membership card usage", description = "Check if membership card is being used by any customers")
+    public ResponseEntity<Map<String, Object>> checkMembershipCardUsage(@PathVariable Integer id) {
+        Map<String, Object> usageInfo = membershipCardService.checkMembershipCardUsage(id);
+        return ResponseEntity.ok(usageInfo);
+    }
+    
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete membership card", description = "Delete a membership card by its ID")
     public ResponseEntity<Void> deleteMembershipCard(@PathVariable Integer id) {
@@ -78,10 +87,48 @@ public class MembershipCardController {
         return ResponseEntity.ok(rankInfo);
     }
     
+    @GetMapping("/{id}/eligible-customers")
+    @Operation(summary = "Get customers eligible for membership card", description = "Get list of customers who are eligible for a specific membership card based on their recharge amount")
+    public ResponseEntity<List<Map<String, Object>>> getEligibleCustomers(@PathVariable Integer id) {
+        List<Map<String, Object>> eligibleCustomers = membershipCardService.getEligibleCustomersForMembershipCard(id);
+        return ResponseEntity.ok(eligibleCustomers);
+    }
+    
+    @PostMapping("/{id}/update-eligible-customers")
+    @Operation(summary = "Update eligible customers to new membership card", description = "Update specific customers to the new membership card")
+    public ResponseEntity<String> updateEligibleCustomers(
+            @PathVariable Integer id,
+            @RequestBody List<Integer> customerIds) {
+        membershipCardService.updateCustomersToMembershipCard(id, customerIds);
+        return ResponseEntity.ok("Successfully updated " + customerIds.size() + " customers to new membership card");
+    }
+    
     @PostMapping("/update-all-ranks")
     @Operation(summary = "Update all customers membership ranks", description = "Batch update membership ranks for all customers based on their recharge history")
     public ResponseEntity<String> updateAllCustomersMembershipRanks() {
         membershipRankService.updateAllCustomersMembershipRank();
         return ResponseEntity.ok("All customers membership ranks have been updated successfully");
+    }
+    
+    @PostMapping("/force-update-customer-rank/{customerId}")
+    @Operation(summary = "Force update customer membership rank", description = "Force update a specific customer's membership rank based on their total recharge amount")
+    public ResponseEntity<String> forceUpdateCustomerRank(@PathVariable Integer customerId) {
+        try {
+            membershipRankService.updateMembershipRank(customerId, BigDecimal.ZERO);
+            return ResponseEntity.ok("Customer " + customerId + " membership rank has been updated successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error updating customer rank: " + e.getMessage());
+        }
+    }
+    
+    @PostMapping("/{id}/set-default")
+    @Operation(summary = "Set membership card as default", description = "Set a membership card as the default card and update all customers with threshold 0")
+    public ResponseEntity<String> setDefaultMembershipCard(@PathVariable Integer id) {
+        try {
+            membershipCardService.setDefaultMembershipCard(id);
+            return ResponseEntity.ok("Membership card " + id + " has been set as default and all customers have been updated");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error setting default membership card: " + e.getMessage());
+        }
     }
 }

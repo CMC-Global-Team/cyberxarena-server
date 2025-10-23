@@ -4,11 +4,14 @@ import internetcafe_management.dto.SaleDTO;
 import internetcafe_management.dto.UpdateSaleRequestDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
+import internetcafe_management.entity.SaleDetail;
+import internetcafe_management.entity.SaleTotal;
 import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.mapper.sale.SaleMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.discount.DiscountRepository;
 import internetcafe_management.repository.sale.SaleRepository;
+import internetcafe_management.repository.sale.SaleTotalRepository;
 import internetcafe_management.service.Customer.CustomerService;
 import internetcafe_management.service.sale.SaleService;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 public class SaleServiceImpl implements SaleService {
     private final SaleMapper saleMapper;
     private final SaleRepository saleRepository;
+    private final SaleTotalRepository saleTotalRepository;
     private final CustomerMapper customerMapper;
     private final CustomerService customerService;
     private final CustomerRepository customerRepository;
@@ -34,9 +39,59 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Transactional
     public SaleDTO create(SaleDTO dto, Integer customerId) {
-        Sale entity = saleMapper.toEntity(dto, customerMapper.toEntity(customerService.getCustomerById(customerId)));
-        Sale savedEntity = saleRepository.save(entity);
-        return saleMapper.toDTO(savedEntity);
+        try {
+            // Get customer
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+            
+            // Create sale entity (SaleTotal will be created automatically in @PrePersist)
+            Sale entity = new Sale();
+            entity.setCustomer(customer);
+            entity.setSaleDate(dto.getSaleDate());
+            entity.setDiscountId(dto.getDiscountId());
+            entity.setPaymentMethod(dto.getPaymentMethod());
+            entity.setNote(dto.getNote());
+            
+            // Map SaleDetailDTO to SaleDetail - handle null items
+            if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+                entity.setSaleDetails(dto.getItems().stream()
+                        .map(item -> {
+                            SaleDetail detail = new SaleDetail();
+                            detail.setItemId(item.getItemId());
+                            detail.setQuantity(item.getQuantity());
+                            detail.setSale(entity);
+                            return detail;
+                        })
+                        .collect(Collectors.toList()));
+            }
+            
+            // Save sale first to get saleId
+            Sale savedEntity = saleRepository.save(entity);
+            
+            // Use stored procedure to calculate and create SaleTotal
+            try {
+                saleRepository.callUpdateSaleTotal(savedEntity.getSaleId());
+                log.info("Successfully called update_sale_total procedure for saleId: {}", savedEntity.getSaleId());
+            } catch (Exception e) {
+                log.error("Error calling update_sale_total procedure: {}", e.getMessage(), e);
+                // Fallback: create SaleTotal manually
+                SaleTotal saleTotal = new SaleTotal();
+                saleTotal.setSaleId(savedEntity.getSaleId());
+                saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
+                saleTotalRepository.save(saleTotal);
+            }
+            
+            // Load SaleTotal để có thể map totalAmount
+            SaleTotal saleTotal = saleTotalRepository.findById(savedEntity.getSaleId()).orElse(null);
+            if (saleTotal != null) {
+                savedEntity.setSaleTotal(saleTotal);
+            }
+            
+            return saleMapper.toDTO(savedEntity);
+        } catch (Exception e) {
+            log.error("Error creating sale: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create sale: " + e.getMessage());
+        }
     }
 
     @Override
@@ -126,11 +181,8 @@ public class SaleServiceImpl implements SaleService {
                             .collect(Collectors.toList());
                     break;
                 case "saletotal":
-                    sales = sales.stream()
-                            .sorted((s1, s2) -> order.equals("desc") ?
-                                    s2.getSaleTotal().getTotalAmount().compareTo(s1.getSaleTotal().getTotalAmount()) :
-                                    s1.getSaleTotal().getTotalAmount().compareTo(s2.getSaleTotal().getTotalAmount()))
-                            .collect(Collectors.toList());
+                    // Note: SaleTotal sorting is not available since we removed the relationship
+                    // This would require a separate query to SaleTotal table
                     break;
 
                 case "customername":
@@ -151,7 +203,14 @@ public class SaleServiceImpl implements SaleService {
         }
 
         return sales.stream()
-                .map(saleMapper::toDTO)
+                .map(sale -> {
+                    // Load SaleTotal cho mỗi sale
+                    SaleTotal saleTotal = saleTotalRepository.findById(sale.getSaleId()).orElse(null);
+                    if (saleTotal != null) {
+                        sale.setSaleTotal(saleTotal);
+                    }
+                    return saleMapper.toDTO(sale);
+                })
                 .collect(Collectors.toList());
     }
 

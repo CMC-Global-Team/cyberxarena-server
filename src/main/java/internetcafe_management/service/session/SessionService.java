@@ -17,4 +17,6 @@ public interface SessionService {
     void deleteSession(Integer id);
     List<SessionDetailsDTO> getSessionsWithTotalAmount();
     List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime);
+    Session endSession(Integer id);
+    Session changeComputer(Integer id, Integer newComputerId);
 }
