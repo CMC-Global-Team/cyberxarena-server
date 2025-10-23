@@ -19,6 +19,8 @@ public class SaleMapper {
         SaleDTO dto = new SaleDTO();
         dto.setSaleId(entity.getSaleId());
         dto.setCustomerId(entity.getCustomer().getCustomerId());
+        dto.setCustomerName(entity.getCustomer().getCustomerName());
+        dto.setCustomerPhone(entity.getCustomer().getPhoneNumber());
         dto.setSaleDate(entity.getSaleDate());
         dto.setDiscountId(entity.getDiscountId());
         dto.setPaymentMethod(entity.getPaymentMethod());
