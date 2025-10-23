@@ -17,9 +17,4 @@ public class SaleTotal {
 
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
-    
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sale_id")
-    @MapsId
-    private Sale sale;
 }

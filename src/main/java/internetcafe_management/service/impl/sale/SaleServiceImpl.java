@@ -11,6 +11,7 @@ import internetcafe_management.mapper.sale.SaleMapper;
 import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.discount.DiscountRepository;
 import internetcafe_management.repository.sale.SaleRepository;
+import internetcafe_management.repository.sale.SaleTotalRepository;
 import internetcafe_management.service.Customer.CustomerService;
 import internetcafe_management.service.sale.SaleService;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +31,7 @@ import java.util.stream.Collectors;
 public class SaleServiceImpl implements SaleService {
     private final SaleMapper saleMapper;
     private final SaleRepository saleRepository;
+    private final SaleTotalRepository saleTotalRepository;
     private final CustomerMapper customerMapper;
     private final CustomerService customerService;
     private final CustomerRepository customerRepository;
@@ -66,17 +68,15 @@ public class SaleServiceImpl implements SaleService {
             // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Create SaleTotal with the real saleId and set bidirectional relationship
+            // Create SaleTotal separately
             SaleTotal saleTotal = new SaleTotal();
             saleTotal.setSaleId(savedEntity.getSaleId());
             saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-            saleTotal.setSale(savedEntity);
             
-            // Set SaleTotal to Sale and save again
-            savedEntity.setSaleTotal(saleTotal);
-            Sale finalEntity = saleRepository.save(savedEntity);
+            // Save SaleTotal separately
+            saleTotalRepository.save(saleTotal);
             
-            return saleMapper.toDTO(finalEntity);
+            return saleMapper.toDTO(savedEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create sale: " + e.getMessage());
