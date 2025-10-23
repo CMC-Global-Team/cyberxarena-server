@@ -20,18 +20,18 @@ public class DatabaseConfig implements CommandLineRunner {
         try {
             // Test database connection
             String result = jdbcTemplate.queryForObject("SELECT 1", String.class);
-            logger.info("✅ Database connection successful! Test query result: {}", result);
+            logger.info("Database connection successful! Test query result: {}", result);
             
             // Test if tables exist
             try {
                 jdbcTemplate.queryForObject("SELECT COUNT(*) FROM computer", Integer.class);
-                logger.info("✅ Computer table exists and is accessible");
+                logger.info("Computer table exists and is accessible");
             } catch (Exception e) {
-                logger.warn("⚠️ Computer table not found or not accessible: {}", e.getMessage());
+                logger.warn("Computer table not found or not accessible: {}", e.getMessage());
             }
             
         } catch (Exception e) {
-            logger.error("❌ Database connection failed: {}", e.getMessage());
+            logger.error("Database connection failed: {}", e.getMessage());
             logger.error("Application will continue to start but database operations may fail");
             // Don't throw exception to prevent application startup failure
         }
