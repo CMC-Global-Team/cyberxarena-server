@@ -26,6 +26,10 @@ public class SaleMapper {
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
                 .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);
+        
+        // Map totalAmount từ SaleTotal
+        dto.setTotalAmount(entity.getSaleTotal() != null ? entity.getSaleTotal().getTotalAmount() : BigDecimal.ZERO);
+        
         return dto;
     }
 

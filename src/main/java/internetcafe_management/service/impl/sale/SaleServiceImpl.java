@@ -81,6 +81,12 @@ public class SaleServiceImpl implements SaleService {
                 saleTotalRepository.save(saleTotal);
             }
             
+            // Load SaleTotal để có thể map totalAmount
+            SaleTotal saleTotal = saleTotalRepository.findById(savedEntity.getSaleId()).orElse(null);
+            if (saleTotal != null) {
+                savedEntity.setSaleTotal(saleTotal);
+            }
+            
             return saleMapper.toDTO(savedEntity);
         } catch (Exception e) {
             log.error("Error creating sale: {}", e.getMessage(), e);
@@ -197,7 +203,14 @@ public class SaleServiceImpl implements SaleService {
         }
 
         return sales.stream()
-                .map(saleMapper::toDTO)
+                .map(sale -> {
+                    // Load SaleTotal cho mỗi sale
+                    SaleTotal saleTotal = saleTotalRepository.findById(sale.getSaleId()).orElse(null);
+                    if (saleTotal != null) {
+                        sale.setSaleTotal(saleTotal);
+                    }
+                    return saleMapper.toDTO(sale);
+                })
                 .collect(Collectors.toList());
     }
 

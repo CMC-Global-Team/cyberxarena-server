@@ -3,7 +3,6 @@ package internetcafe_management.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -39,6 +38,11 @@ public class Sale {
     // Quan hệ 1->N tới sale_detail
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
+
+    // Quan hệ 1->1 tới sale_total
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "sale_id")
+    private SaleTotal saleTotal;
 
     @PrePersist
     protected void onCreate() {
