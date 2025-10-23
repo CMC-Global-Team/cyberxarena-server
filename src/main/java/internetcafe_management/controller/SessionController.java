@@ -61,4 +61,27 @@ public class SessionController {
     public List<SessionDetailsDTO> getAllWithTotalAndUsage() {
         return sessionService.getSessionsWithTotalAmount();
     }
+
+    @PostMapping("/{id}/end")
+    public Session endSession(@PathVariable Integer id) {
+        return sessionService.endSession(id);
+    }
+
+    @PutMapping("/{id}/change-computer")
+    public Session changeComputer(@PathVariable Integer id, @RequestBody ChangeComputerRequest request) {
+        return sessionService.changeComputer(id, request.getComputerId());
+    }
+
+    // Inner class for change computer request
+    public static class ChangeComputerRequest {
+        private Integer computerId;
+
+        public Integer getComputerId() {
+            return computerId;
+        }
+
+        public void setComputerId(Integer computerId) {
+            this.computerId = computerId;
+        }
+    }
 }
