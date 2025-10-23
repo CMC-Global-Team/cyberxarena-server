@@ -1,9 +1,9 @@
 -- ======================
 -- XÓA & TẠO LẠI DATABASE
 -- ======================
-DROP DATABASE IF EXISTS internet_cafe;
-CREATE DATABASE internet_cafe;
-USE internet_cafe;
+DROP DATABASE IF EXISTS railway;
+CREATE DATABASE railway;
+USE railway;
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET GLOBAL time_zone = '+07:00';
@@ -118,6 +118,7 @@ CREATE TABLE sale (
   discount_id INT,
   payment_method VARCHAR(50) NOT NULL DEFAULT 'Cash',
   note VARCHAR(200),
+  status ENUM('Pending', 'Paid', 'Cancelled') DEFAULT 'Pending',
   PRIMARY KEY (sale_id),
   CONSTRAINT fk_sale_customer FOREIGN KEY (customer_id)
     REFERENCES customer(customer_id)
