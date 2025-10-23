@@ -23,6 +23,7 @@ public class SaleMapper {
         dto.setDiscountId(entity.getDiscountId());
         dto.setPaymentMethod(entity.getPaymentMethod());
         dto.setNote(entity.getNote());
+        dto.setStatus(entity.getStatus() != null ? entity.getStatus().name() : "Pending");
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
                 .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);

@@ -35,6 +35,10 @@ public class Sale {
     @Column(name = "note", length = 200)
     private String note;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private SaleStatus status;
+
     // Quan hệ 1->N tới sale_detail
     @OneToMany(mappedBy = "sale", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SaleDetail> saleDetails;
@@ -48,6 +52,9 @@ public class Sale {
     protected void onCreate() {
         if (saleDate == null) {
             saleDate = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = SaleStatus.Pending;
         }
         // discountId can be null according to database schema
     }
