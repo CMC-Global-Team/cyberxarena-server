@@ -48,7 +48,7 @@ public class SaleServiceImpl implements SaleService {
             Sale entity = new Sale();
             entity.setCustomer(customer);
             entity.setSaleDate(dto.getSaleDate());
-            entity.setDiscountId(dto.getDiscountId() != null ? dto.getDiscountId() : 1);
+            entity.setDiscountId(dto.getDiscountId());
             entity.setPaymentMethod(dto.getPaymentMethod());
             entity.setNote(dto.getNote());
             

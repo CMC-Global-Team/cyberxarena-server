@@ -27,8 +27,8 @@ public class Sale {
     @Column(name = "sale_date", nullable = false)
     private LocalDateTime saleDate;
 
-    @Column(name = "discount_id", nullable = false)
-    private Integer discountId = 1;
+    @Column(name = "discount_id")
+    private Integer discountId;
 
     @Column(name = "payment_method", nullable = false, length = 50)
     private String paymentMethod;
@@ -45,9 +45,6 @@ public class Sale {
         if (saleDate == null) {
             saleDate = LocalDateTime.now();
         }
-        if (discountId == null) {
-            discountId = 1;
-        }
-        // Don't create SaleTotal here - it needs saleId which is not available yet
+        // discountId can be null according to database schema
     }
 }
