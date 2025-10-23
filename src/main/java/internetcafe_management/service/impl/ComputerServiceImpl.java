@@ -7,6 +7,7 @@ import internetcafe_management.entity.Computer.ComputerStatus;
 import internetcafe_management.entity.Session;
 import internetcafe_management.mapper.computer.ComputerMapper;
 import internetcafe_management.repository.computer.ComputerRepository;
+import internetcafe_management.repository.Customer.CustomerRepository;
 import internetcafe_management.repository.session.SessionRepository;
 import internetcafe_management.service.computer.ComputerService;
 import internetcafe_management.specification.ComputerSpecification;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,11 +33,13 @@ public class ComputerServiceImpl implements ComputerService {
     private final ComputerRepository computerRepository;
     private final ComputerMapper computerMapper;
     private final SessionRepository sessionRepository;
+    private final CustomerRepository customerRepository;
 
-    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper, SessionRepository sessionRepository) {
+    public ComputerServiceImpl(ComputerRepository repo, ComputerMapper mapper, SessionRepository sessionRepository, CustomerRepository customerRepository) {
         this.computerRepository = repo;
         this.computerMapper = mapper;
         this.sessionRepository = sessionRepository;
+        this.customerRepository = customerRepository;
     }
 
     @Override
@@ -140,9 +144,14 @@ public class ComputerServiceImpl implements ComputerService {
                         durationHours = seconds / 3600.0;
                     }
                     
+                    // Get customer name from database
+                    String customerName = customerRepository.findById(session.getCustomerId())
+                            .map(customer -> customer.getCustomerName())
+                            .orElse("Khách hàng #" + session.getCustomerId());
+                    
                     return new ComputerUsageStats.SessionUsageHistory(
                             session.getSessionId(),
-                            session.getCustomerId().toString(), // We'll need to fetch customer name separately
+                            customerName,
                             session.getStartTime(),
                             session.getEndTime(),
                             durationHours,
