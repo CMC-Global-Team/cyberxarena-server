@@ -2,9 +2,11 @@ package internetcafe_management.service.impl.sale;
 
 import internetcafe_management.dto.SaleDTO;
 import internetcafe_management.dto.UpdateSaleRequestDTO;
+import internetcafe_management.dto.UpdateSaleStatusDTO;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Sale;
 import internetcafe_management.entity.SaleDetail;
+import internetcafe_management.entity.SaleStatus;
 import internetcafe_management.entity.SaleTotal;
 import internetcafe_management.mapper.Customer.CustomerMapper;
 import internetcafe_management.mapper.sale.SaleMapper;
@@ -120,6 +122,27 @@ public class SaleServiceImpl implements SaleService {
         }
         Sale savedEntity = saleRepository.save(existingS);
         return saleMapper.toDTO(savedEntity);
+    }
+
+    @Override
+    public SaleDTO updateStatus(Integer saleId, UpdateSaleStatusDTO dto) {
+        Sale existingSale = saleRepository.findById(saleId)
+                .orElseThrow(() -> new EntityNotFoundException("Không tìm thấy hóa đơn với ID: " + saleId));
+        
+        try {
+            SaleStatus newStatus = SaleStatus.valueOf(dto.getStatus());
+            existingSale.setStatus(newStatus);
+            Sale savedSale = saleRepository.save(existingSale);
+            
+            log.info("Đã cập nhật trạng thái hóa đơn {} thành {}", saleId, newStatus.getDisplayName());
+            return saleMapper.toDTO(savedSale);
+        } catch (IllegalArgumentException e) {
+            log.error("Trạng thái không hợp lệ: {}", dto.getStatus());
+            throw new IllegalArgumentException("Trạng thái không hợp lệ: " + dto.getStatus());
+        } catch (Exception e) {
+            log.error("Lỗi khi cập nhật trạng thái hóa đơn {}: {}", saleId, e.getMessage(), e);
+            throw new RuntimeException("Không thể cập nhật trạng thái hóa đơn: " + e.getMessage());
+        }
     }
 
     @Override
