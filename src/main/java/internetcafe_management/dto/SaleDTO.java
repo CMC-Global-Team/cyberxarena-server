@@ -35,4 +35,7 @@ public class SaleDTO {
 
     @Size(max = 200, message = "Ghi chú không được vượt quá 200 ký tự")
     private String note;
+
+    @NotBlank(message = "Trạng thái không được để trống")
+    private String status; // Pending, Paid, Cancelled
 }
