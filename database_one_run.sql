@@ -211,4 +211,39 @@ CREATE TABLE revenue (
   PRIMARY KEY (revenue_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- ======================
+--  BẢNG REFUND (HOÀN TIỀN)
+-- ======================
+CREATE TABLE refund (
+  refund_id INT NOT NULL AUTO_INCREMENT,
+  sale_id INT NOT NULL,
+  refund_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+  refund_amount DECIMAL(10,2) NOT NULL,
+  refund_reason VARCHAR(200),
+  refund_type ENUM('Full', 'Partial') DEFAULT 'Full',
+  processed_by VARCHAR(100), -- Nhân viên xử lý
+  status ENUM('Pending', 'Approved', 'Rejected', 'Completed') DEFAULT 'Pending',
+  PRIMARY KEY (refund_id),
+  CONSTRAINT fk_refund_sale FOREIGN KEY (sale_id)
+    REFERENCES sale(sale_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ======================
+--  BẢNG REFUND_DETAIL (CHI TIẾT HOÀN TIỀN)
+-- ======================
+CREATE TABLE refund_detail (
+  refund_detail_id INT NOT NULL AUTO_INCREMENT,
+  refund_id INT NOT NULL,
+  sale_detail_id INT NOT NULL,
+  quantity INT NOT NULL CHECK (quantity > 0),
+  PRIMARY KEY (refund_detail_id),
+  CONSTRAINT fk_refund_detail_refund FOREIGN KEY (refund_id)
+    REFERENCES refund(refund_id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_refund_detail_sale FOREIGN KEY (sale_detail_id)
+    REFERENCES sale_detail(sale_detail_id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
 COMMIT;
