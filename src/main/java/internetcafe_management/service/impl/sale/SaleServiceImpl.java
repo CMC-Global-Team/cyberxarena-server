@@ -65,26 +65,19 @@ public class SaleServiceImpl implements SaleService {
                         .collect(Collectors.toList()));
             }
             
-            // Set initial saleTotal to avoid NOT NULL constraint
-            entity.setSaleTotal(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-            
             // Save sale first to get saleId
             Sale savedEntity = saleRepository.save(entity);
             
-            // Use stored procedure to calculate and update SaleTotal
+            // Use stored procedure to calculate and create SaleTotal
             try {
                 saleRepository.callUpdateSaleTotal(savedEntity.getSaleId());
                 log.info("Successfully called update_sale_total procedure for saleId: {}", savedEntity.getSaleId());
-                
-                // Refresh entity to get updated saleTotal from stored procedure
-                savedEntity = saleRepository.findById(savedEntity.getSaleId())
-                        .orElseThrow(() -> new RuntimeException("Sale not found after update"));
             } catch (Exception e) {
                 log.error("Error calling update_sale_total procedure: {}", e.getMessage(), e);
-                // Fallback: create SaleTotal manually and update Sale entity
+                // Fallback: create SaleTotal manually
                 SaleTotal saleTotal = new SaleTotal();
                 saleTotal.setSaleId(savedEntity.getSaleId());
-                saleTotal.setTotalAmount(savedEntity.getSaleTotal());
+                saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
                 saleTotalRepository.save(saleTotal);
             }
             

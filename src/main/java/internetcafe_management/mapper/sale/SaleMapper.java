@@ -23,7 +23,6 @@ public class SaleMapper {
         dto.setDiscountId(entity.getDiscountId());
         dto.setPaymentMethod(entity.getPaymentMethod());
         dto.setNote(entity.getNote());
-        dto.setTotalAmount(entity.getSaleTotal());
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
                 .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);
@@ -42,7 +41,6 @@ public class SaleMapper {
         entity.setDiscountId(dto.getDiscountId() != null ? dto.getDiscountId() : 1);
         entity.setPaymentMethod(dto.getPaymentMethod());
         entity.setNote(dto.getNote());
-        entity.setSaleTotal(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
 
         // Map SaleDetailDTO to SaleDetail - handle null items
         if (dto.getItems() != null && !dto.getItems().isEmpty()) {
