@@ -35,30 +35,29 @@ public class SaleMapper {
             throw new IllegalArgumentException("SaleDTO cannot be null");
         }
 
-
         Sale entity = new Sale();
-        entity.setSaleId(dto.getSaleId());
         entity.setCustomer(customer);
         entity.setSaleDate(dto.getSaleDate());
-        entity.setDiscountId(dto.getDiscountId());
+        entity.setDiscountId(dto.getDiscountId() != null ? dto.getDiscountId() : 1);
         entity.setPaymentMethod(dto.getPaymentMethod());
         entity.setNote(dto.getNote());
 
-        // Map SaleDetailDTO to SaleDetail
-        entity.setSaleDetails(dto.getItems().stream()
-                .map(item -> {
-                    SaleDetail detail = new SaleDetail();
-                    detail.setItemId(item.getItemId());
-                    detail.setQuantity(item.getQuantity());
-                    detail.setSale(entity);
-                    return detail;
-                })
-                .collect(Collectors.toList()));
+        // Map SaleDetailDTO to SaleDetail - handle null items
+        if (dto.getItems() != null && !dto.getItems().isEmpty()) {
+            entity.setSaleDetails(dto.getItems().stream()
+                    .map(item -> {
+                        SaleDetail detail = new SaleDetail();
+                        detail.setItemId(item.getItemId());
+                        detail.setQuantity(item.getQuantity());
+                        detail.setSale(entity);
+                        return detail;
+                    })
+                    .collect(Collectors.toList()));
+        }
 
-        // Initialize SaleTotal without setting saleId
+        // Initialize SaleTotal - don't set saleId here, it will be set after entity is saved
         SaleTotal saleTotal = new SaleTotal();
         saleTotal.setTotalAmount(dto.getTotalAmount() != null ? dto.getTotalAmount() : BigDecimal.ZERO);
-        saleTotal.setSaleId(dto.getSaleId());
         entity.setSaleTotal(saleTotal);
 
         return entity;

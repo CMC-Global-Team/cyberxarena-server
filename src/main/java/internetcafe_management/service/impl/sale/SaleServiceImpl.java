@@ -34,9 +34,26 @@ public class SaleServiceImpl implements SaleService {
     @Override
     @Transactional
     public SaleDTO create(SaleDTO dto, Integer customerId) {
-        Sale entity = saleMapper.toEntity(dto, customerMapper.toEntity(customerService.getCustomerById(customerId)));
-        Sale savedEntity = saleRepository.save(entity);
-        return saleMapper.toDTO(savedEntity);
+        try {
+            // Get customer
+            Customer customer = customerRepository.findById(customerId)
+                    .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+            
+            // Create sale entity
+            Sale entity = saleMapper.toEntity(dto, customer);
+            Sale savedEntity = saleRepository.save(entity);
+            
+            // Set saleId for SaleTotal after entity is saved
+            if (savedEntity.getSaleTotal() != null) {
+                savedEntity.getSaleTotal().setSaleId(savedEntity.getSaleId());
+                saleRepository.save(savedEntity); // Save again to update SaleTotal
+            }
+            
+            return saleMapper.toDTO(savedEntity);
+        } catch (Exception e) {
+            log.error("Error creating sale: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to create sale: " + e.getMessage());
+        }
     }
 
     @Override
