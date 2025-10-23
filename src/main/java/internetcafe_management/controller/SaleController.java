@@ -18,8 +18,8 @@ public class SaleController {
     private final SaleService saleService;
 
     @PostMapping
-    public SaleDTO createSale(@RequestBody SaleDTO sale, @RequestParam Integer customerId) {
-        return saleService.create(sale, customerId);
+    public SaleDTO createSale(@RequestBody UpdateSaleRequestDTO updateSale) {
+        return saleService.create(updateSale);
     }
 
     @PutMapping("/{id}")
