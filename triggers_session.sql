@@ -1,23 +1,8 @@
 USE internet_cafe;
 
 DELIMITER $$
-DROP TRIGGER IF EXISTS trg_session_management $$
-CREATE TRIGGER trg_session_management
-AFTER INSERT ON session
-FOR EACH ROW
-BEGIN
-    -- Cập nhật trạng thái máy tính thành 'In Use' khi bắt đầu phiên
-    UPDATE computer
-    SET status = 'In Use'
-    WHERE computer_id = NEW.computer_id;
-    
-    -- Khởi tạo session_usage với giá trị ban đầu
-    INSERT INTO session_usage (session_id, duration_hours, remaining_hours)
-    VALUES (NEW.session_id, 0, 0);
-END$$
-
-DROP TRIGGER IF EXISTS trg_session_end $$
-CREATE TRIGGER trg_session_end
+DROP TRIGGER IF EXISTS trg_session_update $$
+CREATE TRIGGER trg_session_update
 AFTER UPDATE ON session
 FOR EACH ROW
 BEGIN
@@ -27,7 +12,24 @@ BEGIN
     DECLARE current_balance DECIMAL(10,2);
     DECLARE remaining DECIMAL(10,2) DEFAULT 0;
     
-    -- Chỉ xử lý khi end_time được cập nhật (từ NULL sang có giá trị)
+    -- =============================================
+    -- TRƯỜNG HỢP 1: ĐỔI MÁY (computer_id thay đổi)
+    -- =============================================
+    IF OLD.computer_id != NEW.computer_id THEN
+        -- Máy cũ → Available
+        UPDATE computer
+        SET status = 'Available'
+        WHERE computer_id = OLD.computer_id;
+        
+        -- Máy mới → In Use
+        UPDATE computer
+        SET status = 'In Use'
+        WHERE computer_id = NEW.computer_id;
+    END IF;
+    
+    -- =============================================
+    -- TRƯỜNG HỢP 2: KẾT THÚC PHIÊN (end_time được set)
+    -- =============================================
     IF OLD.end_time IS NULL AND NEW.end_time IS NOT NULL THEN
         
         -- 1. Cập nhật trạng thái máy tính thành 'Available'
