@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,14 +28,17 @@ import java.util.stream.Collectors;
 public class SaleServiceImpl implements SaleService {
     private final SaleMapper saleMapper;
     private final SaleRepository saleRepository;
-    private final CustomerMapper customerMapper;
-    private final CustomerService customerService;
     private final CustomerRepository customerRepository;
     private final DiscountRepository discountRepository;
     @Override
     @Transactional
-    public SaleDTO create(SaleDTO dto, Integer customerId) {
-        Sale entity = saleMapper.toEntity(dto, customerMapper.toEntity(customerService.getCustomerById(customerId)));
+    public SaleDTO create(UpdateSaleRequestDTO dto) {
+        Sale entity = new Sale();
+        Customer customer = customerRepository.findById(dto.getCustomerId()).orElseThrow(() -> new RuntimeException("Customer not found"));
+        entity.setCustomer(customer);
+        entity.setPaymentMethod(dto.getPaymentMethod());
+        entity.setDiscountId(dto.getDiscountId());
+        entity.setDiscountId(dto.getDiscountId());
         Sale savedEntity = saleRepository.save(entity);
         return saleMapper.toDTO(savedEntity);
     }
