@@ -8,7 +8,7 @@ import internetcafe_management.entity.Sale;
 import java.util.List;
 
 public interface SaleService {
-    SaleDTO create(SaleDTO dto, Integer customerId);
+    SaleDTO create(UpdateSaleRequestDTO dto);
     SaleDTO update(Integer saleId, UpdateSaleRequestDTO dto);
     void delete(Integer saleId);
     SaleDTO getSaleById(Integer saleId);
