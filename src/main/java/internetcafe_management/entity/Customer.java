@@ -7,9 +7,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "customer")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode(exclude = {"account"})
+@ToString(exclude = {"account"})
 public class Customer {
 
     @Id
