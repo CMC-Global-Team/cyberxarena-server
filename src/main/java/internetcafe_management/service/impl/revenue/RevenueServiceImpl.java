@@ -90,12 +90,18 @@ public class RevenueServiceImpl implements RevenueService {
                     computerTotal = BigDecimal.ZERO;
                 }
 
-                // Tính tiền bán hàng
+                // Tính tiền bán hàng (trừ refunds đã approve)
                 BigDecimal salesTotal;
                 try {
-                    salesTotal = Optional.ofNullable(saleRepository.sumTotalAmountBySaleDate(date))
+                    BigDecimal grossSales = Optional.ofNullable(saleRepository.sumTotalAmountBySaleDate(date))
                             .orElse(BigDecimal.ZERO);
-                    log.debug("Sales revenue for {}: {}", date, salesTotal);
+                    
+                    // Trừ refunds đã approve cho ngày này
+                    BigDecimal refundsTotal = Optional.ofNullable(saleRepository.sumRefundedAmountBySaleDate(date))
+                            .orElse(BigDecimal.ZERO);
+                    
+                    salesTotal = grossSales.subtract(refundsTotal);
+                    log.debug("Sales revenue for {}: Gross={}, Refunds={}, Net={}", date, grossSales, refundsTotal, salesTotal);
                 } catch (Exception e) {
                     log.error("Error calculating sales revenue for date {}: {}", date, e.getMessage());
                     salesTotal = BigDecimal.ZERO;
