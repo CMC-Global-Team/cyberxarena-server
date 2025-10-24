@@ -40,12 +40,23 @@ public class RevenueServiceImpl implements RevenueService {
     @Override
     @Transactional(readOnly = true)
     public Page<RevenueDTO> getAllRevenue(Pageable pageable) {
-        // 1. Lấy Page<Revenue> từ DB
-        Page<Revenue> revenuePage = revenueRepository.findAll(pageable);
+        try {
+            log.info("Getting all revenue with pageable: {}", pageable);
+            
+            // 1. Lấy Page<Revenue> từ DB
+            Page<Revenue> revenuePage = revenueRepository.findAll(pageable);
+            log.info("Found {} revenue records from database", revenuePage.getTotalElements());
 
-        // 2. Dùng mapper để chuyển đổi Page<Revenue> thành Page<RevenueDTO>
-        // Mapper sẽ tự động tính totalRevenue cho chúng ta
-        return revenuePage.map(revenueMapper::toDto);
+            // 2. Dùng mapper để chuyển đổi Page<Revenue> thành Page<RevenueDTO>
+            // Mapper sẽ tự động tính totalRevenue cho chúng ta
+            Page<RevenueDTO> result = revenuePage.map(revenueMapper::toDto);
+            log.info("Successfully mapped {} revenue records to DTOs", result.getTotalElements());
+            
+            return result;
+        } catch (Exception e) {
+            log.error("Error getting all revenue: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to get revenue data: " + e.getMessage(), e);
+        }
     }
 
     @Override

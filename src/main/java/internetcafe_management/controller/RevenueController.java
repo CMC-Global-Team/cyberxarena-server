@@ -37,6 +37,17 @@ public class RevenueController {
         }
     }
 
+    @GetMapping("/test")
+    public ResponseEntity<String> testRevenueEndpoint() {
+        try {
+            log.info("Testing revenue endpoint");
+            return ResponseEntity.ok("Revenue endpoint is working");
+        } catch (Exception e) {
+            log.error("Error testing revenue endpoint: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/generate")
     public ResponseEntity<List<RevenueDTO>> generateRevenueReports(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
