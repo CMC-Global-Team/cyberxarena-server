@@ -2,17 +2,24 @@ package internetcafe_management.mapper.revenue;
 
 import internetcafe_management.dto.RevenueDTO;
 import internetcafe_management.entity.Revenue;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
+import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
-@Mapper(componentModel = "spring")
-public interface RevenueMapper {
+@Component
+@Slf4j
+public class RevenueMapper {
 
-    default RevenueDTO toDto(Revenue revenue) {
+    public RevenueMapper() {
+        log.info("🚀 RevenueMapper initialized successfully!");
+        System.out.println("🚀 RevenueMapper initialized successfully!");
+    }
+
+    public RevenueDTO toDto(Revenue revenue) {
         if (revenue == null) {
             return null;
         }
+        
+        log.debug("Mapping Revenue to DTO: {}", revenue.getRevenueId());
         
         RevenueDTO dto = new RevenueDTO();
         dto.setRevenueId(revenue.getRevenueId());
@@ -25,6 +32,7 @@ public interface RevenueMapper {
             dto.setTotalRevenue(revenue.getComputerUsageRevenue().add(revenue.getSalesRevenue()));
         }
         
+        log.debug("Mapped Revenue to DTO: {}", dto.getRevenueId());
         return dto;
     }
 }
