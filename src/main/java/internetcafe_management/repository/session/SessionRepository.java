@@ -44,7 +44,8 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     List<Session> searchSessions(Integer customerId, Integer computerId,
                                  LocalDateTime startTime, LocalDateTime endTime);
 
-    @Query("SELECT SUM(s.sessionPrice.totalAmount) FROM Session s " +
+    @Query("SELECT SUM(sp.totalAmount) FROM Session s " +
+            "JOIN SessionPrice sp ON s.sessionId = sp.sessionId " +
             "WHERE FUNCTION('DATE', s.endTime) = :date")
     BigDecimal sumTotalAmountByEndDateTime(@Param("date") LocalDate date);
 
