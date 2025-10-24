@@ -2,6 +2,7 @@ package internetcafe_management.service.impl;
 
 import internetcafe_management.dto.DashboardStatsDTO;
 import internetcafe_management.entity.Computer;
+import internetcafe_management.entity.Computer.ComputerStatus;
 import internetcafe_management.entity.Customer;
 import internetcafe_management.entity.Session;
 import internetcafe_management.repository.computer.ComputerRepository;
@@ -36,9 +37,9 @@ public class DashboardServiceImpl implements DashboardService {
 
             // Get computer statistics
             long totalComputers = computerRepository.count();
-            long activeComputers = computerRepository.countByStatus("ACTIVE");
-            long maintenanceComputers = computerRepository.countByStatus("MAINTENANCE");
-            long availableComputers = totalComputers - activeComputers - maintenanceComputers;
+            long activeComputers = computerRepository.countByStatus(ComputerStatus.In_Use);
+            long maintenanceComputers = computerRepository.countByStatus(ComputerStatus.Broken);
+            long availableComputers = computerRepository.countByStatus(ComputerStatus.Available);
 
             // Get customer statistics
             long totalCustomers = customerRepository.count();
@@ -127,9 +128,9 @@ public class DashboardServiceImpl implements DashboardService {
             log.info("Getting computer status overview");
 
             long totalComputers = computerRepository.count();
-            long activeComputers = computerRepository.countByStatus("ACTIVE");
-            long maintenanceComputers = computerRepository.countByStatus("MAINTENANCE");
-            long availableComputers = totalComputers - activeComputers - maintenanceComputers;
+            long activeComputers = computerRepository.countByStatus(ComputerStatus.In_Use);
+            long maintenanceComputers = computerRepository.countByStatus(ComputerStatus.Broken);
+            long availableComputers = computerRepository.countByStatus(ComputerStatus.Available);
 
             String utilizationRate = totalComputers > 0 ? 
                     String.format("%.1f%%", (double) activeComputers / totalComputers * 100) : "0%";

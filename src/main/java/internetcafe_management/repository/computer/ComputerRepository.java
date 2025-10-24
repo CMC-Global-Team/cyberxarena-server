@@ -1,6 +1,7 @@
 package internetcafe_management.repository.computer;
 
 import internetcafe_management.entity.Computer;
+import internetcafe_management.entity.Computer.ComputerStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -11,5 +12,5 @@ public interface ComputerRepository extends JpaRepository<Computer, Integer>, Jp
 
     Optional<Computer> findByComputerName(String computerName);
     
-    long countByStatus(String status);
+    long countByStatus(ComputerStatus status);
 }
