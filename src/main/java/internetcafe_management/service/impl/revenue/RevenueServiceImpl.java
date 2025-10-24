@@ -12,7 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,8 @@ public class RevenueServiceImpl implements RevenueService {
         List<RevenueDTO> generatedReports = new ArrayList<>();
 
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
-            if (revenueRepository.existsByDate(date)) {
+            LocalDateTime dateTime = date.atStartOfDay();
+            if (revenueRepository.existsByDate(dateTime)) {
                 continue;
             }
 
@@ -68,7 +69,7 @@ public class RevenueServiceImpl implements RevenueService {
 
             //tạo báo cáo mới
             Revenue newReport = new Revenue();
-            newReport.setDate(date.atStartOfDay());
+            newReport.setDate(dateTime);
             newReport.setComputerUsageRevenue(computerTotal);
             newReport.setSalesRevenue(salesTotal);
 
@@ -83,7 +84,8 @@ public class RevenueServiceImpl implements RevenueService {
     @Override
     public RevenueDTO recalculateRevenueReport(LocalDate date) {
         // Phải tìm báo cáo đã tồn tại, nếu không thì báo lỗi
-        Revenue existingReport = revenueRepository.findByDate(date)
+        LocalDateTime dateTime = date.atStartOfDay();
+        Revenue existingReport = revenueRepository.findByDate(dateTime)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy báo cáo doanh thu cho ngày " + date));
 
         BigDecimal computerTotal = Optional.ofNullable(sessionRepository.sumTotalAmountByEndDateTime(date))

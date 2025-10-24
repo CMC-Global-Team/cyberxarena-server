@@ -8,9 +8,12 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "revenue")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
+@ToString
 public class Revenue {
 
     @Id
