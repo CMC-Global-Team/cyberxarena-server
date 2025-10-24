@@ -9,6 +9,8 @@ import lombok.*;
 @AllArgsConstructor
 public class SaleDetailDTO {
 
+    private Integer saleDetailId; // ID của SaleDetail entity
+
     @NotNull(message = "Mã hóa đơn không được để trống")
     @Positive(message = "Mã hóa đơn phải là số dương")
     private Integer saleId;
