@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface ComputerRepository extends JpaRepository<Computer, Integer>, JpaSpecificationExecutor<Computer> {
 
     Optional<Computer> findByComputerName(String computerName);
+    
+    long countByStatus(String status);
 }

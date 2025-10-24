@@ -2,20 +2,37 @@ package internetcafe_management.mapper.revenue;
 
 import internetcafe_management.dto.RevenueDTO;
 import internetcafe_management.entity.Revenue;
-import org.mapstruct.AfterMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
+import org.springframework.stereotype.Component;
+import lombok.extern.slf4j.Slf4j;
 
-@Mapper(componentModel = "spring")
-public interface RevenueMapper {
+@Component
+@Slf4j
+public class RevenueMapper {
 
-    RevenueDTO toDto(Revenue revenue);
+    public RevenueMapper() {
+        log.info("🚀 RevenueMapper initialized successfully!");
+        System.out.println("🚀 RevenueMapper initialized successfully!");
+    }
 
-    // để tính toán trường totalRevenue
-    @AfterMapping
-    default void calculateTotalRevenue(Revenue revenue, @MappingTarget RevenueDTO dto) {
+    public RevenueDTO toDto(Revenue revenue) {
+        if (revenue == null) {
+            return null;
+        }
+        
+        log.debug("Mapping Revenue to DTO: {}", revenue.getRevenueId());
+        
+        RevenueDTO dto = new RevenueDTO();
+        dto.setRevenueId(revenue.getRevenueId());
+        dto.setDate(revenue.getDate().toLocalDate());
+        dto.setComputerUsageRevenue(revenue.getComputerUsageRevenue());
+        dto.setSalesRevenue(revenue.getSalesRevenue());
+        
+        // Tính toán totalRevenue
         if (revenue.getComputerUsageRevenue() != null && revenue.getSalesRevenue() != null) {
             dto.setTotalRevenue(revenue.getComputerUsageRevenue().add(revenue.getSalesRevenue()));
         }
+        
+        log.debug("Mapped Revenue to DTO: {}", dto.getRevenueId());
+        return dto;
     }
 }

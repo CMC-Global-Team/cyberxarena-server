@@ -27,7 +27,7 @@ public class SaleMapper {
         dto.setNote(entity.getNote());
         dto.setStatus(entity.getStatus() != null ? entity.getStatus().name() : "Pending");
         dto.setItems(entity.getSaleDetails() != null ? entity.getSaleDetails().stream()
-                .map(detail -> new SaleDetailDTO(detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
+                .map(detail -> new SaleDetailDTO(detail.getSaleDetailId(), detail.getSale().getSaleId(), detail.getItemId(), detail.getQuantity()))
                 .collect(Collectors.toList()) : null);
         
         // Map totalAmount từ SaleTotal
