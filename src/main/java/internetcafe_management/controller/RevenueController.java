@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/revenue")
+@RequestMapping("/revenue")
 @Slf4j
 public class RevenueController {
 
@@ -29,7 +29,8 @@ public class RevenueController {
     @GetMapping
     public ResponseEntity<Page<RevenueDTO>> getAllRevenue(Pageable pageable) {
         try {
-            log.info("Getting all revenue with pageable: {}", pageable);
+            log.info("🚀 RevenueController.getAllRevenue() called with pageable: {}", pageable);
+            System.out.println("🚀 RevenueController.getAllRevenue() called!");
             Page<RevenueDTO> revenuePage = revenueService.getAllRevenue(pageable);
             log.info("Successfully retrieved {} revenue records", revenuePage.getTotalElements());
             return ResponseEntity.ok(revenuePage);
