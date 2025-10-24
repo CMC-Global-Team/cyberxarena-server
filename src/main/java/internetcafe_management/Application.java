@@ -18,6 +18,7 @@ public class Application implements CommandLineRunner {
     private ApplicationContext applicationContext;
     
     public static void main(String[] args) {
+        System.out.println("🚀 Starting Spring Boot Application...");
         SpringApplication.run(Application.class, args);
     }
     

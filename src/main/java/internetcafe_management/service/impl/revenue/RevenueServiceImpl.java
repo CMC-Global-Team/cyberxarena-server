@@ -35,6 +35,8 @@ public class RevenueServiceImpl implements RevenueService {
         this.revenueMapper = revenueMapper;
         this.sessionRepository = sessionRepo;
         this.saleRepository = saleRepo;
+        log.info("🚀 RevenueServiceImpl initialized successfully!");
+        System.out.println("🚀 RevenueServiceImpl initialized successfully!");
     }
 
     @Override

@@ -23,6 +23,7 @@ public class RevenueController {
     public RevenueController(RevenueService revenueService) {
         this.revenueService = revenueService;
         log.info("🚀 RevenueController initialized successfully!");
+        System.out.println("🚀 RevenueController initialized successfully!");
     }
 
     @GetMapping
