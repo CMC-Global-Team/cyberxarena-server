@@ -9,13 +9,22 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface RevenueMapper {
 
-    RevenueDTO toDto(Revenue revenue);
-
-    // để tính toán trường totalRevenue
-    @AfterMapping
-    default void calculateTotalRevenue(Revenue revenue, @MappingTarget RevenueDTO dto) {
+    default RevenueDTO toDto(Revenue revenue) {
+        if (revenue == null) {
+            return null;
+        }
+        
+        RevenueDTO dto = new RevenueDTO();
+        dto.setRevenueId(revenue.getRevenueId());
+        dto.setDate(revenue.getDate().toLocalDate());
+        dto.setComputerUsageRevenue(revenue.getComputerUsageRevenue());
+        dto.setSalesRevenue(revenue.getSalesRevenue());
+        
+        // Tính toán totalRevenue
         if (revenue.getComputerUsageRevenue() != null && revenue.getSalesRevenue() != null) {
             dto.setTotalRevenue(revenue.getComputerUsageRevenue().add(revenue.getSalesRevenue()));
         }
+        
+        return dto;
     }
 }
