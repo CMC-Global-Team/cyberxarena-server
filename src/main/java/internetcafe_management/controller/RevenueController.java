@@ -5,19 +5,17 @@ import internetcafe_management.service.revenue.RevenueService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/revenue")
+@Slf4j
 public class RevenueController {
 
     private final RevenueService revenueService;
@@ -28,24 +26,43 @@ public class RevenueController {
 
     @GetMapping
     public ResponseEntity<Page<RevenueDTO>> getAllRevenue(Pageable pageable) {
-        Page<RevenueDTO> revenuePage = revenueService.getAllRevenue(pageable);
-        return ResponseEntity.ok(revenuePage);
+        try {
+            log.info("Getting all revenue with pageable: {}", pageable);
+            Page<RevenueDTO> revenuePage = revenueService.getAllRevenue(pageable);
+            log.info("Successfully retrieved {} revenue records", revenuePage.getTotalElements());
+            return ResponseEntity.ok(revenuePage);
+        } catch (Exception e) {
+            log.error("Error getting all revenue: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PostMapping("/generate")
     public ResponseEntity<List<RevenueDTO>> generateRevenueReports(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-
-        List<RevenueDTO> reports = revenueService.generateRevenueReports(startDate, endDate);
-        return new ResponseEntity<>(reports, HttpStatus.CREATED);
+        try {
+            log.info("Generating revenue reports from {} to {}", startDate, endDate);
+            List<RevenueDTO> reports = revenueService.generateRevenueReports(startDate, endDate);
+            log.info("Successfully generated {} revenue reports", reports.size());
+            return new ResponseEntity<>(reports, HttpStatus.CREATED);
+        } catch (Exception e) {
+            log.error("Error generating revenue reports: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     @PutMapping("/recalculate")
     public ResponseEntity<RevenueDTO> recalculateRevenueReport(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-
-        RevenueDTO updatedReport = revenueService.recalculateRevenueReport(date);
-        return ResponseEntity.ok(updatedReport); // Trả về 200 OK
+        try {
+            log.info("Recalculating revenue report for date: {}", date);
+            RevenueDTO updatedReport = revenueService.recalculateRevenueReport(date);
+            log.info("Successfully recalculated revenue report for {}", date);
+            return ResponseEntity.ok(updatedReport);
+        } catch (Exception e) {
+            log.error("Error recalculating revenue report: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
