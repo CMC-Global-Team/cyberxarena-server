@@ -34,9 +34,14 @@ public class RefundServiceImpl implements RefundService {
     @Transactional
     public RefundDTO createRefund(RefundDTO refundDTO) {
         try {
-            // Kiểm tra sale có tồn tại không
+            // Kiểm tra sale có tồn tại không và load SaleDetails
             Sale sale = saleRepository.findById(refundDTO.getSaleId())
                     .orElseThrow(() -> new ResourceNotFoundException("Sale not found with ID: " + refundDTO.getSaleId()));
+            
+            // Force load SaleDetails để tránh lazy loading issues
+            if (sale.getSaleDetails() != null) {
+                sale.getSaleDetails().size(); // Trigger lazy loading
+            }
 
             // Kiểm tra xem sale đã có refund chưa
             if (hasRefundForSale(refundDTO.getSaleId())) {
@@ -55,15 +60,34 @@ public class RefundServiceImpl implements RefundService {
 
             // Tạo RefundDetail nếu có
             if (refundDTO.getRefundDetails() != null && !refundDTO.getRefundDetails().isEmpty()) {
+                log.info("Creating refund details for sale ID: {}, available SaleDetails: {}", 
+                    refundDTO.getSaleId(), 
+                    sale.getSaleDetails() != null ? sale.getSaleDetails().stream()
+                        .map(SaleDetail::getSaleDetailId)
+                        .collect(Collectors.toList()) : "null");
+                
                 List<RefundDetail> refundDetails = refundDTO.getRefundDetails().stream()
                         .map(detailDTO -> {
                             RefundDetail detail = new RefundDetail();
                             detail.setRefund(refund);
-                            // Tìm SaleDetail theo ID
+                            
+                            // Tìm SaleDetail theo ID với better error handling
+                            if (sale.getSaleDetails() == null || sale.getSaleDetails().isEmpty()) {
+                                throw new ResourceNotFoundException("No SaleDetails found for Sale ID: " + refundDTO.getSaleId());
+                            }
+                            
                             SaleDetail saleDetail = sale.getSaleDetails().stream()
                                     .filter(sd -> sd.getSaleDetailId().equals(detailDTO.getSaleDetailId()))
                                     .findFirst()
-                                    .orElseThrow(() -> new ResourceNotFoundException("SaleDetail not found with ID: " + detailDTO.getSaleDetailId()));
+                                    .orElseThrow(() -> {
+                                        String availableIds = sale.getSaleDetails().stream()
+                                                .map(SaleDetail::getSaleDetailId)
+                                                .map(String::valueOf)
+                                                .collect(Collectors.joining(", "));
+                                        return new ResourceNotFoundException(
+                                            String.format("SaleDetail not found with ID: %d. Available SaleDetail IDs for Sale %d: [%s]", 
+                                                detailDTO.getSaleDetailId(), refundDTO.getSaleId(), availableIds));
+                                    });
                             detail.setSaleDetail(saleDetail);
                             detail.setQuantity(detailDTO.getQuantity());
                             return detail;
