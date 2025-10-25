@@ -52,4 +52,4 @@ INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
 (1, 1, 2), 
 (2, 2, 1),  
 (3, 3, 1),  
-(4, 4, 3),
+(4, 4, 3);
