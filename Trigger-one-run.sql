@@ -1,4 +1,4 @@
-USE internet_cafe;
+USE railway;
 
 -- ======================
 -- XÓA CÁC TRIGGER VÀ PROCEDURE CŨ
@@ -12,6 +12,14 @@ DROP TRIGGER IF EXISTS update_stock_on_sale_delete;
 DROP TRIGGER IF EXISTS check_stock_before_sale_insert;
 DROP TRIGGER IF EXISTS check_stock_before_sale_update;
 DROP TRIGGER IF EXISTS trg_session_update;
+DROP TRIGGER IF EXISTS trg_auto_deduct_on_session_start;
+DROP TRIGGER IF EXISTS trg_auto_end_session_on_insufficient_balance;
+DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_start;
+DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_change;
+DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_end;
+DROP TRIGGER IF EXISTS trg_restock_on_refund_completed;
+DROP TRIGGER IF EXISTS trg_exclude_refunded_sales_from_revenue;
+DROP EVENT IF EXISTS evt_auto_deduct_realtime;
 
 -- ======================
 -- PROCEDURE: CẬP NHẬT TỔNG TIỀN HÓA ĐƠN
@@ -429,6 +437,400 @@ END$$
 DELIMITER ;
 
 -- ======================
+-- TRIGGER: TỰ ĐỘNG TRỪ TIỀN KHI TẠO PHIÊN SỬ DỤNG MỚI
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_auto_deduct_on_session_start
+AFTER INSERT ON session
+FOR EACH ROW
+BEGIN
+    DECLARE hourly_rate DECIMAL(10,2);
+    DECLARE current_balance DECIMAL(12,2);
+    DECLARE deduct_amount DECIMAL(12,2);
+    
+    -- Lấy giá theo giờ của máy tính
+    SELECT price_per_hour INTO hourly_rate
+    FROM computer
+    WHERE computer_id = NEW.computer_id;
+    
+    -- Lấy số dư hiện tại của khách hàng
+    SELECT balance INTO current_balance
+    FROM customer
+    WHERE customer_id = NEW.customer_id;
+    
+    -- Tính số tiền cần trừ (trừ 1 giờ trước)
+    SET deduct_amount = hourly_rate;
+    
+    -- Kiểm tra nếu đủ tiền
+    IF current_balance >= deduct_amount THEN
+        -- Trừ tiền từ tài khoản
+        UPDATE customer
+        SET balance = balance - deduct_amount
+        WHERE customer_id = NEW.customer_id;
+        
+        -- Cập nhật session_usage với thời gian còn lại
+        INSERT INTO session_usage (session_id, duration_hours, remaining_hours)
+        VALUES (NEW.session_id, 0, 1.0)
+        ON DUPLICATE KEY UPDATE 
+            remaining_hours = 1.0;
+            
+        -- Cập nhật session_price
+        INSERT INTO session_price (session_id, total_amount)
+        VALUES (NEW.session_id, deduct_amount)
+        ON DUPLICATE KEY UPDATE total_amount = total_amount + deduct_amount;
+    ELSE
+        -- Nếu không đủ tiền, tự động kết thúc phiên
+        UPDATE session
+        SET end_time = NOW()
+        WHERE session_id = NEW.session_id;
+        
+        -- Cập nhật trạng thái máy tính
+        UPDATE computer
+        SET status = 'Available'
+        WHERE computer_id = NEW.computer_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: TỰ ĐỘNG KẾT THÚC PHIÊN KHI HẾT TIỀN
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_auto_end_session_on_insufficient_balance
+AFTER UPDATE ON customer
+FOR EACH ROW
+BEGIN
+    DECLARE active_session_id INT;
+    DECLARE session_computer_id INT;
+    
+    -- Kiểm tra nếu số dư < 0 và có phiên đang hoạt động
+    IF NEW.balance < 0 AND OLD.balance >= 0 THEN
+        -- Tìm phiên đang hoạt động của khách hàng này
+        SELECT session_id, computer_id INTO active_session_id, session_computer_id
+        FROM session
+        WHERE customer_id = NEW.customer_id 
+        AND end_time IS NULL
+        ORDER BY start_time DESC
+        LIMIT 1;
+        
+        -- Nếu có phiên đang hoạt động, kết thúc nó
+        IF active_session_id IS NOT NULL THEN
+            UPDATE session
+            SET end_time = NOW()
+            WHERE session_id = active_session_id;
+            
+            -- Cập nhật trạng thái máy tính
+            UPDATE computer
+            SET status = 'Available'
+            WHERE computer_id = session_computer_id;
+        END IF;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- EVENT SCHEDULER: TỰ ĐỘNG TRỪ TIỀN THEO THỜI GIAN THỰC
+-- ======================
+DELIMITER $$
+
+CREATE EVENT evt_auto_deduct_realtime
+ON SCHEDULE EVERY 1 MINUTE
+DO
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_session_id INT;
+    DECLARE v_customer_id INT;
+    DECLARE v_computer_id INT;
+    DECLARE v_start_time DATETIME;
+    DECLARE v_hourly_rate DECIMAL(10,2);
+    DECLARE v_current_balance DECIMAL(12,2);
+    DECLARE v_elapsed_hours DECIMAL(10,4);
+    DECLARE v_deduct_amount DECIMAL(12,2);
+    DECLARE v_remaining_hours DECIMAL(10,2);
+    
+    -- Con trỏ để duyệt qua các phiên đang hoạt động
+    DECLARE session_cursor CURSOR FOR
+        SELECT s.session_id, s.customer_id, s.computer_id, s.start_time, c.price_per_hour
+        FROM session s
+        JOIN computer c ON s.computer_id = c.computer_id
+        WHERE s.end_time IS NULL;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN session_cursor;
+    
+    session_loop: LOOP
+        FETCH session_cursor INTO v_session_id, v_customer_id, v_computer_id, v_start_time, v_hourly_rate;
+        
+        IF done THEN
+            LEAVE session_loop;
+        END IF;
+        
+        -- Tính thời gian đã trôi qua (tính bằng giờ)
+        SET v_elapsed_hours = TIMESTAMPDIFF(SECOND, v_start_time, NOW()) / 3600;
+        
+        -- Tính số tiền cần trừ (mỗi phút = 1/60 giờ)
+        SET v_deduct_amount = (v_hourly_rate / 60);
+        
+        -- Lấy số dư hiện tại
+        SELECT balance INTO v_current_balance
+        FROM customer
+        WHERE customer_id = v_customer_id;
+        
+        -- Kiểm tra nếu đủ tiền để trừ
+        IF v_current_balance >= v_deduct_amount THEN
+            -- Trừ tiền
+            UPDATE customer
+            SET balance = balance - v_deduct_amount
+            WHERE customer_id = v_customer_id;
+            
+            -- Cập nhật session_usage
+            SELECT remaining_hours INTO v_remaining_hours
+            FROM session_usage
+            WHERE session_id = v_session_id;
+            
+            UPDATE session_usage
+            SET 
+                duration_hours = v_elapsed_hours,
+                remaining_hours = GREATEST(v_remaining_hours - (1.0/60), 0),
+                updated_at = NOW()
+            WHERE session_id = v_session_id;
+            
+            -- Cập nhật session_price
+            UPDATE session_price
+            SET total_amount = total_amount + v_deduct_amount
+            WHERE session_id = v_session_id;
+            
+        ELSE
+            -- Nếu không đủ tiền, kết thúc phiên
+            UPDATE session
+            SET end_time = NOW()
+            WHERE session_id = v_session_id;
+            
+            -- Cập nhật trạng thái máy tính
+            UPDATE computer
+            SET status = 'Available'
+            WHERE computer_id = v_computer_id;
+            
+            -- Cập nhật session_usage lần cuối
+            UPDATE session_usage
+            SET 
+                duration_hours = v_elapsed_hours,
+                remaining_hours = 0,
+                updated_at = NOW()
+            WHERE session_id = v_session_id;
+        END IF;
+        
+    END LOOP;
+    
+    CLOSE session_cursor;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI MÁY KHI BẮT ĐẦU PHIÊN
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_update_computer_status_on_session_start
+AFTER INSERT ON session
+FOR EACH ROW
+BEGIN
+    -- Cập nhật trạng thái máy tính thành 'In Use' khi bắt đầu phiên
+    UPDATE computer
+    SET status = 'In Use'
+    WHERE computer_id = NEW.computer_id;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI MÁY KHI ĐỔI MÁY
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_update_computer_status_on_session_change
+AFTER UPDATE ON session
+FOR EACH ROW
+BEGIN
+    -- Chỉ xử lý khi computer_id thay đổi
+    IF OLD.computer_id != NEW.computer_id THEN
+        -- Cập nhật máy cũ thành 'Available'
+        UPDATE computer
+        SET status = 'Available'
+        WHERE computer_id = OLD.computer_id;
+        
+        -- Cập nhật máy mới thành 'In Use'
+        UPDATE computer
+        SET status = 'In Use'
+        WHERE computer_id = NEW.computer_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: TỰ ĐỘNG CẬP NHẬT TRẠNG THÁI MÁY KHI KẾT THÚC PHIÊN
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_update_computer_status_on_session_end
+AFTER UPDATE ON session
+FOR EACH ROW
+BEGIN
+    -- Chỉ xử lý khi phiên được kết thúc (end_time được set)
+    IF OLD.end_time IS NULL AND NEW.end_time IS NOT NULL THEN
+        -- Cập nhật trạng thái máy tính thành 'Available'
+        UPDATE computer
+        SET status = 'Available'
+        WHERE computer_id = NEW.computer_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: TỰ ĐỘNG CẬP NHẬT KHO KHI HOÀN TIỀN THÀNH CÔNG
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_restock_on_refund_completed
+AFTER UPDATE ON refund
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_item_id INT;
+    DECLARE v_quantity INT;
+    
+    -- Con trỏ để duyệt qua các sản phẩm được hoàn
+    DECLARE refund_cursor CURSOR FOR
+        SELECT rd.item_id, rd.quantity
+        FROM refund_detail rd
+        WHERE rd.refund_id = NEW.refund_id;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    -- Chỉ xử lý khi trạng thái hoàn tiền chuyển thành 'Completed'
+    IF OLD.status != 'Completed' AND NEW.status = 'Completed' THEN
+        OPEN refund_cursor;
+        
+        refund_loop: LOOP
+            FETCH refund_cursor INTO v_item_id, v_quantity;
+            
+            IF done THEN
+                LEAVE refund_loop;
+            END IF;
+            
+            -- Cập nhật lại số lượng trong kho
+            UPDATE item
+            SET stock = stock + v_quantity
+            WHERE item_id = v_item_id;
+            
+        END LOOP;
+        
+        CLOSE refund_cursor;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: LOẠI TRỪ HÓA ĐƠN ĐÃ HOÀN KHỎI BÁO CÁO DOANH THU
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_exclude_refunded_sales_from_revenue
+AFTER UPDATE ON refund
+FOR EACH ROW
+BEGIN
+    DECLARE v_sale_id INT;
+    DECLARE v_refund_amount DECIMAL(10,2);
+    
+    -- Chỉ xử lý khi trạng thái hoàn tiền chuyển thành 'Completed'
+    IF OLD.status != 'Completed' AND NEW.status = 'Completed' THEN
+        -- Lấy sale_id từ refund
+        SELECT sale_id INTO v_sale_id
+        FROM refund
+        WHERE refund_id = NEW.refund_id;
+        
+        -- Lấy số tiền hoàn
+        SET v_refund_amount = NEW.refund_amount;
+        
+        -- Cập nhật trạng thái hóa đơn thành 'Refunded' để loại trừ khỏi báo cáo
+        UPDATE sale
+        SET status = 'Refunded'
+        WHERE sale_id = v_sale_id;
+        
+        -- Cập nhật lại tổng tiền hóa đơn (trừ đi số tiền hoàn)
+        UPDATE sale_total
+        SET total_amount = GREATEST(total_amount - v_refund_amount, 0)
+        WHERE sale_id = v_sale_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- TRIGGER: CẬP NHẬT LẠI KHO KHI HOÀN TIỀN BỊ HỦY
+-- ======================
+DELIMITER $$
+
+CREATE TRIGGER trg_restock_on_refund_cancelled
+AFTER UPDATE ON refund
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_item_id INT;
+    DECLARE v_quantity INT;
+    
+    -- Con trỏ để duyệt qua các sản phẩm được hoàn
+    DECLARE refund_cursor CURSOR FOR
+        SELECT rd.item_id, rd.quantity
+        FROM refund_detail rd
+        WHERE rd.refund_id = NEW.refund_id;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    -- Chỉ xử lý khi trạng thái hoàn tiền chuyển từ 'Completed' sang trạng thái khác
+    IF OLD.status = 'Completed' AND NEW.status != 'Completed' THEN
+        OPEN refund_cursor;
+        
+        refund_loop: LOOP
+            FETCH refund_cursor INTO v_item_id, v_quantity;
+            
+            IF done THEN
+                LEAVE refund_loop;
+            END IF;
+            
+            -- Trừ lại số lượng trong kho (vì hoàn tiền bị hủy)
+            UPDATE item
+            SET stock = stock - v_quantity
+            WHERE item_id = v_item_id;
+            
+        END LOOP;
+        
+        CLOSE refund_cursor;
+        
+        -- Cập nhật lại trạng thái hóa đơn
+        UPDATE sale
+        SET status = 'Paid'
+        WHERE sale_id = (SELECT sale_id FROM refund WHERE refund_id = NEW.refund_id);
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ======================
+-- BẬT EVENT SCHEDULER
+-- ======================
+SET GLOBAL event_scheduler = ON;
+
+-- ======================
 -- KIỂM TRA CÁC TRIGGER ĐÃ TẠO THÀNH CÔNG
 -- ======================
 SELECT 
@@ -437,5 +839,5 @@ SELECT
     EVENT_OBJECT_TABLE,
     ACTION_TIMING
 FROM information_schema.TRIGGERS
-WHERE TRIGGER_SCHEMA = 'internet_cafe'
+WHERE TRIGGER_SCHEMA = 'railway'
 ORDER BY EVENT_OBJECT_TABLE, ACTION_TIMING, EVENT_MANIPULATION;
