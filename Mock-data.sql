@@ -65,3 +65,8 @@ INSERT INTO session (customer_id, computer_id, start_time, end_time) VALUES
 (2, 2, '2025-01-15 11:30:00', '2025-01-15 23:30:00'),
 (3, 3, '2025-03-18 14:20:00', '2025-03-18 19:20:00'),
 (4, 4, '2025-03-03 16:45:00', '2025-03-03 18:45:00');
+INSERT INTO session_usage (session_id, duration_hours, remaining_hours) VALUES
+(1, 0.50, 0.00),
+(2, 12.00, 0.00),
+(3, 3.00, 0.00),
+(4, 2.00, 0.00);
