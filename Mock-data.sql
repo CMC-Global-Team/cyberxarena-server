@@ -18,3 +18,5 @@ INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, 
 INSERT INTO recharge_history (customer_id, amount, recharge_date) VALUES
 (1, 150000.00, '2025-02-01 09:01:00'),
 (2, 5000000.00, '2025-01-15 11:32:00'),
+(3, 18000000.00, '2025-03-18 14:24:00'),
+(4, 50000, '2025-03-03 16:48:00');
