@@ -29,3 +29,5 @@ INSERT INTO account (customer_id, username, password) VALUES
 
 INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Coca-Cola 330ml', 'Đồ uống', 15000.00, 120, 'Coca-Cola Vietnam'),
+('Trà sữa', 'Đồ uống', 25000.00, 80, 'Local Tea Co.'),
+('Sting', 'Đồ uống', 20000.00, 60, 'Local Coffee Co.'),
