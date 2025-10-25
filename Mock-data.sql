@@ -12,3 +12,4 @@ INSERT INTO membership_card (membership_card_name, discount_id, recharge_thresho
 INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, registration_date) VALUES
 ('Nguyễn Thiện Phúc', '0912345001', 1, 150000.00, '2025-02-01 09:00:00'),
 ('Phạm Như Thắng', '0394971667', 2, 5000000.00, '2025-01-15 11:30:00'),
+('Phùng Văn Linh', '0968703132', 3, 18000000.00, '2025-03-18 14:20:00'),
