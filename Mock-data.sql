@@ -24,3 +24,5 @@ INSERT INTO recharge_history (customer_id, amount, recharge_date) VALUES
 INSERT INTO account (customer_id, username, password) VALUES
 (1, 'nguyenthienphuc', 'p123456'),
 (2, 'thangpham', 'thang123'),
+(3, 'linhpv', 'abc16589'),
+(4, 'dtdat', 'def59874851');
