@@ -70,3 +70,9 @@ INSERT INTO session_usage (session_id, duration_hours, remaining_hours) VALUES
 (2, 12.00, 0.00),
 (3, 3.00, 0.00),
 (4, 2.00, 0.00);
+
+INSERT INTO session_price (session_id, total_amount) VALUES
+(1, 22500.00),  
+(2, 30000.00),   
+(3, 50000.00),   
+(4, 36000.00);
