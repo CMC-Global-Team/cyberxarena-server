@@ -40,4 +40,8 @@ INSERT INTO computer (computer_name, specifications, ip_address, price_per_hour,
 ('PC01', 'i5 / 32GB / RTX3070', '192.168.1.101', 15000.00, 'Available'),
 ('PC02', 'i7 / 32GB / RTX3060', '192.168.1.102', 15000.00, 'Available'),
 ('PC03', 'i9 / 64GB / RTX4070', '192.168.1.103', 20000.00, 'Available'),
-('PC04', 'i9 / 32GB / RTX4080', '192.168.1.104', 18000.00, 'Available'),
+('PC04', 'i9 / 32GB / RTX4080', '192.168.1.104', 18000.00, 'Available');
+
+INSERT INTO sale (customer_id, sale_date, discount_id, payment_method, note, status) VALUES
+(1, '2025-03-01 09:40:00', 1, 'Cash', 'Mua nước', 'Paid'),
+(2, '2025-02-15 10:00:00', 1, 'Cash', 'Mua trà sữa', 'Paid'),
