@@ -85,3 +85,6 @@ INSERT INTO revenue (date, computer_usage_revenue, sales_revenue) VALUES
 
 INSERT INTO refund (sale_id, refund_date, refund_amount, refund_reason, refund_type, processed_by, status) VALUES
 (1, '2025-10-20 10:00:00', 30000.00, 'Khách trả hàng', 'Full', 'NV_LeHai', 'Completed'),
+
+INSERT INTO refund_detail (refund_id, sale_detail_id, quantity) VALUES
+(1, 1, 2);
