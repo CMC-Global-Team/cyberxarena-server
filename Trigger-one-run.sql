@@ -17,6 +17,7 @@ DROP TRIGGER IF EXISTS trg_auto_end_session_on_insufficient_balance;
 DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_start;
 DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_change;
 DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_end;
+DROP TRIGGER IF EXISTS trg_update_computer_status_on_session_insert;
 DROP TRIGGER IF EXISTS trg_restock_on_refund_completed;
 DROP TRIGGER IF EXISTS trg_exclude_refunded_sales_from_revenue;
 DROP TRIGGER IF EXISTS trg_restock_on_refund_cancelled;
@@ -368,46 +369,24 @@ BEGIN
         SET status = 'Available'
         WHERE computer_id = NEW.computer_id;
         
-        -- 2. Lấy giá theo giờ của máy tính
-        SELECT price_per_hour INTO hourly_rate
-        FROM computer
-        WHERE computer_id = NEW.computer_id;
-        
-        -- 3. Tính số giờ đã sử dụng
+        -- 2. Tính số giờ đã sử dụng (chỉ để cập nhật duration_hours)
         SET hourly_used = TIMESTAMPDIFF(SECOND, NEW.start_time, NEW.end_time) / 3600;
         
-        -- 4. Tính tổng tiền phải trả
-        SET total = ROUND(hourly_used * hourly_rate, 2);
-        
-        -- 5. Lấy số dư hiện tại của khách hàng
-        SELECT balance INTO current_balance
-        FROM customer
-        WHERE customer_id = NEW.customer_id
-        LIMIT 1
-        FOR UPDATE;
-        
-        -- 6. Trừ tiền trong tài khoản khách hàng
-        UPDATE customer
-        SET balance = ROUND(current_balance - total, 2)
-        WHERE customer_id = NEW.customer_id;
-        
-        -- 7. Lấy remaining_hours hiện tại
+        -- 3. Lấy remaining_hours hiện tại
         SELECT remaining_hours INTO remaining
         FROM session_usage
         WHERE session_id = NEW.session_id
         LIMIT 1;
         
-        -- 8. Cập nhật session_price
-        INSERT INTO session_price (session_id, total_amount)
-        VALUES (NEW.session_id, total)
-        ON DUPLICATE KEY UPDATE total_amount = total;
-        
-        -- 9. Cập nhật session_usage
+        -- 4. Cập nhật session_usage (duration_hours cuối cùng)
         UPDATE session_usage
         SET 
             duration_hours = hourly_used,
             remaining_hours = GREATEST(remaining - hourly_used, 0)
         WHERE session_id = NEW.session_id;
+        
+        -- NOTE: Không trừ tiền ở đây vì event scheduler đã trừ trong thời gian thực
+        -- session_price đã được cập nhật bởi event scheduler
         
     END IF;
 END$$
