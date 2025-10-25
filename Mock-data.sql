@@ -47,3 +47,9 @@ INSERT INTO sale (customer_id, sale_date, discount_id, payment_method, note, sta
 (2, '2025-02-15 10:00:00', 1, 'Cash', 'Mua trà sữa', 'Paid'),
 (3, '2025-04-18 10:30:00', 3, 'Card', 'Mua cà phê', 'Paid'),
 (4, '2025-03-03 17:00:00', 1, 'Cash', 'Mua snack', 'Paid');
+
+INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
+(1, 1, 2), 
+(2, 2, 1),  
+(3, 3, 1),  
+(4, 4, 3),
