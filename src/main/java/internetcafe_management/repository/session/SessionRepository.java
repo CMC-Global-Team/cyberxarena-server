@@ -54,6 +54,9 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     @Query("SELECT COUNT(s) FROM Session s WHERE s.endTime IS NULL")
     long countActiveSessions();
     
+    @Query("SELECT s FROM Session s WHERE s.endTime IS NULL")
+    List<Session> findByEndTimeIsNull();
+    
     @Query("SELECT s FROM Session s WHERE s.endTime IS NOT NULL ORDER BY s.startTime DESC")
     List<Session> findCompletedSessions();
     

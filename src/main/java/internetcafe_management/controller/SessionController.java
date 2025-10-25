@@ -72,6 +72,11 @@ public class SessionController {
         return sessionService.changeComputer(id, request.getComputerId());
     }
 
+    @GetMapping("/active")
+    public List<Session> getActiveSessions() {
+        return sessionService.getActiveSessions();
+    }
+
     // Inner class for change computer request
     public static class ChangeComputerRequest {
         private Integer computerId;

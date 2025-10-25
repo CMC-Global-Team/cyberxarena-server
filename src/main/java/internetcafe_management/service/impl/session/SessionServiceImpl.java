@@ -84,4 +84,10 @@ public class SessionServiceImpl implements SessionService {
         
         return sessionRepository.save(session);
     }
+
+    @Override
+    public List<Session> getActiveSessions() {
+        // Return only sessions where endTime is NULL (truly active sessions)
+        return sessionRepository.findByEndTimeIsNull();
+    }
 }
