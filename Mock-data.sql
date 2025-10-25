@@ -81,4 +81,7 @@ INSERT INTO revenue (date, computer_usage_revenue, sales_revenue) VALUES
 ('2025-10-20 00:00:00', 102500.00, 291750.00),
 ('2025-10-21 00:00:00', 56000.00, 50000.00),
 ('2025-10-22 00:00:00', 109000.00, 330000.00),
-('2025-10-23 00:00:00', 115000.00, 1160000.00),
+('2025-10-23 00:00:00', 115000.00, 1160000.00);
+
+INSERT INTO refund (sale_id, refund_date, refund_amount, refund_reason, refund_type, processed_by, status) VALUES
+(1, '2025-10-20 10:00:00', 30000.00, 'Khách trả hàng', 'Full', 'NV_LeHai', 'Completed'),
