@@ -9,3 +9,5 @@ INSERT INTO membership_card (membership_card_name, discount_id, recharge_thresho
 ('Premium ', 2, 10000000.00, FALSE),    
 ('Platinum ', 3, 15000000.00, FALSE);     
 
+INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, registration_date) VALUES
+('Nguyễn Thiện Phúc', '0912345001', 1, 150000.00, '2025-02-01 09:00:00'),
