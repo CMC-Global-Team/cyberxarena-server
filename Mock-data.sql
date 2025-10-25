@@ -31,3 +31,5 @@ INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Coca-Cola 330ml', 'Đồ uống', 15000.00, 120, 'Coca-Cola Vietnam'),
 ('Trà sữa', 'Đồ uống', 25000.00, 80, 'Local Tea Co.'),
 ('Sting', 'Đồ uống', 20000.00, 60, 'Local Coffee Co.'),
+('Snack Oishi', 'Đồ ăn nhanh', 10000.00, 200, 'Oishi Vietnam'),
+('Nước suối Lavie', 'Đồ uống', 10000.00, 150, 'La Vie'),
