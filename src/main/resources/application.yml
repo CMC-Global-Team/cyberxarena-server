@@ -6,9 +6,12 @@ server:
 spring:
   application:
     name: internet-cafe-management
+  
+  jackson:
+    time-zone: Asia/Ho_Chi_Minh
 
   datasource:
-    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
     username: root
     password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -27,6 +30,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         format_sql: true
+        jdbc:
+          time_zone: Asia/Ho_Chi_Minh
         
   flyway:
     enabled: false
