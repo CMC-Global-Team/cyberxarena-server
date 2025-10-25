@@ -35,3 +35,7 @@ INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Nước suối Lavie', 'Đồ uống', 10000.00, 150, 'La Vie'),
 ('Mì Hảo Hảo', 'Đồ ăn nhanh', 12000.00, 180, 'Acecook'),
 ('Nem chua', 'Đồ ăn nhanh', 36000.00, 180, '36food');
+
+INSERT INTO computer (computer_name, specifications, ip_address, price_per_hour, status) VALUES
+('PC01', 'i5 / 32GB / RTX3070', '192.168.1.101', 15000.00, 'Available'),
+('PC02', 'i7 / 32GB / RTX3060', '192.168.1.102', 15000.00, 'Available'),
