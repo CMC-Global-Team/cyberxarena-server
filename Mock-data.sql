@@ -15,6 +15,9 @@ INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, 
 ('Phùng Văn Linh', '0968703132', 3, 18000000.00, '2025-03-18 14:20:00'),
 ('Đặng Tiến Đạt', '0909871663', 1, 50000, '2025-03-03 16:45:00'),
 ('Trần Tiến Thành', '0971600519', 1, 100000, '2025-04-03 18:36:00'),
+('Hoàng Cát Tường', '0967357026', 1, 300000, '2025-04-03 18:36:00'),
+
+  
 
 INSERT INTO recharge_history (customer_id, amount, recharge_date) VALUES
 (1, 150000.00, '2025-02-01 09:01:00'),
