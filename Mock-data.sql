@@ -18,6 +18,7 @@ INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, 
 ('Hoàng Cát Tường', '0967357026', 1, 300000, '2025-04-03 18:36:00'),
 ('Đỗ Trí Kiên', '0332928948', 1, 90000, '2025-04-03 9:46:00'),
 ('Nguyễn Duy Anh', '0336211413', 1, 40000, '2025-04-03 13:39:00'),
+('Nguyễn Quang Hà ', '0342928948', 3, 15500000.00, '2025-04-03 22:07:00'),
 
 
   
