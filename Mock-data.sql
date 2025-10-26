@@ -33,6 +33,7 @@ INSERT INTO recharge_history (customer_id, amount, recharge_date) VALUES
 (6, 300000,'2025-04-03 19:36:00'),
 (7, 90000, '2025-04-03 9:50:00'),
 (8, 40000, '2025-06-03 13:40:00'),
+(9, 15500000.00, '2025-04-03 22:10:00'),
 INSERT INTO account (customer_id, username, password) VALUES
 (1, 'nguyenthienphuc', 'p123456'),
 (2, 'thangpham', 'thang123'),
