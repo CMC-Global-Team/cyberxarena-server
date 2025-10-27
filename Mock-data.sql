@@ -209,10 +209,11 @@ INSERT INTO session_usage (session_id, duration_hours, remaining_hours) VALUES
 (19, 3.50, 0.00),
 (20, 4.50, 0.00);  
 INSERT INTO session_price (session_id, total_amount) VALUES
-(1, 22500.00),  
-(2, 30000.00),   
-(3, 50000.00),   
-(4, 36000.00);
+(1, 7500.00),     -- 0.5h × 15000
+(2, 180000.00),   -- 12h × 15000
+(3, 100000.00),   -- 5h × 20000
+(4, 36000.00),    -- 2h × 18000
+(5, 52500.00),    -- 3.5h × 15000
 
 INSERT INTO revenue (date, computer_usage_revenue, sales_revenue) VALUES
 ('2025-10-20 00:00:00', 102500.00, 291750.00),
