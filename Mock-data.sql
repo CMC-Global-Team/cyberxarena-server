@@ -242,7 +242,10 @@ INSERT INTO revenue (date, computer_usage_revenue, sales_revenue) VALUES
 ('2025-09-20', 90000.00, 60000.00),
 ('2025-10-11', 60000.00, 70000.00);
 INSERT INTO refund (sale_id, refund_date, refund_amount, refund_reason, refund_type, processed_by, status) VALUES
-(1, '2025-10-20 10:00:00', 30000.00, 'Khách trả hàng', 'Full', 'NV_LeHai', 'Completed'),
+(1, '2025-03-01 10:00:00', 15000.00, 'Khách trả lại 1 lon Coca-Cola vì bị móp', 'Partial', 'Admin', 'Completed'),
+(2, '2025-02-15 10:30:00', 25000.00, 'Hủy đơn trà sữa do nhầm order', 'Full', 'Thủ quỹ', 'Completed'),
+(3, '2025-04-18 11:00:00', 5000.00, 'Giảm giá thêm cho khách quen', 'Partial', 'Nhân viên bán hàng', 'Completed'),
+
 
 INSERT INTO refund_detail (refund_id, sale_detail_id, quantity) VALUES
 (1, 1, 2);
