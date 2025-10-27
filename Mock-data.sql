@@ -118,7 +118,31 @@ INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
 (2, 2, 1),  
 (3, 3, 1),  
 (4, 4, 3);
-
+(5, 8, 1),     -- Mì xào trứng
+(6, 9, 1),     -- Cơm chiên gà
+(6, 5, 1),     -- Nước suối Lavie
+(7, 10, 2),    -- Khoai tây chiên
+(8, 2, 1),     -- Trà sữa
+(8, 4, 1),     -- Snack Oishi
+(9, 11, 1),    -- Cơm chiên xúc xích
+(9, 1, 1),     -- Coca-Cola
+(10, 12, 2),   -- Mì ly Hảo Hảo
+(11, 1, 1),    -- Coca-Cola (nạp tiền thêm nước)
+(12, 7, 1),    -- Bánh mì pate
+(12, 3, 1),    -- Sting
+(13, 9, 1),    -- Bánh bao nhân thịt
+(13, 5, 1),    -- Nước suối Lavie
+(14, 14, 1),   -- Xôi gà
+(14, 1, 1),    -- Coca-Cola
+(15, 15, 1),   -- Cơm tấm sườn
+(16, 2, 1),    -- Trà sữa
+(16, 17, 1),   -- Bánh tráng trộn
+(17, 10, 2),   -- Cá viên chiên
+(18, 11, 1),   -- Bánh gạo cay
+(19, 9, 1),    -- Cơm chiên gà
+(19, 1, 1),    -- Coca-Cola
+(19, 4, 1),    -- Snack Oishi
+(20, 13, 1);   -- Cơm chiên trứng
 INSERT INTO sale_total (sale_id, total_amount) VALUES
 (1, 30000.00),     
 (2, 23750.00),      
