@@ -3,9 +3,9 @@ USE railway;
 INSERT INTO discount (discount_name, discount_type, discount_value) VALUES
 ('No Discount', 'FLAT', 0.00),  
 (Bronze 5%', 'Percentage', 5.00),  
-(	Silver 10%', 'Percentage', 10.00),  
+(Silver 10%', 'Percentage', 10.00),  
 (Gold 15%', 'Percentage', 15.00),  
-('Platinum Membership', 'Percentage', 10.00);
+('Platinum 20%', 'Percentage', 20.00);
 
 INSERT INTO membership_card (membership_card_name, discount_id, recharge_threshold, is_default) VALUES
 ('Member', 1, 0.00, TRUE),     
