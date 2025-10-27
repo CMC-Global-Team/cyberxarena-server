@@ -79,4 +79,18 @@ public class RevenueController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PostMapping("/force-recalculate")
+    public ResponseEntity<RevenueDTO> forceRecalculateRevenueReport(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            log.info("Force recalculating revenue report for date: {}", date);
+            RevenueDTO updatedReport = revenueService.recalculateRevenueReport(date);
+            log.info("Successfully force recalculated revenue report for {}", date);
+            return ResponseEntity.ok(updatedReport);
+        } catch (Exception e) {
+            log.error("Error force recalculating revenue report: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 }
