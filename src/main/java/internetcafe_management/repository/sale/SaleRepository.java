@@ -16,8 +16,10 @@ public interface SaleRepository extends JpaRepository<Sale, Integer> {
             "WHERE DATE(s.sale_date) = :date", nativeQuery = true)
     BigDecimal sumTotalAmountBySaleDate(@Param("date") LocalDate date);
     
-    @Query(value = "SELECT COALESCE(SUM(rd.total_amount), 0) FROM refund r " +
+    @Query(value = "SELECT COALESCE(SUM(rd.quantity * item.price), 0) FROM refund r " +
             "JOIN refund_detail rd ON r.refund_id = rd.refund_id " +
+            "JOIN sale_detail sd ON rd.sale_detail_id = sd.sale_detail_id " +
+            "JOIN item ON sd.item_id = item.item_id " +
             "JOIN sale s ON r.sale_id = s.sale_id " +
             "WHERE DATE(s.sale_date) = :date AND r.status IN ('Approved', 'Completed')", nativeQuery = true)
     BigDecimal sumRefundedAmountBySaleDate(@Param("date") LocalDate date);
