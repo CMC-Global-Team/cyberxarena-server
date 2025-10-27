@@ -56,7 +56,7 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     
     // Calculate computer revenue directly from session and computer data
     @Query(value = "SELECT COALESCE(SUM( " +
-            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) * c.price_per_hour " +
+            "TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time) * c.price_per_hour / 60 " +
             "), 0) " +
             "FROM session s " +
             "JOIN computer c ON s.computer_id = c.computer_id " +
@@ -82,8 +82,8 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     
     // Debug query to check sessions with endTime
     @Query(value = "SELECT s.session_id, s.start_time, s.end_time, c.price_per_hour, " +
-            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) as hours, " +
-            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) * c.price_per_hour as revenue " +
+            "TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time) as minutes, " +
+            "TIMESTAMPDIFF(MINUTE, s.start_time, s.end_time) * c.price_per_hour / 60 as revenue " +
             "FROM session s " +
             "JOIN computer c ON s.computer_id = c.computer_id " +
             "WHERE s.end_time IS NOT NULL AND DATE(s.end_time) = :date", 

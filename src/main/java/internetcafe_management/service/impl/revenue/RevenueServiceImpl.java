@@ -112,7 +112,7 @@ public class RevenueServiceImpl implements RevenueService {
                     List<Object[]> debugSessions = sessionRepository.debugSessionsWithEndTime(date);
                     log.info("🔍 Debug sessions with endTime on {}: {}", date, debugSessions.size());
                     for (Object[] session : debugSessions) {
-                        log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, hours={}, revenue={}", 
+                        log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, minutes={}, revenue={}", 
                                 session[0], session[1], session[2], session[3], session[4], session[5]);
                     }
                     
@@ -232,7 +232,7 @@ public class RevenueServiceImpl implements RevenueService {
             List<Object[]> debugSessions = sessionRepository.debugSessionsWithEndTime(date);
             log.info("🔍 Debug sessions with endTime on {}: {}", date, debugSessions.size());
             for (Object[] session : debugSessions) {
-                log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, hours={}, revenue={}", 
+                log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, minutes={}, revenue={}", 
                         session[0], session[1], session[2], session[3], session[4], session[5]);
             }
             
