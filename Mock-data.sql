@@ -103,6 +103,16 @@ INSERT INTO sale (customer_id, sale_date, discount_id, payment_method, note, sta
 (8, '2025-05-09 09:30:00', 3, 'Card', 'Mua trà sữa + snack Oishi', 'Paid'),
 (9, '2025-06-01 20:45:00', 2, 'Card', 'Mua combo cơm chiên xúc xích + Coca', 'Paid'),
 (10, '2025-06-15 19:00:00', 1, 'Cash', 'Mua mì ly Hảo Hảo', 'Paid'),
+(11, '2025-07-01 08:40:00', 4, 'Cash', 'Nạp tiền tài khoản 100.000đ', 'Paid'),
+(12, '2025-07-10 12:50:00', 4, 'Card', 'Mua bánh mì pate + Sting', 'Paid'),
+(13, '2025-07-14 16:00:00', 1, 'Cash', 'Mua bánh bao + nước suối Lavie', 'Paid'),
+(14, '2025-08-01 17:30:00', 3, 'Card', 'Mua combo xôi gà + Coca', 'Paid'),
+(15, '2025-08-15 14:10:00', 2, 'Cash', 'Mua cơm tấm sườn', 'Paid'),
+(16, '2025-09-03 18:20:00', 2, 'Card', 'Mua trà sữa + bánh tráng trộn', 'Paid'),
+(17, '2025-09-10 10:25:00', 1, 'Cash', 'Mua cá viên chiên', 'Paid'),
+(18, '2025-09-20 21:00:00', 1, 'Cash', 'Mua bánh gạo cay', 'Paid'),
+(19, '2025-10-01 13:45:00', 4, 'Card', 'Mua combo cơm chiên gà + Coca + Snack', 'Paid'),
+(20, '2025-10-12 15:30:00', 2, 'Cash', 'Mua cơm chiên trứng', 'Paid');
 INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
 (1, 1, 2), 
 (2, 2, 1),  
