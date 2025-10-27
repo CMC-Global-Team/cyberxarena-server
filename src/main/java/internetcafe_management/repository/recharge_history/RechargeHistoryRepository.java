@@ -8,6 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,4 +62,11 @@ public interface RechargeHistoryRepository extends JpaRepository<RechargeHistory
            "WHERE rh.customerId = :customerId " +
            "ORDER BY rh.rechargeDate DESC")
     List<RechargeHistory> findByCustomerIdWithCustomerDetails(@Param("customerId") Integer customerId);
+    
+    // Get total recharge amount for a specific date
+    @Query(value = "SELECT COALESCE(SUM(amount), 0) " +
+           "FROM recharge_history " +
+           "WHERE DATE(recharge_date) = :date", 
+           nativeQuery = true)
+    BigDecimal sumRechargeAmountByDate(@Param("date") LocalDate date);
 }
