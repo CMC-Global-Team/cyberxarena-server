@@ -45,7 +45,8 @@ INSERT INTO account (customer_id, username, password) VALUES
 (4, 'dtdat', 'def59874851'),
 (5, 'thanhtt', 'ttht1004'),
 (6, 'tuonghc', 'tuong3004'),
-
+(7, 'kien36', 'kien12345'),
+(8, 'duyanh', 'anh0406'),
 INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Coca-Cola 330ml', 'Đồ uống', 15000.00, 120, 'Coca-Cola Vietnam'),
 ('Trà sữa', 'Đồ uống', 25000.00, 80, 'Local Tea Co.'),
