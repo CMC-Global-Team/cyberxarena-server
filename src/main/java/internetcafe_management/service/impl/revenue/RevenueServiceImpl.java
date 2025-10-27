@@ -76,10 +76,9 @@ public class RevenueServiceImpl implements RevenueService {
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
             try {
                 LocalDateTime dateTime = date.atStartOfDay();
-                if (revenueRepository.existsByDate(dateTime)) {
-                    log.debug("Revenue report already exists for date: {}", date);
-                    continue;
-                }
+                
+                // Always recalculate, don't skip existing reports
+                log.info("Processing revenue report for date: {}", date);
 
                 // Tính tiền máy - Sử dụng query mới để tính trực tiếp từ session và computer
                 BigDecimal computerTotal;
@@ -155,19 +154,21 @@ public class RevenueServiceImpl implements RevenueService {
                     salesTotal = BigDecimal.ZERO;
                 }
 
-                // Tạo báo cáo mới
-                Revenue newReport = new Revenue();
-                newReport.setDate(dateTime);
-                newReport.setComputerUsageRevenue(computerTotal);
-                newReport.setSalesRevenue(salesTotal);
+                // Tạo hoặc cập nhật báo cáo
+                Revenue report = revenueRepository.findByDate(dateTime)
+                        .orElse(new Revenue());
+                
+                report.setDate(dateTime);
+                report.setComputerUsageRevenue(computerTotal);
+                report.setSalesRevenue(salesTotal);
 
                 // Lưu vào db
-                Revenue savedReport = revenueRepository.save(newReport);
+                Revenue savedReport = revenueRepository.save(report);
                 
                 // Map to DTO với totalRevenue
                 RevenueDTO dto = revenueMapper.toDto(savedReport);
                 
-                log.info("✅ Generated revenue report for {}: Computer={}, Sales={}, Total={}", 
+                log.info("✅ Generated/Updated revenue report for {}: Computer={}, Sales={}, Total={}", 
                         date, computerTotal, salesTotal, dto.getTotalRevenue());
                 
                 generatedReports.add(dto);
