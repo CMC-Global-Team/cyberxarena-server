@@ -2,6 +2,8 @@ package internetcafe_management.service.impl.revenue;
 
 import internetcafe_management.dto.RevenueDTO;
 import internetcafe_management.entity.Revenue;
+import internetcafe_management.entity.Sale;
+import internetcafe_management.entity.Session;
 import internetcafe_management.mapper.revenue.RevenueMapper;
 import internetcafe_management.repository.revenue.RevenueRepository;
 import internetcafe_management.repository.sale.SaleRepository;
@@ -97,6 +99,16 @@ public class RevenueServiceImpl implements RevenueService {
                             .count();
                     log.info("📊 Sessions with endTime on {}: {}", date, sessionCount);
                     
+                    // Debug: Check all sessions to see their endTime
+                    List<Session> allSessions = sessionRepository.findAll();
+                    log.info("🔍 All sessions count: {}", allSessions.size());
+                    for (Session session : allSessions) {
+                        log.info("Session {}: startTime={}, endTime={}", 
+                                session.getSessionId(), 
+                                session.getStartTime(), 
+                                session.getEndTime());
+                    }
+                    
                 } catch (Exception e) {
                     log.error("❌ Error calculating computer revenue for date {}: {}", date, e.getMessage(), e);
                     computerTotal = BigDecimal.ZERO;
@@ -127,6 +139,16 @@ public class RevenueServiceImpl implements RevenueService {
                                        s.getSaleDate().toLocalDate().equals(filterDateForSales))
                             .count();
                     log.info("📊 Sales on {}: {}", date, saleCount);
+                    
+                    // Debug: Check all sales to see their saleDate
+                    List<Sale> allSales = saleRepository.findAll();
+                    log.info("🔍 All sales count: {}", allSales.size());
+                    for (Sale sale : allSales) {
+                        log.info("Sale {}: saleDate={}, status={}", 
+                                sale.getSaleId(), 
+                                sale.getSaleDate(), 
+                                sale.getStatus());
+                    }
                     
                 } catch (Exception e) {
                     log.error("❌ Error calculating sales revenue for date {}: {}", date, e.getMessage(), e);
