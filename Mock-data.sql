@@ -55,8 +55,17 @@ INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Sting', 'Đồ uống', 20000.00, 60, 'Local Coffee Co.'),
 ('Snack Oishi', 'Đồ ăn nhanh', 10000.00, 200, 'Oishi Vietnam'),
 ('Nước suối Lavie', 'Đồ uống', 10000.00, 150, 'La Vie'),
-('Mì Hảo Hảo', 'Đồ ăn nhanh', 12000.00, 180, 'Acecook'),
-('Nem chua', 'Đồ ăn nhanh', 36000.00, 180, '36food');
+('Nem chua', 'Đồ ăn nhanh', 36000.00, 180, '36food'),
+('Mì xào trứng', 'Đồ ăn nhanh', 30000.00, 100, 'HOAKYFOOD'),
+('Cơm chiên trứng', 'Đồ ăn nhanh', 35000.00, 100, 'HOAKYFOOD'),
+('Cơm chiên xúc xích', 'Đồ ăn nhanh', 40000.00, 80, 'HOAKYFOOD'),
+('Cơm chiên gà', 'Đồ ăn nhanh', 45000.00, 70, 'HOAKYFOOD'),  
+('Xúc xích chiên', 'Đồ ăn nhanh', 20000.00, 150, 'HOAKYFOOD'),
+('Khoai tây chiên', 'Đồ ăn nhanh', 25000.00, 120, 'HOAKYFOOD'),
+('Bánh mì trứng', 'Đồ ăn nhanh', 20000.00, 100, 'HOAKYFOOD'),
+('Bánh mì pate', 'Đồ ăn nhanh', 22000.00, 100, 'HOAKYFOOD'),
+('Bánh bao nhân thịt', 'Đồ ăn nhanh', 15000.00, 150, 'HOAKYFOOD'),
+('Cá viên chiên', 'Đồ ăn nhanh', 25000.00, 100, 'HOAKYFOOD'),  
 
 INSERT INTO computer (computer_name, specifications, ip_address, price_per_hour, status) VALUES
 ('PC01', 'i5 / 32GB / RTX3070', '192.168.1.101', 15000.00, 'Available'),
