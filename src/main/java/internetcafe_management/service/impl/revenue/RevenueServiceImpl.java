@@ -184,21 +184,89 @@ public class RevenueServiceImpl implements RevenueService {
 
     @Override
     public RevenueDTO recalculateRevenueReport(LocalDate date) {
+        log.info("🔄 Recalculating revenue report for date: {}", date);
+        
         // Phải tìm báo cáo đã tồn tại, nếu không thì báo lỗi
         LocalDateTime dateTime = date.atStartOfDay();
         Revenue existingReport = revenueRepository.findByDate(dateTime)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy báo cáo doanh thu cho ngày " + date));
 
-        BigDecimal computerTotal = Optional.ofNullable(sessionRepository.sumTotalAmountByEndDateTime(date))
-                .orElse(BigDecimal.ZERO);
+        // Tính tiền máy - Sử dụng query mới để tính trực tiếp từ session và computer
+        BigDecimal computerTotal;
+        try {
+            // Try the new direct calculation query first
+            BigDecimal rawValue = sessionRepository.calculateComputerRevenueByDate(date);
+            log.info("🔍 Computer revenue (direct calculation) raw query result for {}: {}", date, rawValue);
+            computerTotal = Optional.ofNullable(rawValue)
+                    .orElse(BigDecimal.ZERO);
+            log.info("💰 Computer revenue for {}: {}", date, computerTotal);
+            
+            // Debug: Check if there are any sessions with endTime on this date
+            final LocalDate filterDate = date; // Make effectively final for lambda
+            long sessionCount = sessionRepository.findAll().stream()
+                    .filter(s -> s.getEndTime() != null && 
+                               s.getEndTime().toLocalDate().equals(filterDate))
+                    .count();
+            log.info("📊 Sessions with endTime on {}: {}", date, sessionCount);
+            
+            // Debug: Check all sessions to see their endTime
+            List<Session> allSessions = sessionRepository.findAll();
+            log.info("🔍 All sessions count: {}", allSessions.size());
+            for (Session session : allSessions) {
+                log.info("Session {}: startTime={}, endTime={}", 
+                        session.getSessionId(), 
+                        session.getStartTime(), 
+                        session.getEndTime());
+            }
+            
+        } catch (Exception e) {
+            log.error("❌ Error calculating computer revenue for date {}: {}", date, e.getMessage(), e);
+            computerTotal = BigDecimal.ZERO;
+        }
 
-        BigDecimal salesTotal = Optional.ofNullable(saleRepository.sumTotalAmountBySaleDate(date))
-                .orElse(BigDecimal.ZERO);
+        // Tính tiền bán hàng (trừ refunds đã approve)
+        BigDecimal salesTotal;
+        try {
+            // Try direct calculation first
+            BigDecimal grossSales = saleRepository.calculateSalesRevenueByDate(date);
+            log.info("🔍 Sales revenue (direct calculation) raw query result for {}: {}", date, grossSales);
+            
+            // Calculate refunds (only approved ones)
+            BigDecimal refundsTotal = Optional.ofNullable(saleRepository.sumRefundAmountBySaleDate(date))
+                    .orElse(BigDecimal.ZERO);
+            
+            salesTotal = grossSales.subtract(refundsTotal);
+            log.info("💰 Sales revenue for {}: Gross={}, Refunds={}, Net={}", date, grossSales, refundsTotal, salesTotal);
+            
+            // Debug: Check if there are any sales on this date
+            final LocalDate filterDateForSales = date; // Make effectively final for lambda
+            long saleCount = saleRepository.findAll().stream()
+                    .filter(s -> s.getSaleDate() != null && 
+                               s.getSaleDate().toLocalDate().equals(filterDateForSales))
+                    .count();
+            log.info("📊 Sales on {}: {}", date, saleCount);
+            
+            // Debug: Check all sales to see their saleDate
+            List<Sale> allSales = saleRepository.findAll();
+            log.info("🔍 All sales count: {}", allSales.size());
+            for (Sale sale : allSales) {
+                log.info("Sale {}: saleDate={}, status={}", 
+                        sale.getSaleId(), 
+                        sale.getSaleDate(), 
+                        sale.getStatus());
+            }
+            
+        } catch (Exception e) {
+            log.error("❌ Error calculating sales revenue for date {}: {}", date, e.getMessage(), e);
+            salesTotal = BigDecimal.ZERO;
+        }
 
         existingReport.setComputerUsageRevenue(computerTotal);
         existingReport.setSalesRevenue(salesTotal);
 
         Revenue updatedReport = revenueRepository.save(existingReport);
+        log.info("✅ Successfully recalculated revenue report for {}: Computer={}, Sales={}", 
+                date, computerTotal, salesTotal);
 
         return revenueMapper.toDto(updatedReport);
     }
