@@ -34,7 +34,24 @@ INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, 
 ('Phạm Minh Đức', '0964782331', 3, 350000.00, '2025-05-25 14:20:00'),
 ('Nguyễn Hoài Nam', '0974123876', 2, 180000.00, '2025-06-15 09:45:00'),
 ('Lê Đình Anh Đức', '0356789421', 1, 60000.00, '2025-07-05 17:10:00'),
-('Nguyễn Tuấn Anh', '0346788421', 1, 900000.00, '2025-07-05 18:10:00');
+('Nguyễn Tuấn Anh', '0346788421', 1, 900000.00, '2025-07-05 18:10:00'),
+
+('Nguyễn Hải Đăng', '0936123456', 3, 220000.00, '2025-07-10 09:30:00'),
+('Trần Anh Tuấn', '0977345612', 5, 8500000.00, '2025-08-02 11:45:00'),
+('Đỗ Hữu Tài', '0963457812', 2, 175000.00, '2025-08-08 14:50:00'),
+('Phan Thanh Tùng', '0912233445', 1, 40000.00, '2025-08-12 18:05:00'),
+('Nguyễn Thị Phương', '0905667123', 4, 1250000.00, '2025-09-01 10:10:00'),
+('Hoàng Đức Huy', '0933456712', 2, 130000.00, '2025-09-03 15:25:00'),
+('Phạm Văn Toàn', '0978123456', 3, 320000.00, '2025-09-06 17:00:00'),
+('Bùi Minh Khang', '0987654123', 5, 5000000.00, '2025-09-10 20:40:00'),
+('Trần Hồng Ngọc', '0378123098', 2, 95000.00, '2025-09-20 13:35:00'),
+('Nguyễn Kim Oanh', '0356217845', 4, 1450000.00, '2025-10-01 09:15:00'),
+('Phạm Gia Huy', '0938123776', 1, 80000.00, '2025-10-05 16:20:00'),
+('Vũ Tuấn Kiệt', '0975567345', 5, 7800000.00, '2025-10-07 12:50:00'),
+('Lê Hữu Phước', '0912763458', 2, 210000.00, '2025-10-12 14:10:00'),
+('Ngô Bảo Trâm', '0386782345', 3, 250000.00, '2025-10-18 17:45:00'),
+('Đặng Quốc Thịnh', '0935612876', 2, 120000.00, '2025-10-20 11:25:00'),
+('Nguyễn Thảo My', '0947234598', 4, 980000.00, '2025-10-25 19:55:00');
 INSERT INTO recharge_history (customer_id, amount, recharge_date) VALUES
 (1, 150000.00, '2025-02-01 09:01:00'),
 (2, 5000000.00, '2025-01-15 11:32:00'),
@@ -66,7 +83,25 @@ INSERT INTO account (customer_id, username, password) VALUES
 (17, 'phamminhduc', 'duc0525'),
 (18, 'nguyenhoainam', 'nam1506'),
 (19, 'ledinhanhduc', 'anhduc1707'),
-(20, 'nguyentuananh', 'tuananh1807');
+(20, 'nguyentuananh', 'tuananh1807'),
+
+  
+(21, 'nguyenhaidang', 'haidang123'),
+(22, 'trananhtuan', 'anttuan123'),
+(23, 'dohuutai', 'huutai123'),
+(24, 'phanthanhtung', 'thanhtung123'),
+(25, 'nguyenthiphuong', 'phuong123'),
+(26, 'hoangduchuy', 'duchuy123'),
+(27, 'phamvantoan', 'vantoan123'),
+(28, 'buiminhkhang', 'minhkhang123'),
+(29, 'tranhongngoc', 'hongngoc123'),
+(30, 'nguyenkimoanh', 'kimoanh123'),
+(31, 'phamgiahuy', 'giahuy123'),
+(32, 'vutuankiet', 'tuankiet123'),
+(33, 'lehuuphoc', 'phuoc123'),
+(34, 'ngobaotram', 'baotram123'),
+(35, 'dangquocthinh', 'quocthinh123'),
+(36, 'nguyenthaomy', 'thaomy123');  
 INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Coca-Cola 330ml', 'Đồ uống', 15000.00, 120, 'Coca-Cola Vietnam'),
 ('Trà sữa', 'Đồ uống', 25000.00, 80, 'Local Tea Co.'),
