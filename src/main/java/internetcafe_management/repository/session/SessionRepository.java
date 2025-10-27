@@ -53,6 +53,16 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
             "JOIN SessionPrice sp ON s.sessionId = sp.sessionId " +
             "WHERE FUNCTION('DATE', s.endTime) = :date")
     BigDecimal sumTotalAmountByEndDateTime(@Param("date") LocalDate date);
+    
+    // Calculate computer revenue directly from session and computer data
+    @Query(value = "SELECT COALESCE(SUM( " +
+            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) * c.price_per_hour " +
+            "), 0) " +
+            "FROM session s " +
+            "JOIN computer c ON s.computer_id = c.computer_id " +
+            "WHERE s.end_time IS NOT NULL AND DATE(s.end_time) = :date", 
+            nativeQuery = true)
+    BigDecimal calculateComputerRevenueByDate(@Param("date") LocalDate date);
 
     List<Session> findByComputerIdOrderByStartTimeDesc(Integer computerId);
     

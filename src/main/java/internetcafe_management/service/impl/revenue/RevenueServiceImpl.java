@@ -79,11 +79,12 @@ public class RevenueServiceImpl implements RevenueService {
                     continue;
                 }
 
-                // Tính tiền máy
+                // Tính tiền máy - Sử dụng query mới để tính trực tiếp từ session và computer
                 BigDecimal computerTotal;
                 try {
-                    BigDecimal rawValue = sessionRepository.sumTotalAmountByEndDateTime(date);
-                    log.info("🔍 Computer revenue raw query result for {}: {}", date, rawValue);
+                    // Try the new direct calculation query first
+                    BigDecimal rawValue = sessionRepository.calculateComputerRevenueByDate(date);
+                    log.info("🔍 Computer revenue (direct calculation) raw query result for {}: {}", date, rawValue);
                     computerTotal = Optional.ofNullable(rawValue)
                             .orElse(BigDecimal.ZERO);
                     log.info("💰 Computer revenue for {}: {}", date, computerTotal);
@@ -103,8 +104,9 @@ public class RevenueServiceImpl implements RevenueService {
                 // Tính tiền bán hàng (trừ refunds đã approve)
                 BigDecimal salesTotal;
                 try {
-                    BigDecimal grossSales = saleRepository.sumTotalAmountBySaleDate(date);
-                    log.info("🔍 Sales revenue gross raw query result for {}: {}", date, grossSales);
+                    // Try direct calculation first
+                    BigDecimal grossSales = saleRepository.calculateSalesRevenueByDate(date);
+                    log.info("🔍 Sales revenue (direct calculation) raw query result for {}: {}", date, grossSales);
                     grossSales = Optional.ofNullable(grossSales)
                             .orElse(BigDecimal.ZERO);
                     
