@@ -90,9 +90,10 @@ public class RevenueServiceImpl implements RevenueService {
                     log.info("💰 Computer revenue for {}: {}", date, computerTotal);
                     
                     // Debug: Check if there are any sessions with endTime on this date
+                    final LocalDate filterDate = date; // Make effectively final for lambda
                     long sessionCount = sessionRepository.findAll().stream()
                             .filter(s -> s.getEndTime() != null && 
-                                       s.getEndTime().toLocalDate().equals(date))
+                                       s.getEndTime().toLocalDate().equals(filterDate))
                             .count();
                     log.info("📊 Sessions with endTime on {}: {}", date, sessionCount);
                     
@@ -120,9 +121,10 @@ public class RevenueServiceImpl implements RevenueService {
                     log.info("💰 Sales revenue for {}: Gross={}, Refunds={}, Net={}", date, grossSales, refundsTotal, salesTotal);
                     
                     // Debug: Check if there are any sales on this date
+                    final LocalDate filterDateForSales = date; // Make effectively final for lambda
                     long saleCount = saleRepository.findAll().stream()
                             .filter(s -> s.getSaleDate() != null && 
-                                       s.getSaleDate().toLocalDate().equals(date))
+                                       s.getSaleDate().toLocalDate().equals(filterDateForSales))
                             .count();
                     log.info("📊 Sales on {}: {}", date, saleCount);
                     
