@@ -117,7 +117,7 @@ INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
 (1, 1, 2), 
 (2, 2, 1),  
 (3, 3, 1),  
-(4, 4, 3);
+(4, 4, 3),
 (5, 8, 1),     -- Mì xào trứng
 (6, 9, 1),     -- Cơm chiên gà
 (6, 5, 1),     -- Nước suối Lavie
@@ -144,10 +144,27 @@ INSERT INTO sale_detail (sale_id, item_id, quantity) VALUES
 (19, 4, 1),    -- Snack Oishi
 (20, 13, 1);   -- Cơm chiên trứng
 INSERT INTO sale_total (sale_id, total_amount) VALUES
-(1, 30000.00),     
-(2, 23750.00),      
-(3, 18000.00),      
-(4, 30000.00);
+INSERT INTO sale_total (sale_id, total_amount) VALUES
+(1, 30000.00),     -- 2 Coca-Cola (15.000 x 2)
+(2, 23750.00),     -- 1 Trà sữa (25.000 - 5%)
+(3, 18000.00),     -- 1 Sting (20.000 - 10%)
+(4, 30000.00),     -- 3 Snack Oishi (10.000 x 3)
+(5, 28500.00),     -- 1 Mì xào trứng (30.000 - 5%)
+(6, 52250.00),     -- Cơm chiên gà (45.000) + Lavie (10.000) - 5%
+(7, 50000.00),     -- Khoai tây chiên (25.000 x 2)
+(8, 45000.00),     -- Trà sữa (25.000) + Snack (10.000) -10%
+(9, 57000.00),     -- Cơm chiên xúc xích (40.000) + Coca (15.000) -5%
+(10, 24000.00),    -- 2 Mì ly Hảo Hảo (12.000 x 2)
+(11, 98000.00),    -- Nạp tiền (100.000 - 2%)
+(12, 39200.00),    -- Bánh mì pate (22.000) + Sting (20.000) -2%
+(13, 24500.00),    -- Bánh bao (15.000) + Lavie (10.000) -5%
+(14, 58500.00),    -- Xôi gà (35.000) + Coca (15.000) -10%
+(15, 42750.00),    -- Cơm tấm sườn (45.000 - 5%)
+(16, 43750.00),    -- Trà sữa (25.000) + Bánh tráng trộn (20.000) -5%
+(17, 40000.00),    -- 2 Cá viên chiên (25.000 x 2 - 10.000 combo giảm)
+(18, 27000.00),    -- Bánh gạo cay (30.000 - 10%)
+(19, 62700.00),    -- Cơm chiên gà (45.000) + Coca (15.000) + Snack (10.000) -2%
+(20, 31500.00);    -- Cơm chiên trứng (35.000 - 10%)
 
 INSERT INTO session (customer_id, computer_id, start_time, end_time) VALUES
 (1, 1, '2025-02-01 09:00:00', '2025-02-01 09:30:00'),
