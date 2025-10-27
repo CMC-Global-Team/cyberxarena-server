@@ -198,6 +198,16 @@ INSERT INTO session_usage (session_id, duration_hours, remaining_hours) VALUES
 (8, 2.00, 0.00),
 (9, 4.00, 0.00),
 (10, 3.50, 0.00),
+(11, 3.50, 0.00),
+(12, 3.00, 0.00),
+(13, 3.00, 0.00),
+(14, 5.00, 0.00),
+(15, 2.50, 0.00),
+(16, 4.00, 0.00),
+(17, 2.00, 0.00),
+(18, 4.00, 0.00),
+(19, 3.50, 0.00),
+(20, 4.50, 0.00);  
 INSERT INTO session_price (session_id, total_amount) VALUES
 (1, 22500.00),  
 (2, 30000.00),   
