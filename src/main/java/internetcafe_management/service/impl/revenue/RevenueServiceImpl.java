@@ -232,7 +232,7 @@ public class RevenueServiceImpl implements RevenueService {
             log.info("🔍 Sales revenue (direct calculation) raw query result for {}: {}", date, grossSales);
             
             // Calculate refunds (only approved ones)
-            BigDecimal refundsTotal = Optional.ofNullable(saleRepository.sumRefundAmountBySaleDate(date))
+            BigDecimal refundsTotal = Optional.ofNullable(saleRepository.sumRefundedAmountBySaleDate(date))
                     .orElse(BigDecimal.ZERO);
             
             salesTotal = grossSales.subtract(refundsTotal);
