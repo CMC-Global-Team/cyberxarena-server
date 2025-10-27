@@ -245,7 +245,9 @@ INSERT INTO refund (sale_id, refund_date, refund_amount, refund_reason, refund_t
 (1, '2025-03-01 10:00:00', 15000.00, 'Khách trả lại 1 lon Coca-Cola vì bị móp', 'Partial', 'Admin', 'Completed'),
 (2, '2025-02-15 10:30:00', 25000.00, 'Hủy đơn trà sữa do nhầm order', 'Full', 'Thủ quỹ', 'Completed'),
 (3, '2025-04-18 11:00:00', 5000.00, 'Giảm giá thêm cho khách quen', 'Partial', 'Nhân viên bán hàng', 'Completed'),
-
+(4, '2025-03-03 17:30:00', 10000.00, 'Snack bị hết hạn 1 gói', 'Partial', 'Admin', 'Completed'),
+(5, '2025-05-10 09:45:00', 20000.00, 'Hủy đơn hàng không nhận', 'Full', 'Admin', 'Pending'),
+(6, '2025-06-01 14:20:00', 10000.00, 'Giảm giá thêm do lỗi hệ thống tính tiền', 'Partial', 'Admin', 'Completed');
 
 INSERT INTO refund_detail (refund_id, sale_detail_id, quantity) VALUES
 (1, 1, 2);
