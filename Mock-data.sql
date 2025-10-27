@@ -253,3 +253,4 @@ INSERT INTO refund_detail (refund_id, sale_detail_id, quantity) VALUES
 (1, 1, 1),
 (2, 2, 1),
 (3, 3, 0),
+(4, 4, 1),
