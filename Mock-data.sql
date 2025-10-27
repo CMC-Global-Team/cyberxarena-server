@@ -250,4 +250,4 @@ INSERT INTO refund (sale_id, refund_date, refund_amount, refund_reason, refund_t
 (6, '2025-06-01 14:20:00', 10000.00, 'Giảm giá thêm do lỗi hệ thống tính tiền', 'Partial', 'Admin', 'Completed');
 
 INSERT INTO refund_detail (refund_id, sale_detail_id, quantity) VALUES
-(1, 1, 2);
+(1, 1, 1),
