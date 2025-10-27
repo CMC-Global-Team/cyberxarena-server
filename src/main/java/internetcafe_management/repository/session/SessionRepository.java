@@ -79,4 +79,14 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
     List<Session> findRecentSessions(Pageable pageable);
     
     List<Session> findByStartTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+    
+    // Debug query to check sessions with endTime
+    @Query(value = "SELECT s.session_id, s.start_time, s.end_time, c.price_per_hour, " +
+            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) as hours, " +
+            "TIMESTAMPDIFF(HOUR, s.start_time, s.end_time) * c.price_per_hour as revenue " +
+            "FROM session s " +
+            "JOIN computer c ON s.computer_id = c.computer_id " +
+            "WHERE s.end_time IS NOT NULL AND DATE(s.end_time) = :date", 
+            nativeQuery = true)
+    List<Object[]> debugSessionsWithEndTime(@Param("date") LocalDate date);
 }

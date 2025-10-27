@@ -108,6 +108,14 @@ public class RevenueServiceImpl implements RevenueService {
                                 session.getEndTime());
                     }
                     
+                    // Debug: Check sessions with endTime on specific date
+                    List<Object[]> debugSessions = sessionRepository.debugSessionsWithEndTime(date);
+                    log.info("🔍 Debug sessions with endTime on {}: {}", date, debugSessions.size());
+                    for (Object[] session : debugSessions) {
+                        log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, hours={}, revenue={}", 
+                                session[0], session[1], session[2], session[3], session[4], session[5]);
+                    }
+                    
                 } catch (Exception e) {
                     log.error("❌ Error calculating computer revenue for date {}: {}", date, e.getMessage(), e);
                     computerTotal = BigDecimal.ZERO;
@@ -218,6 +226,14 @@ public class RevenueServiceImpl implements RevenueService {
                         session.getSessionId(), 
                         session.getStartTime(), 
                         session.getEndTime());
+            }
+            
+            // Debug: Check sessions with endTime on specific date
+            List<Object[]> debugSessions = sessionRepository.debugSessionsWithEndTime(date);
+            log.info("🔍 Debug sessions with endTime on {}: {}", date, debugSessions.size());
+            for (Object[] session : debugSessions) {
+                log.info("Debug Session: id={}, start={}, end={}, pricePerHour={}, hours={}, revenue={}", 
+                        session[0], session[1], session[2], session[3], session[4], session[5]);
             }
             
         } catch (Exception e) {
