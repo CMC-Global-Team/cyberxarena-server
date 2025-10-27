@@ -56,7 +56,17 @@ INSERT INTO account (customer_id, username, password) VALUES
 (7, 'kien36', 'kien12345'),
 (8, 'duyanh', 'anh0406'),
 (9, 'quangha', 'ha155000'),
-(10, 'quangchung', 'chung1011');  
+(10, 'quangchung', 'chung1011'),
+(11, 'leminhtuan', 'tuan2505'),
+(12, 'vungochan', 'han1207'),
+(13, 'ngovannam', 'nam5000'),
+(14, 'nguyenthimai', 'mai0220'),
+(15, 'buiduclong', 'long1003'),
+(16, 'tranngocvy', 'vy1809'),
+(17, 'phamminhduc', 'duc0525'),
+(18, 'nguyenhoainam', 'nam1506'),
+(19, 'ledinhanhduc', 'anhduc1707'),
+(20, 'nguyentuananh', 'tuananh1807');
 INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Coca-Cola 330ml', 'Đồ uống', 15000.00, 120, 'Coca-Cola Vietnam'),
 ('Trà sữa', 'Đồ uống', 25000.00, 80, 'Local Tea Co.'),
