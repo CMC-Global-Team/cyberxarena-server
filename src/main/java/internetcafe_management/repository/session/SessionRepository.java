@@ -36,13 +36,18 @@ public interface SessionRepository extends JpaRepository<Session, Integer> {
 
     @Query("""
         SELECT s FROM Session s
-        WHERE (:customerId IS NULL OR s.customerId = :customerId)
-        AND (:computerId IS NULL OR s.computerId = :computerId)
-        AND (:startTime IS NULL OR s.startTime >= :startTime)
-        AND (:endTime IS NULL OR s.endTime <= :endTime)
+        LEFT JOIN Customer c ON s.customerId = c.customerId
+        LEFT JOIN Computer comp ON s.computerId = comp.computerId
+        WHERE (:customerName IS NULL OR LOWER(c.customerName) LIKE LOWER(CONCAT('%', :customerName, '%')))
+        AND (:computerName IS NULL OR LOWER(comp.computerName) LIKE LOWER(CONCAT('%', :computerName, '%')))
+        AND (:status IS NULL OR 
+            (:status = 'Active' AND s.endTime IS NULL) OR 
+            (:status = 'Ended' AND s.endTime IS NOT NULL))
     """)
-    List<Session> searchSessions(Integer customerId, Integer computerId,
-                                 LocalDateTime startTime, LocalDateTime endTime);
+    Page<Session> searchSessions(@Param("customerName") String customerName, 
+                                 @Param("computerName") String computerName, 
+                                 @Param("status") String status, 
+                                 Pageable pageable);
 
     @Query("SELECT SUM(sp.totalAmount) FROM Session s " +
             "JOIN SessionPrice sp ON s.sessionId = sp.sessionId " +

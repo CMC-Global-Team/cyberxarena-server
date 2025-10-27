@@ -50,8 +50,8 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime) {
-        return sessionRepository.searchSessions(customerId, computerId, startTime, endTime);
+    public Page<Session> searchSessions(String customerName, String computerName, String status, Pageable pageable) {
+        return sessionRepository.searchSessions(customerName, computerName, status, pageable);
     }
 
     @Override

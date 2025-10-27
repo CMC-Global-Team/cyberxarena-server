@@ -16,7 +16,7 @@ public interface SessionService {
     Session updateSession(Integer id, Session session);
     void deleteSession(Integer id);
     List<SessionDetailsDTO> getSessionsWithTotalAmount();
-    List<Session> searchSessions(Integer customerId, Integer computerId, LocalDateTime startTime, LocalDateTime endTime);
+    Page<Session> searchSessions(String customerName, String computerName, String status, Pageable pageable);
     Session endSession(Integer id);
     Session changeComputer(Integer id, Integer newComputerId);
     List<Session> getActiveSessions();

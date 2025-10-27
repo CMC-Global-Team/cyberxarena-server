@@ -49,12 +49,19 @@ public class SessionController {
     }
 
     @GetMapping("/search")
-    public List<Session> searchSessions(
-            @RequestParam(required = false) Integer customerId,
-            @RequestParam(required = false) Integer computerId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
-        return sessionService.searchSessions(customerId, computerId, startTime, endTime);
+    public Page<Session> searchSessions(
+            @RequestParam(required = false) String customerName,
+            @RequestParam(required = false) String computerName,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "sessionId") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDir) {
+        
+        Sort.Direction direction = sortDir.equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+        PageRequest pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        return sessionService.searchSessions(customerName, computerName, status, pageable);
     }
 
     @GetMapping("/with-details")
