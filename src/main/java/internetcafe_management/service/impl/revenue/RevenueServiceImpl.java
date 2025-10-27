@@ -82,28 +82,50 @@ public class RevenueServiceImpl implements RevenueService {
                 // Tính tiền máy
                 BigDecimal computerTotal;
                 try {
-                    computerTotal = Optional.ofNullable(sessionRepository.sumTotalAmountByEndDateTime(date))
+                    BigDecimal rawValue = sessionRepository.sumTotalAmountByEndDateTime(date);
+                    log.info("🔍 Computer revenue raw query result for {}: {}", date, rawValue);
+                    computerTotal = Optional.ofNullable(rawValue)
                             .orElse(BigDecimal.ZERO);
-                    log.debug("Computer revenue for {}: {}", date, computerTotal);
+                    log.info("💰 Computer revenue for {}: {}", date, computerTotal);
+                    
+                    // Debug: Check if there are any sessions with endTime on this date
+                    long sessionCount = sessionRepository.findAll().stream()
+                            .filter(s -> s.getEndTime() != null && 
+                                       s.getEndTime().toLocalDate().equals(date))
+                            .count();
+                    log.info("📊 Sessions with endTime on {}: {}", date, sessionCount);
+                    
                 } catch (Exception e) {
-                    log.error("Error calculating computer revenue for date {}: {}", date, e.getMessage());
+                    log.error("❌ Error calculating computer revenue for date {}: {}", date, e.getMessage(), e);
                     computerTotal = BigDecimal.ZERO;
                 }
 
                 // Tính tiền bán hàng (trừ refunds đã approve)
                 BigDecimal salesTotal;
                 try {
-                    BigDecimal grossSales = Optional.ofNullable(saleRepository.sumTotalAmountBySaleDate(date))
+                    BigDecimal grossSales = saleRepository.sumTotalAmountBySaleDate(date);
+                    log.info("🔍 Sales revenue gross raw query result for {}: {}", date, grossSales);
+                    grossSales = Optional.ofNullable(grossSales)
                             .orElse(BigDecimal.ZERO);
                     
                     // Trừ refunds đã approve cho ngày này
-                    BigDecimal refundsTotal = Optional.ofNullable(saleRepository.sumRefundedAmountBySaleDate(date))
+                    BigDecimal refundsTotal = saleRepository.sumRefundedAmountBySaleDate(date);
+                    log.info("🔍 Refunds raw query result for {}: {}", date, refundsTotal);
+                    refundsTotal = Optional.ofNullable(refundsTotal)
                             .orElse(BigDecimal.ZERO);
                     
                     salesTotal = grossSales.subtract(refundsTotal);
-                    log.debug("Sales revenue for {}: Gross={}, Refunds={}, Net={}", date, grossSales, refundsTotal, salesTotal);
+                    log.info("💰 Sales revenue for {}: Gross={}, Refunds={}, Net={}", date, grossSales, refundsTotal, salesTotal);
+                    
+                    // Debug: Check if there are any sales on this date
+                    long saleCount = saleRepository.findAll().stream()
+                            .filter(s -> s.getSaleDate() != null && 
+                                       s.getSaleDate().toLocalDate().equals(date))
+                            .count();
+                    log.info("📊 Sales on {}: {}", date, saleCount);
+                    
                 } catch (Exception e) {
-                    log.error("Error calculating sales revenue for date {}: {}", date, e.getMessage());
+                    log.error("❌ Error calculating sales revenue for date {}: {}", date, e.getMessage(), e);
                     salesTotal = BigDecimal.ZERO;
                 }
 
@@ -115,10 +137,14 @@ public class RevenueServiceImpl implements RevenueService {
 
                 // Lưu vào db
                 Revenue savedReport = revenueRepository.save(newReport);
-                generatedReports.add(revenueMapper.toDto(savedReport));
                 
-                log.info("Generated revenue report for {}: Computer={}, Sales={}", 
-                        date, computerTotal, salesTotal);
+                // Map to DTO với totalRevenue
+                RevenueDTO dto = revenueMapper.toDto(savedReport);
+                
+                log.info("✅ Generated revenue report for {}: Computer={}, Sales={}, Total={}", 
+                        date, computerTotal, salesTotal, dto.getTotalRevenue());
+                
+                generatedReports.add(dto);
                         
             } catch (Exception e) {
                 log.error("Error generating revenue report for date {}: {}", date, e.getMessage(), e);
