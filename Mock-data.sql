@@ -9,7 +9,9 @@ INSERT INTO discount (discount_name, discount_type, discount_value) VALUES
 
 INSERT INTO membership_card (membership_card_name, discount_id, recharge_threshold, is_default) VALUES
 ('Basic', 1, 0.00, TRUE),     
-('Premium ', 2, 10000000.00, FALSE),    
+('Bronze ', 2, 10000000.00, FALSE),  
+('Silver ', 2, 10000000.00, FALSE),    
+('Gold ', 2, 10000000.00, FALSE),    
 ('Platinum ', 5, 2000000.00, FALSE);     
 
 INSERT INTO customer (customer_name, phone_number, membership_card_id, balance, registration_date) VALUES
