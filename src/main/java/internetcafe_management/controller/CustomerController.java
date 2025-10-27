@@ -1,0 +1,86 @@
+package internetcafe_management.controller;
+
+import internetcafe_management.dto.CustomerDTO;
+import internetcafe_management.service.Customer.CustomerService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.Valid;
+import java.util.List;
+
+
+@RestController
+@RequestMapping("/customers")
+public class CustomerController {
+
+    @Autowired
+    private CustomerService customerService;
+
+    @PostMapping
+    public ResponseEntity<CustomerDTO> createCustomer(@Valid @RequestBody CustomerDTO dto) {
+        try {
+            return ResponseEntity.ok(customerService.createCustomer(dto));
+        } catch (Exception e) {
+            System.err.println("Error creating customer: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    @DeleteMapping("/{customerId}")
+    public ResponseEntity<Void> deleteCustomer(@PathVariable Integer customerId) {
+        System.out.println("Deleting customer with ID: " + customerId);
+        customerService.deleteCustomer(customerId);
+        return ResponseEntity.noContent().build();
+    }
+    @GetMapping("/{customerId}")
+    public ResponseEntity<CustomerDTO> getCustomerById(@PathVariable Integer customerId) {
+        return ResponseEntity.ok(customerService.getCustomerById(customerId));
+    }
+    @PutMapping("/{customerId}")
+    public ResponseEntity<CustomerDTO> updateCustomer(@PathVariable Integer customerId, @Valid @RequestBody CustomerDTO dto) { // Thêm @Valid
+        return ResponseEntity.ok(customerService.updateCustomer(customerId, dto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CustomerDTO>> getAllCustomers() {
+        try {
+            return ResponseEntity.ok(customerService.getAllCustomers());
+        } catch (Exception e) {
+            System.err.println("Error getting all customers: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+    
+    @GetMapping("/{customerId}/debug")
+    public ResponseEntity<Object> debugCustomer(@PathVariable Integer customerId) {
+        try {
+            CustomerDTO customer = customerService.getCustomerById(customerId);
+            System.out.println("🔍 DEBUG - Customer " + customerId + " membership card ID: " + customer.getMembershipCardId());
+            System.out.println("🔍 DEBUG - Customer " + customerId + " name: " + customer.getCustomerName());
+            System.out.println("🔍 DEBUG - Customer " + customerId + " balance: " + customer.getBalance());
+            return ResponseEntity.ok(customer);
+        } catch (Exception e) {
+            System.err.println("Error getting customer debug info: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerDTO>> searchCustomers(
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(required = false) String sortOrder,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) String email) {
+        try {
+            return ResponseEntity.ok(customerService.searchCustomers(sortBy, sortOrder, name, phone, email));
+        } catch (Exception e) {
+            System.err.println("Error searching customers: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+}

@@ -1,0 +1,79 @@
+package internetcafe_management.mapper.Customer;
+
+import internetcafe_management.dto.CustomerDTO;
+import internetcafe_management.entity.*;
+import org.springframework.stereotype.Component;
+
+@Component
+public class CustomerMapper {
+    public CustomerDTO toDTO(Customer entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCardId(entity.getMembershipCardId());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+
+    public Customer toEntity(CustomerDTO dto) {
+        if (dto == null) return null;
+        Customer entity = new Customer();
+        // Only set customerId if it's not null and not 0 (for new entities)
+        if (dto.getCustomerId() != null && dto.getCustomerId() > 0) {
+            entity.setCustomerId(dto.getCustomerId());
+        }
+        entity.setCustomerName(dto.getCustomerName());
+        entity.setPhoneNumber(dto.getPhoneNumber());
+        entity.setMembershipCardId(dto.getMembershipCardId());
+        entity.setBalance(dto.getBalance());
+        return entity;
+    }
+    public CustomerDTO toDTO(CustomerSortedAsc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCardId(entity.getMembershipCardId());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+    public CustomerDTO toDTO(CustomerSortedDesc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCardId(entity.getMembershipCardId());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+    public CustomerDTO toDTO(CustomerSortDateDesc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCardId(entity.getMembershipCardId());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+    public CustomerDTO toDTO(CustomerSortDateAsc entity) {
+        if (entity == null) return null;
+        CustomerDTO dto = new CustomerDTO();
+        dto.setCustomerId(entity.getCustomerId());
+        dto.setCustomerName(entity.getCustomerName());
+        dto.setPhoneNumber(entity.getPhoneNumber());
+        dto.setMembershipCardId(entity.getMembershipCardId());
+        dto.setBalance(entity.getBalance());
+        dto.setRegistrationDate(entity.getRegistrationDate());
+        return dto;
+    }
+
+}
