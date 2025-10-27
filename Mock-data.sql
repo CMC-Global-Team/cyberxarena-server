@@ -66,7 +66,11 @@ INSERT INTO item (item_name, item_category, price, stock, supplier_name) VALUES
 ('Bánh mì pate', 'Đồ ăn nhanh', 22000.00, 100, 'HOAKYFOOD'),
 ('Bánh bao nhân thịt', 'Đồ ăn nhanh', 15000.00, 150, 'HOAKYFOOD'),
 ('Cá viên chiên', 'Đồ ăn nhanh', 25000.00, 100, 'HOAKYFOOD'),  
-
+('Bánh gạo cay', 'Đồ ăn nhanh', 30000.00, 80, 'HOAKYFOOD'),
+('Mì ly Hảo Hảo', 'Đồ ăn nhanh', 12000.00, 200, 'Acecook Vietnam'),
+('Xôi gà', 'Đồ ăn nhanh', 35000.00, 60, 'HOAKYFOOD'),
+('Cơm tấm sườn', 'Đồ ăn nhanh', 45000.00, 50, 'HOAKYFOOD'),
+('Bánh tráng trộn', 'Đồ ăn nhanh', 20000.00, 90, 'HOAKYFOOD');
 INSERT INTO computer (computer_name, specifications, ip_address, price_per_hour, status) VALUES
 ('PC01', 'i5 / 32GB / RTX3070', '192.168.1.101', 15000.00, 'Available'),
 ('PC02', 'i7 / 32GB / RTX3060', '192.168.1.102', 15000.00, 'Available'),
