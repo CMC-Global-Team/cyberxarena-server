@@ -1,0 +1,649 @@
+-- ========================================================
+-- DATABASE SCHEMA & SEED DATA FOR CYBERXARENA MANAGEMENT  
+-- Target DB Engine: MySQL 8.0+ / MariaDB                 
+-- ========================================================
+
+CREATE DATABASE IF NOT EXISTS `cyberxarena` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE `cyberxarena`;
+
+SET FOREIGN_KEY_CHECKS = 0;
+
+
+-- 1. Bảng discount (Khuyến mãi)
+DROP TABLE IF EXISTS `discount`;
+CREATE TABLE `discount` (
+  `discount_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `discount_name` VARCHAR(100) NOT NULL,
+  `discount_type` ENUM('Flat', 'Percentage') NOT NULL DEFAULT 'Flat',
+  `discount_value` DECIMAL(10, 2) DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2. Bảng membership_card (Thẻ thành viên)
+DROP TABLE IF EXISTS `membership_card`;
+CREATE TABLE `membership_card` (
+  `membership_card_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `membership_card_name` VARCHAR(100) NOT NULL,
+  `discount_id` INT NULL,
+  `recharge_threshold` DECIMAL(12, 2) DEFAULT 0.00,
+  `is_default` BIT(1) NOT NULL DEFAULT b'0',
+  CONSTRAINT `fk_membership_discount` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`discount_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3. Bảng customer (Khách hàng)
+DROP TABLE IF EXISTS `customer`;
+CREATE TABLE `customer` (
+  `customer_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `customer_name` VARCHAR(100) NOT NULL,
+  `phone_number` VARCHAR(15) NULL,
+  `membership_card_id` INT NULL,
+  `balance` DECIMAL(12, 2) DEFAULT 0.00,
+  `registration_date` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+  CONSTRAINT `fk_customer_membership` FOREIGN KEY (`membership_card_id`) REFERENCES `membership_card` (`membership_card_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4. Bảng account (Tài khoản hội viên)
+DROP TABLE IF EXISTS `account`;
+CREATE TABLE `account` (
+  `account_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `customer_id` INT NOT NULL UNIQUE,
+  `username` VARCHAR(50) NOT NULL UNIQUE,
+  `password` VARCHAR(255) NOT NULL,
+  CONSTRAINT `fk_account_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5. Bảng computer (Máy trạm gaming)
+DROP TABLE IF EXISTS `computer`;
+CREATE TABLE `computer` (
+  `computer_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `computer_name` VARCHAR(50) NOT NULL,
+  `ip_address` VARCHAR(20) NOT NULL,
+  `price_per_hour` DECIMAL(10, 2) NOT NULL,
+  `specifications` JSON NOT NULL,
+  `status` VARCHAR(255) NOT NULL DEFAULT 'Available'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 6. Bảng item (Mặt hàng / Sản phẩm dịch vụ)
+DROP TABLE IF EXISTS `item`;
+CREATE TABLE `item` (
+  `item_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `item_name` VARCHAR(100) NOT NULL,
+  `item_category` VARCHAR(50) NULL,
+  `price` DECIMAL(10, 2) NOT NULL,
+  `stock` INT NOT NULL DEFAULT 0,
+  `supplier_name` VARCHAR(100) NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Bảng session (Phiên máy trạm)
+DROP TABLE IF EXISTS `session`;
+CREATE TABLE `session` (
+  `session_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `customer_id` INT NOT NULL,
+  `computer_id` INT NOT NULL,
+  `start_time` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `end_time` DATETIME(6) NULL,
+  CONSTRAINT `fk_session_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_session_computer` FOREIGN KEY (`computer_id`) REFERENCES `computer` (`computer_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 8. Bảng session_price (Thành tiền phiên)
+DROP TABLE IF EXISTS `session_price`;
+CREATE TABLE `session_price` (
+  `session_id` INT PRIMARY KEY,
+  `total_amount` DECIMAL(10, 2) DEFAULT 0.00,
+  CONSTRAINT `fk_session_price_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 9. Bảng session_usage (Thời gian sử dụng phiên)
+DROP TABLE IF EXISTS `session_usage`;
+CREATE TABLE `session_usage` (
+  `session_id` INT PRIMARY KEY,
+  `duration_hours` DOUBLE DEFAULT 0.0,
+  `remaining_hours` DOUBLE DEFAULT 0.0,
+  `updated_at` DATETIME(6) NULL,
+  CONSTRAINT `fk_session_usage_session` FOREIGN KEY (`session_id`) REFERENCES `session` (`session_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 10. Bảng recharge_history (Lịch sử nạp tiền)
+DROP TABLE IF EXISTS `recharge_history`;
+CREATE TABLE `recharge_history` (
+  `recharge_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `customer_id` INT NOT NULL,
+  `amount` DECIMAL(12, 2) NOT NULL,
+  `recharge_date` DATETIME(6) DEFAULT CURRENT_TIMESTAMP(6),
+  CONSTRAINT `fk_recharge_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 11. Bảng sale (Hóa đơn bán hàng)
+DROP TABLE IF EXISTS `sale`;
+CREATE TABLE `sale` (
+  `sale_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `customer_id` INT NOT NULL,
+  `sale_date` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `discount_id` INT NULL,
+  `payment_method` VARCHAR(50) NOT NULL,
+  `note` VARCHAR(200) NULL,
+  `status` ENUM('Pending', 'Paid', 'Cancelled') NOT NULL DEFAULT 'Pending',
+  CONSTRAINT `fk_sale_customer` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`customer_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_sale_discount` FOREIGN KEY (`discount_id`) REFERENCES `discount` (`discount_id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 12. Bảng sale_detail (Chi tiết hóa đơn)
+DROP TABLE IF EXISTS `sale_detail`;
+CREATE TABLE `sale_detail` (
+  `sale_detail_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `sale_id` INT NOT NULL,
+  `item_id` INT NOT NULL,
+  `quantity` INT NOT NULL,
+  CONSTRAINT `fk_saledetail_sale` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_saledetail_item` FOREIGN KEY (`item_id`) REFERENCES `item` (`item_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 13. Bảng sale_total (Tổng tiền hóa đơn)
+DROP TABLE IF EXISTS `sale_total`;
+CREATE TABLE `sale_total` (
+  `sale_id` INT PRIMARY KEY,
+  `total_amount` DECIMAL(10, 2) DEFAULT 0.00,
+  CONSTRAINT `fk_saletotal_sale` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 14. Bảng refund (Yêu cầu hoàn tiền)
+DROP TABLE IF EXISTS `refund`;
+CREATE TABLE `refund` (
+  `refund_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `sale_id` INT NOT NULL,
+  `refund_date` DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+  `refund_amount` DECIMAL(10, 2) NOT NULL,
+  `refund_reason` VARCHAR(200) NULL,
+  `refund_type` ENUM('Full', 'Partial') NOT NULL DEFAULT 'Full',
+  `processed_by` VARCHAR(100) NULL,
+  `status` ENUM('Pending', 'Approved', 'Rejected', 'Completed') NOT NULL DEFAULT 'Pending',
+  CONSTRAINT `fk_refund_sale` FOREIGN KEY (`sale_id`) REFERENCES `sale` (`sale_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 15. Bảng refund_detail (Chi tiết món hoàn)
+DROP TABLE IF EXISTS `refund_detail`;
+CREATE TABLE `refund_detail` (
+  `refund_detail_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `refund_id` INT NOT NULL,
+  `sale_detail_id` INT NOT NULL,
+  `quantity` INT NOT NULL,
+  CONSTRAINT `fk_refunddetail_refund` FOREIGN KEY (`refund_id`) REFERENCES `refund` (`refund_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_refunddetail_saledetail` FOREIGN KEY (`sale_detail_id`) REFERENCES `sale_detail` (`sale_detail_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 16. Bảng revenue (Báo cáo doanh thu ngày)
+DROP TABLE IF EXISTS `revenue`;
+CREATE TABLE `revenue` (
+  `revenue_id` INT AUTO_INCREMENT PRIMARY KEY,
+  `date` DATETIME(6) NOT NULL UNIQUE,
+  `computer_usage_revenue` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+  `sales_revenue` DECIMAL(10, 2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ========================================================
+-- SEED DATA INSERTS (20-30 RECORDS PER TABLE)              
+-- ========================================================
+
+-- Seed Data for `discount`
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (1, 'Thành viên Thường - Không giảm giá', 'Flat', '0.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (2, 'Thành viên Bạc - Giảm 5%', 'Percentage', '5.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (3, 'Thành viên Vàng - Giảm 10%', 'Percentage', '10.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (4, 'Thành viên Bạch Kim - Giảm 15%', 'Percentage', '15.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (5, 'Thành viên Kim Cương - Giảm 20%', 'Percentage', '20.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (6, 'Khuyến Mãi Khai Trương - Giảm 25K', 'Flat', '25000.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (7, 'Đêm Khuya Ưu Đãi - Giảm 30%', 'Percentage', '30.00');
+INSERT INTO `discount` (`discount_id`, `discount_name`, `discount_type`, `discount_value`) VALUES (8, 'Sinh Nhật VIP - Giảm 50%', 'Percentage', '50.00');
+
+-- Seed Data for `membership_card`
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (1, 1, b'1', 'Hạng Đồng (Standard)', '0.00');
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (2, 2, b'0', 'Hạng Bạc (Silver)', '200000.00');
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (3, 3, b'0', 'Hạng Vàng (Gold)', '500000.00');
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (4, 4, b'0', 'Hạng Bạch Kim (Platinum)', '1000000.00');
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (5, 5, b'0', 'Hạng Kim Cương (Diamond)', '2000000.00');
+INSERT INTO `membership_card` (`membership_card_id`, `discount_id`, `is_default`, `membership_card_name`, `recharge_threshold`) VALUES (6, 8, b'0', 'Hạng VIP Legend', '5000000.00');
+
+-- Seed Data for `customer`
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (1, '862751.17', 'Nguyễn Văn An', 4, '0900000001', '2026-07-20 03:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (2, '1177677.77', 'Trần Thị Bích', 1, '0900000002', '2026-06-17 07:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (3, '478604.35', 'Lê Hoàng Nam', 1, '0900000003', '2026-05-09 08:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (4, '437259.99', 'Phạm Quốc Minh', 3, '0900000004', '2026-06-12 13:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (5, '190160.47', 'Đặng Thùy Trang', 1, '0900000005', '2026-07-21 23:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (6, '720334.93', 'Vũ Anh Tuấn', 1, '0900000006', '2026-07-27 10:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (7, '945332.00', 'Bùi Hoàng Long', 3, '0900000007', '2026-07-05 04:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (8, '976043.94', 'Đỗ Hải Yến', 2, '0900000008', '2026-07-09 07:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (9, '821152.44', 'Ngô Thành Đạt', 2, '0900000009', '2026-07-29 15:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (10, '1074339.43', 'Hồ Đức Kiên', 1, '0900000010', '2026-05-11 08:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (11, '292145.68', 'Dương Thu Thảo', 5, '0900000011', '2026-06-14 15:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (12, '1103724.91', 'Lý Gia Bảo', 1, '0900000012', '2026-06-12 10:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (13, '588037.73', 'Đinh Quang Vinh', 5, '0900000013', '2026-07-15 08:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (14, '806945.40', 'Mai Thanh Tùng', 4, '0900000014', '2026-06-26 05:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (15, '1110284.67', 'Trịnh Như Quỳnh', 3, '0900000015', '2026-06-20 15:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (16, '186288.27', 'Phan Gia Huy', 4, '0900000016', '2026-08-03 19:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (17, '488047.76', 'Võ Kim Ngân', 1, '0900000017', '2026-07-14 22:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (18, '404178.89', 'Nguyễn Đức Anh', 2, '0900000018', '2026-05-09 16:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (19, '298872.72', 'Trần Hoàng Phúc', 1, '0900000019', '2026-06-09 10:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (20, '716778.34', 'Lê Thị Mai', 1, '0900000020', '2026-05-17 03:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (21, '1005994.38', 'Phạm Văn Hùng', 3, '0900000021', '2026-05-10 18:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (22, '301266.27', 'Đặng Tiến Dũng', 6, '0900000022', '2026-06-18 03:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (23, '262146.45', 'Vũ Hoàng My', 1, '0900000023', '2026-07-03 21:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (24, '366635.03', 'Bùi Văn Thái', 2, '0900000024', '2026-06-15 06:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (25, '505210.51', 'Đỗ Phương Thảo', 3, '0900000025', '2026-07-04 21:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (26, '1408273.11', 'Ngô Tấn Tài', 4, '0900000026', '2026-06-19 21:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (27, '1329413.07', 'Hồ Văn Cường', 2, '0900000027', '2026-07-27 20:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (28, '868317.33', 'Dương Bảo Ngọc', 6, '0900000028', '2026-07-16 11:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (29, '1314096.51', 'Lý Thanh Phong', 4, '0900000029', '2026-06-18 05:22:38.212734');
+INSERT INTO `customer` (`customer_id`, `balance`, `customer_name`, `membership_card_id`, `phone_number`, `registration_date`) VALUES (30, '23110.25', 'Đinh Hữu Nghĩa', 3, '0900000030', '2026-06-16 23:22:38.212734');
+
+-- Seed Data for `account`
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (1, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'an.nguyen', 1);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (2, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'bich.tran', 2);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (3, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'nam.le', 3);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (4, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'minh.pham', 4);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (5, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'trang.dang', 5);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (6, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'tuan.vu', 6);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (7, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'long.bui', 7);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (8, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'yen.do', 8);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (9, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'dat.ngo', 9);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (10, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'kien.ho', 10);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (11, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'thao.duong', 11);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (12, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'bao.ly', 12);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (13, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'vinh.dinh', 13);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (14, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'tung.mai', 14);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (15, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'quynh.trinh', 15);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (16, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'huy.phan', 16);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (17, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'ngan.vo', 17);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (18, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'ducanh.nguyen', 18);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (19, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'phuc.tran', 19);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (20, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'mai.le', 20);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (21, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'hung.pham', 21);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (22, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'dung.dang', 22);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (23, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'my.vu', 23);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (24, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'thai.bui', 24);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (25, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'thao.do', 25);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (26, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'tai.ngo', 26);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (27, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'cuong.ho', 27);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (28, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'ngoc.duong', 28);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (29, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'phong.ly', 29);
+INSERT INTO `account` (`account_id`, `password`, `username`, `customer_id`) VALUES (30, '$2a$10$E2Z67p5rM./QY8Yd7lS0g.r8h/43M2O/e4Q1Hk.s/zK.M8/k2.yS6', 'nghia.dinh', 30);
+
+-- Seed Data for `computer`
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (1, 'FPS-01', '192.168.1.101', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (2, 'FPS-02', '192.168.1.102', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (3, 'FPS-03', '192.168.1.103', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (4, 'FPS-04', '192.168.1.104', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (5, 'FPS-05', '192.168.1.105', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (6, 'FPS-06', '192.168.1.106', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (7, 'FPS-07', '192.168.1.107', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (8, 'FPS-08', '192.168.1.108', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'Broken');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (9, 'FPS-09', '192.168.1.109', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (10, 'FPS-10', '192.168.1.110', '12000.00', '{"cpu": "Intel Core i5-12400F", "gpu": "RTX 3060 12GB", "ram": "16GB DDR4", "mouse": "Logitech G102", "monitor": "165Hz 24-inch", "keyboard": "Mechanical RGB"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (11, 'VIP-01', '192.168.1.111', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (12, 'VIP-02', '192.168.1.112', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (13, 'VIP-03', '192.168.1.113', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (14, 'VIP-04', '192.168.1.114', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (15, 'VIP-05', '192.168.1.115', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (16, 'VIP-06', '192.168.1.116', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (17, 'VIP-07', '192.168.1.117', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (18, 'VIP-08', '192.168.1.118', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (19, 'VIP-09', '192.168.1.119', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (20, 'VIP-10', '192.168.1.120', '18000.00', '{"cpu": "Intel Core i7-13700K", "gpu": "RTX 4070 Ti 12GB", "ram": "32GB DDR5", "mouse": "Logitech G Pro X Superlight", "monitor": "240Hz 27-inch IPS", "keyboard": "Akko Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (21, 'STREAM-01', '192.168.1.121', '25000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Broken');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (22, 'STREAM-02', '192.168.1.122', '25000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Broken');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (23, 'STREAM-03', '192.168.1.123', '25000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Broken');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (24, 'STREAM-04', '192.168.1.124', '25000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Broken');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (25, 'STREAM-05', '192.168.1.125', '25000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (26, 'COUPLE-01', '192.168.1.126', '30000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (27, 'COUPLE-02', '192.168.1.127', '30000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'In Use');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (28, 'COUPLE-03', '192.168.1.128', '30000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (29, 'COUPLE-04', '192.168.1.129', '30000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'Available');
+INSERT INTO `computer` (`computer_id`, `computer_name`, `ip_address`, `price_per_hour`, `specifications`, `status`) VALUES (30, 'COUPLE-05', '192.168.1.130', '30000.00', '{"cpu": "AMD Ryzen 7 7800X3D", "gpu": "RTX 4080 Super 16GB", "ram": "64GB DDR5", "mouse": "Razer DeathAdder V3 Pro", "monitor": "360Hz 27-inch OLED", "keyboard": "Custom Mechanical"}', 'In Use');
+
+-- Seed Data for `item`
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (1, 'Food', 'Mì Tôm Trứng Xúc Xích', '25000.00', 150, 'Acecook Việt Nam');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (2, 'Food', 'Cơm Chiên Dương Châu', '35000.00', 80, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (3, 'Food', 'Cơm Gà Xối Mỡ', '45000.00', 60, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (4, 'Food', 'Mì Xào Bò Hột Vịt Lộn', '40000.00', 70, 'Acecook Việt Nam');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (5, 'Food', 'Bánh Mì Ốp La 2 Trứng', '25000.00', 100, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (6, 'Food', 'Cơm Tấm Sườn Bì Chả', '48000.00', 50, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (7, 'Food', 'Mì Cay Hải Sản Cấp 3', '55000.00', 40, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (8, 'Food', 'Khoai Tây Chiên Crispy', '30000.00', 90, 'Masan Consumer');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (9, 'Food', 'Xúc Xích Đức Nướng Đá', '20000.00', 120, 'CP Foods');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (10, 'Food', 'Hủ Tếu Nam Vang Special', '42000.00', 45, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (11, 'Drink', 'Sting Dâu 330ml', '15000.00', 300, 'Suntory Pepsico');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (12, 'Drink', 'Redbull Thái Can 250ml', '20000.00', 250, 'TCP Group');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (13, 'Drink', 'Trà Sữa Thái Xanh Chân Châu', '30000.00', 100, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (14, 'Drink', 'Trà Chanh Giã Tay 700ml', '25000.00', 120, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (15, 'Drink', 'Cà Phê Sữa Đá Sài Gòn', '22000.00', 200, 'Trung Nguyên Legend');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (16, 'Drink', 'Monster Energy Ultra 500ml', '45000.00', 80, 'Monster Energy');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (17, 'Drink', 'Nước Cam Ép Nguyên Chất', '28000.00', 70, 'Bếp CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (18, 'Drink', 'Coca Cola Không Đường 320ml', '15000.00', 280, 'Coca-Cola Việt Nam');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (19, 'Drink', 'Nước Suối Aquafina 500ml', '10000.00', 500, 'Suntory Pepsico');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (20, 'Drink', 'Nước Chanh Muối ICY', '15000.00', 180, 'Vinamilk');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (21, 'Snack', 'Bánh Snack Oishi Poca', '12000.00', 200, 'Oishi');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (22, 'Snack', 'Bánh Lay''s Tảo Biển 68g', '20000.00', 150, 'Pepsico Foods');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (23, 'Snack', 'Bánh Oreo Kem Vani', '18000.00', 110, 'Mondelez');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (24, 'Snack', 'Hạt Hướng Dương Vị Dừa', '15000.00', 220, 'Chacheer');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (25, 'Snack', 'Kẹo Cao Su Doublemint', '8000.00', 300, 'Mars Wrigley');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (26, 'Combo', 'Combo Đêm Đầy Đủ (Mì+Sting+Bánh)', '45000.00', 100, 'CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (27, 'Combo', 'Combo Game Thủ VIP (Cơm+Monster)', '85000.00', 60, 'CyberXArena');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (28, 'Card', 'Thẻ Garena 50K', '50000.00', 100, 'Garena Việt Nam');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (29, 'Card', 'Thẻ Zing 100K', '100000.00', 50, 'VNG Corporation');
+INSERT INTO `item` (`item_id`, `item_category`, `item_name`, `price`, `stock`, `supplier_name`) VALUES (30, 'Card', 'Thẻ Steam Wallet 5$', '130000.00', 40, 'Valve Corporation');
+
+-- Seed Data for `session`
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (1, 1, 18, '2026-07-27 01:38:14.212734', '2026-07-26 22:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (2, 2, 14, '2026-07-28 07:58:02.212734', '2026-07-28 06:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (3, 3, 27, '2026-07-28 08:38:14.212734', '2026-07-28 04:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (4, 4, 5, '2026-07-28 06:57:26.212734', '2026-07-28 03:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (5, 5, 8, '2026-07-30 18:47:14.212734', '2026-07-30 14:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (6, 6, 17, '2026-08-06 09:02:50.212734', '2026-08-06 07:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (7, 7, 23, '2026-07-30 04:43:02.212734', '2026-07-30 03:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (8, 8, 23, '2026-07-24 18:59:14.212734', '2026-07-24 14:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (9, 9, 7, '2026-07-24 23:38:14.212734', '2026-07-24 22:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (10, 10, 2, '2026-07-31 01:04:02.212734', '2026-07-30 22:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (11, 11, 5, '2026-07-23 20:48:26.212734', '2026-07-23 15:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (12, 12, 6, '2026-08-01 15:19:02.212734', '2026-08-01 13:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (13, 13, 12, '2026-07-27 01:26:14.212734', '2026-07-26 21:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (14, 14, 26, '2026-07-30 12:32:50.212734', '2026-07-30 07:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (15, 15, 2, '2026-08-04 10:09:26.212734', '2026-08-04 08:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (16, 16, 22, '2026-08-02 21:20:50.212734', '2026-08-02 19:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (17, 17, 8, '2026-08-05 12:56:50.212734', '2026-08-05 11:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (18, 18, 3, '2026-08-04 20:33:26.212734', '2026-08-04 16:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (19, 19, 8, '2026-07-27 23:44:50.212734', '2026-07-27 22:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (20, 20, 20, '2026-08-02 06:28:38.212734', '2026-08-02 04:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (21, 21, 22, '2026-07-26 08:19:02.212734', '2026-07-26 06:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (22, 22, 19, '2026-07-25 02:04:38.212734', '2026-07-24 20:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (23, 23, 16, '2026-07-23 21:14:14.212734', '2026-07-23 15:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (24, 24, 14, '2026-08-03 05:01:38.212734', '2026-08-03 03:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (25, 25, 1, '2026-08-06 16:06:26.212734', '2026-08-06 10:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (26, 26, 30, NULL, '2026-07-30 19:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (27, 27, 18, NULL, '2026-08-04 03:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (28, 28, 5, NULL, '2026-07-27 12:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (29, 29, 20, NULL, '2026-08-03 21:22:38.212734');
+INSERT INTO `session` (`session_id`, `computer_id`, `customer_id`, `end_time`, `start_time`) VALUES (30, 30, 20, NULL, '2026-08-01 16:22:38.212734');
+
+-- Seed Data for `session_price`
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (1, '39120.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (2, '19080.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (3, '51120.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (4, '42960.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (5, '52920.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (6, '20040.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (7, '16080.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (8, '55320.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (9, '15120.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (10, '32280.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (11, '97740.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (12, '34920.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (13, '73080.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (14, '93060.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (15, '32040.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (16, '35460.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (17, '28260.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (18, '75240.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (19, '24660.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (20, '37800.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (21, '48500.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (22, '142500.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (23, '146500.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (24, '41250.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (25, '143250.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (26, '0.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (27, '0.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (28, '0.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (29, '0.00');
+INSERT INTO `session_price` (`session_id`, `total_amount`) VALUES (30, '0.00');
+
+-- Seed Data for `session_usage`
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (1, 3.26, 0.0, '2026-07-27 01:38:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (2, 1.59, 0.0, '2026-07-28 07:58:02.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (3, 4.26, 0.0, '2026-07-28 08:38:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (4, 3.58, 0.0, '2026-07-28 06:57:26.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (5, 4.41, 0.0, '2026-07-30 18:47:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (6, 1.67, 0.0, '2026-08-06 09:02:50.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (7, 1.34, 0.0, '2026-07-30 04:43:02.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (8, 4.61, 0.0, '2026-07-24 18:59:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (9, 1.26, 0.0, '2026-07-24 23:38:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (10, 2.69, 0.0, '2026-07-31 01:04:02.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (11, 5.43, 0.0, '2026-07-23 20:48:26.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (12, 1.94, 0.0, '2026-08-01 15:19:02.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (13, 4.06, 0.0, '2026-07-27 01:26:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (14, 5.17, 0.0, '2026-07-30 12:32:50.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (15, 1.78, 0.0, '2026-08-04 10:09:26.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (16, 1.97, 0.0, '2026-08-02 21:20:50.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (17, 1.57, 0.0, '2026-08-05 12:56:50.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (18, 4.18, 0.0, '2026-08-04 20:33:26.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (19, 1.37, 0.0, '2026-07-27 23:44:50.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (20, 2.1, 0.0, '2026-08-02 06:28:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (21, 1.94, 0.0, '2026-07-26 08:19:02.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (22, 5.7, 0.0, '2026-07-25 02:04:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (23, 5.86, 0.0, '2026-07-23 21:14:14.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (24, 1.65, 0.0, '2026-08-03 05:01:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (25, 5.73, 0.0, '2026-08-06 16:06:26.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (26, 172.0, 4.59, '2026-08-06 23:22:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (27, 68.0, 1.43, '2026-08-06 23:22:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (28, 251.0, 3.03, '2026-08-06 23:22:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (29, 74.0, 4.92, '2026-08-06 23:22:38.212734');
+INSERT INTO `session_usage` (`session_id`, `duration_hours`, `remaining_hours`, `updated_at`) VALUES (30, 127.0, 3.35, '2026-08-06 23:22:38.212734');
+
+-- Seed Data for `recharge_history`
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (1, '500000.00', 29, '2026-06-23 13:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (2, '1000000.00', 4, '2026-07-20 23:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (3, '100000.00', 30, '2026-06-08 17:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (4, '1000000.00', 29, '2026-07-31 05:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (5, '100000.00', 4, '2026-07-02 17:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (6, '50000.00', 24, '2026-06-09 15:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (7, '200000.00', 25, '2026-06-29 04:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (8, '50000.00', 28, '2026-07-21 20:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (9, '100000.00', 25, '2026-06-30 04:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (10, '200000.00', 27, '2026-07-11 03:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (11, '200000.00', 17, '2026-06-18 00:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (12, '50000.00', 29, '2026-06-15 15:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (13, '1000000.00', 12, '2026-07-27 18:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (14, '50000.00', 6, '2026-06-15 12:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (15, '200000.00', 1, '2026-07-28 21:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (16, '500000.00', 1, '2026-07-17 17:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (17, '500000.00', 8, '2026-06-12 01:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (18, '200000.00', 12, '2026-07-20 19:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (19, '1000000.00', 28, '2026-06-22 10:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (20, '200000.00', 14, '2026-07-03 00:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (21, '1000000.00', 16, '2026-06-16 02:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (22, '100000.00', 8, '2026-06-17 05:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (23, '100000.00', 8, '2026-06-17 00:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (24, '200000.00', 16, '2026-06-09 13:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (25, '1000000.00', 26, '2026-07-22 08:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (26, '50000.00', 5, '2026-06-10 02:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (27, '100000.00', 30, '2026-07-16 13:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (28, '1000000.00', 27, '2026-06-21 08:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (29, '200000.00', 8, '2026-07-13 22:22:38.212734');
+INSERT INTO `recharge_history` (`recharge_id`, `amount`, `customer_id`, `recharge_date`) VALUES (30, '200000.00', 13, '2026-06-18 19:22:38.212734');
+
+-- Seed Data for `sale`
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (1, 6, 'Đơn hàng tự động #1', 'Momo', '2026-07-13 11:22:38.212734', 'Pending', 11);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (2, 6, 'Đơn hàng tự động #2', 'Banking', '2026-08-03 23:22:38.212734', 'Pending', 2);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (3, 3, 'Đơn hàng tự động #3', 'Cash', '2026-07-27 16:22:38.212734', 'Cancelled', 28);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (4, 1, 'Đơn hàng tự động #4', 'Cash', '2026-07-19 13:22:38.212734', 'Cancelled', 19);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (5, NULL, 'Đơn hàng tự động #5', 'Momo', '2026-07-07 16:22:38.212734', 'Cancelled', 20);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (6, 2, 'Đơn hàng tự động #6', 'Balance', '2026-07-12 03:22:38.212734', 'Paid', 19);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (7, 6, 'Đơn hàng tự động #7', 'Balance', '2026-07-07 15:22:38.212734', 'Paid', 15);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (8, 6, 'Đơn hàng tự động #8', 'Balance', '2026-07-28 20:22:38.212734', 'Paid', 20);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (9, 3, 'Đơn hàng tự động #9', 'Balance', '2026-08-01 23:22:38.212734', 'Paid', 26);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (10, NULL, 'Đơn hàng tự động #10', 'Cash', '2026-07-29 04:22:38.212734', 'Paid', 20);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (11, 6, 'Đơn hàng tự động #11', 'Balance', '2026-07-12 13:22:38.212734', 'Paid', 7);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (12, 1, 'Đơn hàng tự động #12', 'Balance', '2026-07-27 10:22:38.212734', 'Paid', 5);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (13, NULL, 'Đơn hàng tự động #13', 'Balance', '2026-07-29 23:22:38.212734', 'Pending', 6);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (14, 6, 'Đơn hàng tự động #14', 'Momo', '2026-07-08 17:22:38.212734', 'Paid', 29);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (15, 2, 'Đơn hàng tự động #15', 'Banking', '2026-07-27 10:22:38.212734', 'Paid', 24);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (16, 6, 'Đơn hàng tự động #16', 'Banking', '2026-07-16 03:22:38.212734', 'Pending', 11);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (17, 3, 'Đơn hàng tự động #17', 'Balance', '2026-07-30 05:22:38.212734', 'Paid', 17);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (18, 2, 'Đơn hàng tự động #18', 'Balance', '2026-07-26 11:22:38.212734', 'Paid', 19);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (19, 6, 'Đơn hàng tự động #19', 'Balance', '2026-08-05 15:22:38.212734', 'Paid', 2);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (20, 2, 'Đơn hàng tự động #20', 'Balance', '2026-07-08 02:22:38.212734', 'Pending', 18);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (21, 6, 'Đơn hàng tự động #21', 'Momo', '2026-07-20 06:22:38.212734', 'Paid', 18);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (22, 3, 'Đơn hàng tự động #22', 'Banking', '2026-07-15 00:22:38.212734', 'Cancelled', 8);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (23, 6, 'Đơn hàng tự động #23', 'Balance', '2026-07-30 07:22:38.212734', 'Cancelled', 5);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (24, NULL, 'Đơn hàng tự động #24', 'Cash', '2026-08-02 03:22:38.212734', 'Cancelled', 19);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (25, 3, 'Đơn hàng tự động #25', 'Balance', '2026-08-04 14:22:38.212734', 'Paid', 4);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (26, NULL, 'Đơn hàng tự động #26', 'Balance', '2026-07-20 00:22:38.212734', 'Pending', 11);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (27, 1, 'Đơn hàng tự động #27', 'Momo', '2026-07-31 15:22:38.212734', 'Paid', 7);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (28, 2, 'Đơn hàng tự động #28', 'Balance', '2026-07-15 10:22:38.212734', 'Cancelled', 9);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (29, 3, 'Đơn hàng tự động #29', 'Balance', '2026-07-19 10:22:38.212734', 'Cancelled', 2);
+INSERT INTO `sale` (`sale_id`, `discount_id`, `note`, `payment_method`, `sale_date`, `status`, `customer_id`) VALUES (30, 1, 'Đơn hàng tự động #30', 'Banking', '2026-07-26 09:22:38.212734', 'Paid', 17);
+
+-- Seed Data for `sale_detail`
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (1, 21, 2, 1);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (2, 5, 1, 1);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (3, 23, 2, 2);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (4, 29, 3, 2);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (5, 2, 3, 2);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (6, 13, 2, 3);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (7, 30, 1, 4);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (8, 12, 1, 4);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (9, 22, 1, 4);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (10, 2, 1, 4);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (11, 6, 3, 5);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (12, 25, 3, 5);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (13, 3, 3, 5);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (14, 8, 3, 6);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (15, 17, 3, 7);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (16, 28, 2, 7);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (17, 18, 1, 7);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (18, 4, 2, 8);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (19, 10, 1, 9);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (20, 16, 3, 10);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (21, 8, 3, 10);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (22, 23, 2, 10);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (23, 21, 3, 11);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (24, 14, 1, 12);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (25, 5, 2, 13);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (26, 2, 3, 14);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (27, 18, 2, 15);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (28, 3, 2, 15);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (29, 26, 2, 16);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (30, 16, 1, 16);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (31, 27, 1, 16);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (32, 28, 3, 17);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (33, 23, 1, 18);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (34, 9, 2, 19);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (35, 30, 2, 19);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (36, 25, 1, 19);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (37, 4, 2, 20);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (38, 28, 3, 20);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (39, 19, 2, 20);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (40, 18, 2, 20);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (41, 5, 2, 21);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (42, 3, 3, 21);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (43, 10, 2, 21);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (44, 23, 2, 21);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (45, 10, 1, 22);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (46, 21, 3, 22);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (47, 22, 1, 22);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (48, 1, 3, 23);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (49, 26, 2, 23);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (50, 27, 3, 23);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (51, 18, 1, 23);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (52, 15, 3, 24);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (53, 22, 1, 25);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (54, 29, 1, 25);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (55, 6, 3, 25);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (56, 20, 1, 26);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (57, 17, 2, 27);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (58, 22, 3, 28);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (59, 7, 3, 28);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (60, 26, 1, 29);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (61, 7, 2, 29);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (62, 28, 3, 29);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (63, 10, 3, 30);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (64, 14, 3, 30);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (65, 12, 2, 30);
+INSERT INTO `sale_detail` (`sale_detail_id`, `item_id`, `quantity`, `sale_id`) VALUES (66, 9, 2, 30);
+
+-- Seed Data for `sale_total`
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (1, '49000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (2, '441000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (3, '60000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (4, '205000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (5, '303000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (6, '90000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (7, '199000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (8, '80000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (9, '42000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (10, '261000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (11, '36000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (12, '25000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (13, '50000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (14, '105000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (15, '120000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (16, '220000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (17, '150000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (18, '18000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (19, '308000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (20, '280000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (21, '305000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (22, '98000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (23, '435000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (24, '66000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (25, '264000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (26, '15000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (27, '56000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (28, '225000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (29, '305000.00');
+INSERT INTO `sale_total` (`sale_id`, `total_amount`) VALUES (30, '281000.00');
+
+-- Seed Data for `refund`
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (1, 'Admin', '220500.00', '2026-07-29 23:22:38.212734', 'Thanh toán nhầm số lượng', 'Partial', 'Completed', 2);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (2, 'Quản Lý Ca', '205000.00', '2026-07-26 23:22:38.212734', 'Sản phẩm lỗi packaging', 'Full', 'Completed', 4);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (3, 'Quản Lý Ca', '90000.00', '2026-07-27 23:22:38.212734', 'Phục vụ chậm khách hủy', 'Full', 'Pending', 6);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (4, 'Admin', '80000.00', '2026-07-22 23:22:38.212734', 'Máy hỏng đổi chỗ', 'Full', 'Approved', 8);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (5, 'Quản Lý Ca', '261000.00', '2026-07-31 23:22:38.212734', 'Máy hỏng đổi chỗ', 'Full', 'Pending', 10);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (6, 'Thu Ngân 01', '25000.00', '2026-08-03 23:22:38.212734', 'Thanh toán nhầm số lượng', 'Full', 'Approved', 12);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (7, 'Admin', '105000.00', '2026-07-28 23:22:38.212734', 'Thanh toán nhầm số lượng', 'Full', 'Approved', 14);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (8, 'Thu Ngân 01', '110000.00', '2026-07-23 23:22:38.212734', 'Phục vụ chậm khách hủy', 'Partial', 'Approved', 16);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (9, 'Thu Ngân 01', '18000.00', '2026-07-26 23:22:38.212734', 'Máy hỏng đổi chỗ', 'Full', 'Pending', 18);
+INSERT INTO `refund` (`refund_id`, `processed_by`, `refund_amount`, `refund_date`, `refund_reason`, `refund_type`, `status`, `sale_id`) VALUES (10, 'Thu Ngân 01', '280000.00', '2026-08-03 23:22:38.212734', 'Thanh toán nhầm số lượng', 'Full', 'Pending', 20);
+
+-- Seed Data for `refund_detail`
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (1, 1, 1, 3);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (2, 1, 2, 7);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (3, 1, 3, 14);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (4, 1, 4, 18);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (5, 1, 5, 20);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (6, 1, 6, 24);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (7, 1, 7, 26);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (8, 1, 8, 29);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (9, 1, 9, 33);
+INSERT INTO `refund_detail` (`refund_detail_id`, `quantity`, `refund_id`, `sale_detail_id`) VALUES (10, 1, 10, 37);
+
+-- Seed Data for `revenue`
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (1, '3637242.52', '2026-07-07 00:00:00', '1407911.58');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (2, '3793219.88', '2026-07-08 00:00:00', '2214808.47');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (3, '3219803.91', '2026-07-09 00:00:00', '2400406.88');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (4, '3314018.77', '2026-07-10 00:00:00', '1077820.79');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (5, '2963318.83', '2026-07-11 00:00:00', '1146783.94');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (6, '4141308.56', '2026-07-12 00:00:00', '1918167.99');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (7, '2361813.30', '2026-07-13 00:00:00', '1174454.06');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (8, '2226237.42', '2026-07-14 00:00:00', '1005174.97');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (9, '3477937.11', '2026-07-15 00:00:00', '883945.22');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (10, '3243887.25', '2026-07-16 00:00:00', '1161667.26');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (11, '2650960.99', '2026-07-17 00:00:00', '1849777.80');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (12, '4203677.38', '2026-07-18 00:00:00', '899142.10');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (13, '3226714.05', '2026-07-19 00:00:00', '1135635.16');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (14, '3482553.87', '2026-07-20 00:00:00', '1674100.53');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (15, '4113472.95', '2026-07-21 00:00:00', '2328579.17');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (16, '3499411.15', '2026-07-22 00:00:00', '2309230.85');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (17, '3086132.05', '2026-07-23 00:00:00', '2085248.53');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (18, '3330475.58', '2026-07-24 00:00:00', '2007710.98');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (19, '3596920.82', '2026-07-25 00:00:00', '803485.89');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (20, '3224191.01', '2026-07-26 00:00:00', '2127782.88');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (21, '2976218.29', '2026-07-27 00:00:00', '1851662.31');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (22, '2413249.88', '2026-07-28 00:00:00', '2463049.37');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (23, '2870952.39', '2026-07-29 00:00:00', '1499161.24');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (24, '3258129.68', '2026-07-30 00:00:00', '1041814.59');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (25, '3691437.96', '2026-07-31 00:00:00', '951616.29');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (26, '2378153.77', '2026-08-01 00:00:00', '1672807.31');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (27, '1860285.54', '2026-08-02 00:00:00', '1762184.25');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (28, '4374957.28', '2026-08-03 00:00:00', '2239179.14');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (29, '4248762.40', '2026-08-04 00:00:00', '1108707.68');
+INSERT INTO `revenue` (`revenue_id`, `computer_usage_revenue`, `date`, `sales_revenue`) VALUES (30, '1500530.94', '2026-08-05 00:00:00', '2102483.75');
+
+SET FOREIGN_KEY_CHECKS = 1;
