@@ -18,9 +18,9 @@ spring:
       adjust-dates-to-context-time-zone: false
 
   datasource:
-    url: jdbc:mysql://switchyard.proxy.rlwy.net:24392/railway?useSSL=true&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true
-    username: root
-    password: KQwNUDfYBmUqcOEYgIuZBzhBOdepwaFB
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://sakura.proxy.rlwy.net:20751/railway?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Ho_Chi_Minh}
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:UQZRLMmhPzTEEHzGOPzQRSLvIOlkmQUk}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 10
