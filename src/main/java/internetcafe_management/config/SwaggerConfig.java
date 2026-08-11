@@ -40,7 +40,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                                 .url("http://localhost:8080/api/v1")
                                 .description("Development server"),
                         new Server()
-                                .url("https://cyberxarena-server.onrender.com/api/v1")
+                                .url("https://cyberxarena-server-ollt.onrender.com/api/v1")
                                 .description("Production server (Render.com)")
                 ));
     }
